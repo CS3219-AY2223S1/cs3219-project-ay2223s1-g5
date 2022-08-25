@@ -8,11 +8,11 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
+    "dev": "concurrently \"npm run --prefix ../shared dev\" \"nest start --watch\"",
+    "dev:debug": "concurrently \"npm run --prefix ../shared dev\" \"nest start --watch --debug\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node build/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -66,6 +66,14 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "globals": {
+      "ts-jest": {
+        "isolatedModules": true
+      }
+    },
+    "moduleNameMapper": {
+      "~shared/(.*)": "<rootDir>/../../shared/src/$1"
+    }
   }
 }
