@@ -29,10 +29,14 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.5.0",
+    "lint-staged": "^13.0.3",
     "prettier": "^2.6.2",
     "typescript": "^4.6.4"
   },
   "scripts": {
+    "pre-commit": "lint-staged",
+    "lint": "eslint --ext ts,tsx,js,jsx .",
+    "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -54,6 +58,12 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "lint-staged": {
+    "**/*.(js|jsx|ts|tsx)": [
+      "prettier --write",
+      "eslint --fix"
     ]
   }
 }
