@@ -19,7 +19,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "prisma:gen": "npx prisma generate",
+    "migration:gen": "npx prisma migrate dev --create-only --name",
+    "migration:run": "npx prisma migrate dev",
+    "migration:reset": "npx prisma migrate reset"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
