@@ -31,3 +31,29 @@ $ npm run dev:full
 ```
 
 The frontend should be served from http://localhost:3000 and the backend should be accessible from http://localhost:8080.
+
+### Synchronizing the database
+
+#### Creating migrations
+
+Create a new migration file by running:
+
+```sh
+$ npm run on-backend migration:gen -- <name_of_migration>
+```
+
+#### Running existing migrations
+
+Synchronize your database with existing migrations by running:
+
+```sh
+$ npm run on-backend migration:run
+```
+
+#### Updating the Prisma Client 
+
+Update the type definitions in the Prisma Client package by running:
+
+```sh
+$ npm run on-backend prisma:gen
+```
