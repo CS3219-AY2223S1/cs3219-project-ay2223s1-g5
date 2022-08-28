@@ -5,37 +5,41 @@ module.exports = {
     jest: true,
   },
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended",
   ],
-  parser: '@typescript-eslint/parser',
+  parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: './tsconfig.json',
+    project: "./tsconfig.json",
     tsconfigRootDir: __dirname,
     ecmaVersion: 2018,
-    sourceType: 'module',
+    sourceType: "module",
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ["@typescript-eslint"],
   root: true,
-  ignorePatterns: [
-    '.eslintrc.js',
-  ],
+  ignorePatterns: [".eslintrc.js"],
   rules: {
-    'no-console': 'warn',
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/member-delimiter-style': [
-      'error',
+    "no-console": "warn",
+    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/member-delimiter-style": [
+      "error",
       {
         multiline: {
-          delimiter: 'none',
+          delimiter: "none",
           requireLast: true,
         },
         singleline: {
-          delimiter: 'semi',
+          delimiter: "semi",
           requireLast: false,
         },
       },
     ],
+    "prettier/prettier": [
+      "error",
+      {
+        endOfLine: "auto",
+      },
+    ],
   },
-}
+};
