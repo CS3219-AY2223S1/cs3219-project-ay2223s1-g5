@@ -3,3 +3,7 @@ export class CreateUserReq {
   password: string;
   name: string;
 }
+
+export class UpdateUserReq {
+  name: string;
+}
