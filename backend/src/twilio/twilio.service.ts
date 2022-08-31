@@ -16,8 +16,8 @@ export class TwilioService {
     this.verificationSid = configService.get("twilio.verificationSid");
   }
 
-  async sendVerificationEmail(email: string) {
-    return this.twilioClient.verify
+  async sendVerificationEmail(email: string): Promise<void> {
+    await this.twilioClient.verify
       .services(this.verificationSid)
       .verifications.create({
         to: email,
