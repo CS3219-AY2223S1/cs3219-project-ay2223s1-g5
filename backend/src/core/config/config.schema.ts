@@ -7,6 +7,11 @@ export interface ConfigSchema {
     secret: string;
     validity: number;
   };
+  twilio: {
+    accountSid: string;
+    authToken: string;
+    verificationSid: string;
+  };
 }
 
 addFormats({
@@ -41,6 +46,26 @@ export const schema: Schema<ConfigSchema> = {
       env: "JWT_VALIDITY",
       format: "int",
       default: 604800000,
+    },
+  },
+  twilio: {
+    accountSid: {
+      env: "TWILIO_ACCOUNT_SID",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    authToken: {
+      env: "TWILIO_AUTH_TOKEN",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    verificationSid: {
+      env: "TWILIO_VERIFICATION_SID",
+      format: "required-string",
+      default: "",
+      sensitive: true,
     },
   },
 };

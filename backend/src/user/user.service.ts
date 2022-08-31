@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { compare, hash } from "bcrypt";
 
 import { PrismaService } from "src/core/prisma.service";
@@ -22,14 +23,24 @@ export class UserService {
     email: string;
     name: string;
     password: string;
-  }): Promise<User> {
+  }): Promise<User | null> {
     const hashedPassword = await hash(data.password, SALT_ROUNDS);
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashedPassword,
-      },
-    });
+    try {
+      return await this.prisma.user.create({
+        data: {
+          ...data,
+          password: hashedPassword,
+        },
+      });
+    } catch (e: unknown) {
+      if (!(e instanceof PrismaClientKnownRequestError)) {
+        throw e;
+      }
+      if (e.code !== "P2002") {
+        throw e;
+      }
+      return null;
+    }
   }
 
   async updateUserVerification(id: number): Promise<User> {
