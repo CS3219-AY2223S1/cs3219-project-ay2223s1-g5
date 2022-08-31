@@ -8,6 +8,7 @@
     "lint": "eslint --ext ts,tsx,js,jsx .",
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
     "build": "tsc --build --clean && tsc --build tsconfig.build.json --force",
+    "clean": "rm -rf node_modules && rm -rf build",
     "dev": "tsc-watch"
   },
   "devDependencies": {

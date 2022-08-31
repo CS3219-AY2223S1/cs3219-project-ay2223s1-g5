@@ -41,6 +41,7 @@
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
     "dev": "react-app-rewired start",
     "build": "react-app-rewired build",
+    "clean": "rm -rf node_modules && rm -rf build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
