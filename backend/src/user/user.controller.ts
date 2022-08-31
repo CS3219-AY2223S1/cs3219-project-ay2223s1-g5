@@ -9,10 +9,13 @@ import {
   Request,
   UseGuards,
 } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { CreateUserReq, UpdateUserReq } from "~shared/types/api";
-import { JwtAuthGuard } from "src/auth/jwt.guard";
 import { Request as ExpressRequest } from "express";
+
+import { JwtAuthGuard } from "src/auth/jwt.guard";
+
+import { UserService } from "./user.service";
+
+import { CreateUserReq, UpdateUserReq } from "~shared/types/api";
 
 @Controller("users")
 export class UserController {

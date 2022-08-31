@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { UserService } from "src/user/user.service";
-import { compare } from "bcrypt";
-import { User } from "@prisma/client";
 import { JwtService } from "@nestjs/jwt";
+import { User } from "@prisma/client";
+import { compare } from "bcrypt";
+
 import { ConfigService } from "src/core/config/config.service";
+import { UserService } from "src/user/user.service";
 
 export interface JwtPayload {
   sub: number;
