@@ -3,6 +3,7 @@ import { UserService } from "src/user/user.service";
 import { compare } from "bcrypt";
 import { User } from "@prisma/client";
 import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "src/core/config/config.service";
 
 export interface JwtPayload {
   sub: number;
@@ -11,6 +12,7 @@ export interface JwtPayload {
 @Injectable()
 export class AuthService {
   constructor(
+    private configService: ConfigService,
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
@@ -32,7 +34,7 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       token_type: "Bearer",
       // TODO: Read token expiry from ConfigService
-      expires_in: 604800000,
+      expires_in: this.configService.get("jwt.validity"),
     };
   }
 }

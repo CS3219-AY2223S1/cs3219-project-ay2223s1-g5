@@ -6,16 +6,22 @@ import { LocalAuthGuard } from "./local.guard";
 import { AuthController } from "./auth.controller";
 import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./jwt.strategy";
+import { ConfigService } from "src/core/config/config.service";
+import { CoreModule } from "src/core/core.module";
 
 @Module({
   imports: [
     UserServiceModule,
-    JwtModule.register({
-      // TODO: Read secret from ConfigService
-      secret: "SECRET",
-      signOptions: {
-        expiresIn: 604800000, // 7 days
-      },
+    CoreModule,
+    JwtModule.registerAsync({
+      imports: [CoreModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get("jwt.secret"),
+        signOptions: {
+          expiresIn: configService.get("jwt.validity"),
+        },
+      }),
     }),
   ],
   providers: [AuthService, LocalStrategy, LocalAuthGuard, JwtStrategy],
