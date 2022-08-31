@@ -43,6 +43,13 @@ export class UserService {
     });
   }
 
+  async handleFailedLogin(id: number): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: id },
+      data: { failedLogins: { increment: 1 } },
+    });
+  }
+
   async resetFailedAttempts(id: number): Promise<User> {
     return this.prisma.user.update({
       where: { id: id },
