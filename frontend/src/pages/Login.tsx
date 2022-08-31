@@ -1,13 +1,11 @@
 import { useState } from "react";
-
+import { Face, LockReset, MailOutline } from "@mui/icons-material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Container, Grid, Stack, Tab } from "@mui/material";
-
-import { InputWithIcon } from "../components/InputWithIcon";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
-import { Face, LockReset, MailOutline } from "@mui/icons-material";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { InputWithIcon } from "../components/InputWithIcon";
 
 export const Login = () => {
   const [formType, setFormType] = useState<"login" | "signup">("login");
