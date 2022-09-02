@@ -1,16 +1,12 @@
-import Card from "@mui/material/Card";
-import Input from "@mui/material/Input";
-
-import LockResetIcon from "@mui/icons-material/LockReset";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import FaceIcon from "@mui/icons-material/Face";
+import { Card, Input } from "@mui/material";
+import { SvgIconComponent } from "@mui/icons-material";
 
 interface TextBoxProps {
+  Icon: SvgIconComponent;
   label: string;
-  icon: string;
 }
 
-export const InputWithIcon = ({ label, icon }: TextBoxProps) => {
+export const InputWithIcon = ({ Icon, label }: TextBoxProps) => {
   return (
     <Card
       sx={{
@@ -21,30 +17,12 @@ export const InputWithIcon = ({ label, icon }: TextBoxProps) => {
         height: "40px",
       }}
     >
-      {icon === "Email" && (
-        <MailOutlineIcon
-          sx={{
-            color: "primary.main",
-            alignSelf: "center",
-          }}
-        />
-      )}
-      {icon === "Username" && (
-        <FaceIcon
-          sx={{
-            color: "primary.main",
-            alignSelf: "center",
-          }}
-        />
-      )}
-      {icon === "Password" && (
-        <LockResetIcon
-          sx={{
-            color: "primary.main",
-            alignSelf: "center",
-          }}
-        />
-      )}
+      <Icon
+        sx={{
+          color: "primary.main",
+          alignSelf: "center",
+        }}
+      />
       <Input
         sx={{
           marginLeft: "10px",
