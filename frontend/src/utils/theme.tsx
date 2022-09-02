@@ -1,13 +1,20 @@
 import { createTheme } from "@mui/material/styles";
 
 const colors = {
-  primary: "#1472D3", // Blue
+  blue: "#1472D3", // Blue
 };
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: colors.primary,
+      main: colors.blue,
+    },
+  },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableRipple: true,
+      },
     },
   },
 });
