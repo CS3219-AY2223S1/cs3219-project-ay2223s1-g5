@@ -31,8 +31,8 @@ export const Login = () => {
           sx={{ width: "50%" }}
         />
       </Grid>
-      <Grid item xs={4} display="grid" alignItems="center">
-        <Stack spacing={3}>
+      <Grid item xs={4}>
+        <Stack spacing={3} width="100%" height="100%" justifyContent="center">
           <Container component="img" src={LogoImage} sx={{ width: "35%" }} />
           <TabContext value={formType}>
             <TabList centered onChange={handleChange}>
