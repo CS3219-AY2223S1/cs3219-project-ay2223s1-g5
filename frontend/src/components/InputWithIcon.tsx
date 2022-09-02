@@ -23,14 +23,26 @@ export const InputWithIcon = ({ Icon, label }: TextBoxProps) => {
           alignSelf: "center",
         }}
       />
-      <Input
-        sx={{
-          marginLeft: "10px",
-          width: "100%",
-        }}
-        disableUnderline={true}
-        placeholder={label}
-      />
+      {label === "Password" ? (
+        <Input
+          sx={{
+            marginLeft: "10px",
+            width: "100%",
+          }}
+          disableUnderline={true}
+          placeholder={label}
+          type="password"
+        />
+      ) : (
+        <Input
+          sx={{
+            marginLeft: "10px",
+            width: "100%",
+          }}
+          disableUnderline={true}
+          placeholder={label}
+        />
+      )}
     </Card>
   );
 };
