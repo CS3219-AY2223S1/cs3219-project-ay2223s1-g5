@@ -10,21 +10,21 @@ interface TextBoxProps {
   icon: string;
 }
 
-export const TextBox = ({ label, icon }: TextBoxProps) => {
+export const InputWithIcon = ({ label, icon }: TextBoxProps) => {
   return (
     <Card
       sx={{
-        width: "90%",
+        width: "70%",
         borderRadius: "20px",
         display: "flex",
-        boxShadow: "2",
+        px: "4%",
+        height: "40px",
       }}
     >
       {icon === "Email" && (
         <MailOutlineIcon
           sx={{
             color: "primary.main",
-            ml: "4%",
             alignSelf: "center",
           }}
         />
@@ -33,7 +33,6 @@ export const TextBox = ({ label, icon }: TextBoxProps) => {
         <FaceIcon
           sx={{
             color: "primary.main",
-            ml: "4%",
             alignSelf: "center",
           }}
         />
@@ -42,21 +41,13 @@ export const TextBox = ({ label, icon }: TextBoxProps) => {
         <LockResetIcon
           sx={{
             color: "primary.main",
-            ml: "4%",
             alignSelf: "center",
           }}
         />
       )}
       <Input
         sx={{
-          ml: "4%",
-          "& .MuiInputBase-root": {
-            width: "100%",
-            height: "100%",
-            "& .MuiInputBase-input": {
-              ml: "5%",
-            },
-          },
+          marginLeft: "10px",
           width: "100%",
         }}
         disableUnderline={true}

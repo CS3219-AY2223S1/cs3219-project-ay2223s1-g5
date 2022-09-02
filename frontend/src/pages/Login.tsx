@@ -8,15 +8,18 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 
-import { TextBox } from "../components/TextBox";
+import { InputWithIcon } from "../components/InputWithIcon";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
 
 export const Login = () => {
   const [formType, setFormType] = useState<"login" | "signup">("login");
-  const handleChange = (event: React.SyntheticEvent, formType: string) => {
-    formType === "login" ? setFormType("login") : setFormType("signup");
+  const handleChange = (
+    _: React.SyntheticEvent,
+    formType: "login" | "signup",
+  ) => {
+    setFormType(formType);
   };
 
   return (
@@ -54,15 +57,15 @@ export const Login = () => {
             </TabList>
             <TabPanel value="login">
               <Stack spacing={4} alignItems="center">
-                <TextBox label="Email" icon="Email" />
-                <TextBox label="Password" icon="Password" />
+                <InputWithIcon label="Email" icon="Email" />
+                <InputWithIcon label="Password" icon="Password" />
               </Stack>
             </TabPanel>
             <TabPanel value="signup">
               <Stack spacing={4} alignItems="center">
-                <TextBox label="Email" icon="Email" />
-                <TextBox label="Username" icon="Username" />
-                <TextBox label="Password" icon="Password" />
+                <InputWithIcon label="Email" icon="Email" />
+                <InputWithIcon label="Username" icon="Username" />
+                <InputWithIcon label="Password" icon="Password" />
               </Stack>
             </TabPanel>
           </TabContext>
