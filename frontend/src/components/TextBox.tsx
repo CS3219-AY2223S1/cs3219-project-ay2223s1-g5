@@ -21,13 +21,31 @@ export const TextBox = ({ label, icon }: TextBoxProps) => {
       }}
     >
       {icon === "Email" && (
-        <MailOutlineIcon sx={{ color: "primary.main", ml: "4%", mt: "0.6%" }} />
+        <MailOutlineIcon
+          sx={{
+            color: "primary.main",
+            ml: "4%",
+            alignSelf: "center",
+          }}
+        />
       )}
       {icon === "Username" && (
-        <FaceIcon sx={{ color: "primary.main", ml: "4%", mt: "0.6%" }} />
+        <FaceIcon
+          sx={{
+            color: "primary.main",
+            ml: "4%",
+            alignSelf: "center",
+          }}
+        />
       )}
       {icon === "Password" && (
-        <LockResetIcon sx={{ color: "primary.main", ml: "4%", mt: "0.6%" }} />
+        <LockResetIcon
+          sx={{
+            color: "primary.main",
+            ml: "4%",
+            alignSelf: "center",
+          }}
+        />
       )}
       <Input
         sx={{
