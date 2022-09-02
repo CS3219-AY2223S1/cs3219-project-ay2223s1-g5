@@ -59,7 +59,7 @@ export class UserService {
     const user = await this.prisma.user.findUnique({
       where: { id: id },
     });
-    if (!compare(oldPassword, user.password)) {
+    if (!user || !compare(oldPassword, user.password)) {
       // TODO: Handle incorrect password error.
       throw new Error();
     }
