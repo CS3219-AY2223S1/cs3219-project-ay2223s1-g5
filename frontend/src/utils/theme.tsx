@@ -5,6 +5,9 @@ const colors = {
 };
 
 const theme = createTheme({
+  typography: {
+    fontSize: 14,
+  },
   palette: {
     primary: {
       main: colors.blue,

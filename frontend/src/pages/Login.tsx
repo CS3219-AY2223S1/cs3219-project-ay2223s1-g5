@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
@@ -21,23 +20,15 @@ export const Login = () => {
   };
 
   return (
-    <Grid container sx={{ height: "100vh" }}>
-      <Grid
-        container
-        item
-        xs={8}
-        sx={{
-          alignItems: "center",
-          backgroundColor: "primary.main",
-        }}
-      >
+    <Grid container height="100vh">
+      <Grid container item xs={8} alignItems="center" bgcolor="primary.main">
         <Container
           component="img"
           src={PairProgrammingImage}
           sx={{ width: "50%" }}
         />
       </Grid>
-      <Grid item xs={4} sx={{ display: "grid", alignItems: "center" }}>
+      <Grid item xs={4} display="grid" alignItems="center">
         <Stack spacing={3}>
           <Container component="img" src={LogoImage} sx={{ width: "35%" }} />
           <TabContext value={formType}>
@@ -62,12 +53,18 @@ export const Login = () => {
               />
             </TabList>
             <TabPanel value="login">
-              <Stack spacing={2} alignItems="center">
-                <TextBox label="Email" />
-                <TextBox label="Password" />
+              <Stack spacing={4} alignItems="center">
+                <TextBox label="Email" icon="Email" />
+                <TextBox label="Password" icon="Password" />
               </Stack>
             </TabPanel>
-            <TabPanel value="signup">Sign Up</TabPanel>
+            <TabPanel value="signup">
+              <Stack spacing={4} alignItems="center">
+                <TextBox label="Email" icon="Email" />
+                <TextBox label="Username" icon="Username" />
+                <TextBox label="Password" icon="Password" />
+              </Stack>
+            </TabPanel>
           </TabContext>
         </Stack>
       </Grid>
