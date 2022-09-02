@@ -1,17 +1,13 @@
 import { useState } from "react";
 
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
+import { Container, Grid, Stack, Tab } from "@mui/material";
 
 import { InputWithIcon } from "../components/InputWithIcon";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
+import { Face, LockReset, MailOutline } from "@mui/icons-material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 
 export const Login = () => {
   const [formType, setFormType] = useState<"login" | "signup">("login");
@@ -57,15 +53,15 @@ export const Login = () => {
             </TabList>
             <TabPanel value="login">
               <Stack spacing={4} alignItems="center">
-                <InputWithIcon label="Email" icon="Email" />
-                <InputWithIcon label="Password" icon="Password" />
+                <InputWithIcon label="Email" Icon={MailOutline} />
+                <InputWithIcon label="Password" Icon={LockReset} />
               </Stack>
             </TabPanel>
             <TabPanel value="signup">
               <Stack spacing={4} alignItems="center">
-                <InputWithIcon label="Email" icon="Email" />
-                <InputWithIcon label="Username" icon="Username" />
-                <InputWithIcon label="Password" icon="Password" />
+                <InputWithIcon label="Email" Icon={MailOutline} />
+                <InputWithIcon label="Username" Icon={Face} />
+                <InputWithIcon label="Password" Icon={LockReset} />
               </Stack>
             </TabPanel>
           </TabContext>
