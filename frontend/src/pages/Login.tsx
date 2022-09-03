@@ -2,9 +2,15 @@ import { useState } from "react";
 
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Container, Grid, Stack, Tab } from "@mui/material";
-import { AccountCircle, Lock, MailOutline } from "@mui/icons-material";
+import {
+  AccountCircle,
+  Lock,
+  LockReset,
+  MailOutline,
+} from "@mui/icons-material";
 
 import { InputWithIcon } from "../components/InputWithIcon";
+import { StyledButton } from "../components/StyledButton";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
@@ -31,10 +37,21 @@ export const Login = () => {
         />
       </Grid>
       <Grid item xs={4}>
-        <Stack width="100%" height="100%" justifyContent="center">
+        <Stack spacing={4} width="100%" height="100%" justifyContent="center">
           <Container component="img" src={LogoImage} sx={{ width: "35%" }} />
-          {formType === "resetpassword" ? null : (
-            <Stack spacing={3}>
+          {formType === "resetpassword" ? (
+            <Stack spacing={4}>
+              <Stack spacing={4} alignItems="center">
+                <InputWithIcon label="Email" Icon={MailOutline} />
+                <InputWithIcon label="New Password" Icon={LockReset} />
+                <InputWithIcon label="Confirm New Password" Icon={LockReset} />
+              </Stack>
+              <Stack direction="row" justifyContent="space-around">
+                <StyledButton label="Continue" />
+              </Stack>
+            </Stack>
+          ) : (
+            <Stack spacing={4}>
               <TabContext value={formType}>
                 <TabList centered onChange={handleChange}>
                   <Tab
@@ -72,39 +89,29 @@ export const Login = () => {
                   </Stack>
                 </TabPanel>
               </TabContext>
-              <Stack direction="row" justifyContent="space-around">
-                <Button
-                  // value="resetpw"
-                  variant="text"
-                  disableRipple={true}
-                  onClick={(e) => handleChange(e, "resetpassword")}
-                  sx={{
-                    "&:hover": {
-                      backgroundColor: "transparent",
-                      color: "secondary.main",
-                    },
-                    fontWeight: "bold",
-                    textTransform: "none",
-                  }}
-                >
-                  Forgot your password?
-                </Button>
-                <Button
-                  variant="contained"
-                  disableRipple={true}
-                  sx={{
-                    borderRadius: "20px",
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    px: "7%",
-                    "&:hover": {
-                      backgroundColor: "primary.main",
-                    },
-                  }}
-                >
-                  Login
-                </Button>
-              </Stack>
+              {formType === "signup" ? (
+                <Stack direction="row" justifyContent="space-around">
+                  <StyledButton label="Continue" />
+                </Stack>
+              ) : (
+                <Stack direction="row" justifyContent="space-around">
+                  <Button
+                    variant="text"
+                    disableRipple={true}
+                    onClick={(e) => handleChange(e, "resetpassword")}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                      fontWeight: "bold",
+                      textTransform: "none",
+                    }}
+                  >
+                    Forgot your password?
+                  </Button>
+                  <StyledButton label="Login" />
+                </Stack>
+              )}
             </Stack>
           )}
         </Stack>
