@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   ForbiddenException,
   Param,
@@ -9,19 +10,32 @@ import {
   Request,
   UseGuards,
 } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { CreateUserReq, UpdateUserReq } from "~shared/types/api";
-import { JwtAuthGuard } from "src/auth/jwt.guard";
 import { Request as ExpressRequest } from "express";
+
+import { JwtAuthGuard } from "src/auth/jwt.guard";
+import { VerificationService } from "src/verification/verification.service";
+
+import { UserService } from "./user.service";
+
+import { CreateUserReq, UpdateUserReq } from "~shared/types/api";
 
 @Controller("users")
 export class UserController {
-  constructor(private readonly service: UserService) {}
+  constructor(
+    private userService: UserService,
+    private verificationService: VerificationService,
+  ) {}
 
   @Post()
   async createUser(@Body() data: CreateUserReq) {
-    // TODO: Call verification service
-    return this.service.create(data);
+    const user = await this.userService.create(data);
+    if (!user) {
+      throw new ConflictException();
+    }
+    // We should not receive any exceptions from this call since the
+    // user should not be verified on creation, and the user should exist.
+    // In both cases, it should be treated as an internal server error.
+    await this.verificationService.sendVerificationEmail(user.email);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -34,6 +48,6 @@ export class UserController {
     if (req.user?.userId != userId) {
       throw new ForbiddenException();
     }
-    return this.service.updateUserDetails(userId, data);
+    return this.userService.updateUserDetails(userId, data);
   }
 }

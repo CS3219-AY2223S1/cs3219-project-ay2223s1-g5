@@ -8,6 +8,7 @@
     "lint": "eslint --ext ts,tsx,js,jsx .",
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
     "build": "tsc --build --clean && tsc --build tsconfig.build.json --force",
+    "clean": "rm -rf node_modules && rm -rf build",
     "dev": "tsc-watch"
   },
   "devDependencies": {
@@ -16,6 +17,7 @@
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
     "tsc-watch": "^5.0.3",

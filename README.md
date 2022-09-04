@@ -1,11 +1,11 @@
 # CS3219-AY22-23-Project-Skeleton
 
-
 ## Getting Started
 
 ### Install dependencies
 
 In the root folder of the repository:
+
 ```sh
 $ npm install
 ```
@@ -13,8 +13,6 @@ $ npm install
 ### Environment Variables
 
 1. Make a copy `backend/.env.example` at `backend/.env`.
-
-2. If using docker-compose to provision the development environment, copy `backend/.env` to `.env` in the root folder.
 
 ### Run the application
 
@@ -50,7 +48,7 @@ Synchronize your database with existing migrations by running:
 $ npm run on-backend migration:run
 ```
 
-#### Updating the Prisma Client 
+#### Updating the Prisma Client
 
 Update the type definitions in the Prisma Client package by running:
 

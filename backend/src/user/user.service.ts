@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
-import { PrismaService } from "src/core/prisma.service";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { compare, hash } from "bcrypt";
+
+import { PrismaService } from "src/core/prisma.service";
 
 const SALT_ROUNDS = 10;
 
@@ -21,14 +23,28 @@ export class UserService {
     email: string;
     name: string;
     password: string;
-  }): Promise<User> {
+  }): Promise<User | null> {
     const hashedPassword = await hash(data.password, SALT_ROUNDS);
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashedPassword,
-      },
-    });
+    try {
+      return await this.prisma.user.create({
+        data: {
+          ...data,
+          password: hashedPassword,
+        },
+      });
+    } catch (e: unknown) {
+      if (!(e instanceof PrismaClientKnownRequestError)) {
+        throw e;
+      }
+      // If error is due to unique constraint violation,
+      // then we return null since it means an account with the
+      // email already exists.
+      // Otherwise, we cannot handle the error.
+      if (e.code !== "P2002") {
+        throw e;
+      }
+      return null;
+    }
   }
 
   async updateUserVerification(id: number): Promise<User> {
@@ -39,6 +55,13 @@ export class UserService {
       data: {
         verified: true,
       },
+    });
+  }
+
+  async handleFailedLogin(id: number): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: id },
+      data: { failedLogins: { increment: 1 } },
     });
   }
 

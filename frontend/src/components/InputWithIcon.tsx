@@ -1,5 +1,5 @@
-import { Card, Input } from "@mui/material";
 import { SvgIconComponent } from "@mui/icons-material";
+import { Card, Input } from "@mui/material";
 
 interface TextBoxProps {
   Icon: SvgIconComponent;

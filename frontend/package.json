@@ -32,6 +32,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.5.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
     "lint-staged": "^13.0.3",
     "prettier": "^2.6.2",
     "react-app-alias-ex": "^2.1.0",
@@ -44,6 +45,7 @@
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
     "dev": "react-app-rewired start",
     "build": "react-app-rewired build",
+    "clean": "rm -rf node_modules && rm -rf build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
