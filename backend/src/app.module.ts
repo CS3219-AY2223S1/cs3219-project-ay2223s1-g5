@@ -25,7 +25,7 @@ import { AppService } from "./app.service";
     UserModule,
     AuthModule,
     VerificationModule,
-    MatchModule
+    MatchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

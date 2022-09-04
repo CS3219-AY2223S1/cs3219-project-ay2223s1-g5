@@ -1,21 +1,24 @@
-import { Injectable, OnApplicationShutdown } from "@nestjs/common";
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
 import { createClient, RedisClientType } from "redis";
 
 import { ConfigService } from "src/core/config/config.service";
 
 @Injectable()
 export class RedisService implements OnApplicationShutdown {
-  redisClient: RedisClientType;
+  private readonly logger = new Logger(RedisService.name);
+  private redisClient: RedisClientType;
 
   constructor(url: string) {
     this.redisClient = createClient({ url: url });
 
     this.redisClient.on("connection", () => {
-      console.log("Redis client connected successfully");
+      this.logger.log("Redis client connected successfully");
     });
 
     this.redisClient.on("error", () => {
-      console.error("Error occured while connecting or accessing redis server");
+      this.logger.error(
+        "Error occured while connecting or accessing redis server",
+      );
     });
   }
 
