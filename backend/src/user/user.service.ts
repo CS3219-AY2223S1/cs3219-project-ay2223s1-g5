@@ -36,6 +36,10 @@ export class UserService {
       if (!(e instanceof PrismaClientKnownRequestError)) {
         throw e;
       }
+      // If error is due to unique constraint violation,
+      // then we return null since it means an account with the
+      // email already exists.
+      // Otherwise, we cannot handle the error.
       if (e.code !== "P2002") {
         throw e;
       }
