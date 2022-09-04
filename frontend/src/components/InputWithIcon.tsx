@@ -7,7 +7,7 @@ interface TextBoxProps {
   type?: string;
 }
 
-export const InputWithIcon = ({ Icon, label, type }: TextBoxProps) => {
+export const InputWithIcon = ({ Icon, label, type = "text" }: TextBoxProps) => {
   return (
     <Card
       sx={{
@@ -24,26 +24,15 @@ export const InputWithIcon = ({ Icon, label, type }: TextBoxProps) => {
           alignSelf: "center",
         }}
       />
-      {type === "password" ? (
-        <Input
-          sx={{
-            marginLeft: "10px",
-            width: "100%",
-          }}
-          disableUnderline={true}
-          placeholder={label}
-          type="password"
-        />
-      ) : (
-        <Input
-          sx={{
-            marginLeft: "10px",
-            width: "100%",
-          }}
-          disableUnderline={true}
-          placeholder={label}
-        />
-      )}
+      <Input
+        sx={{
+          marginLeft: "10px",
+          width: "100%",
+        }}
+        disableUnderline={true}
+        placeholder={label}
+        type={type}
+      />
     </Card>
   );
 };
