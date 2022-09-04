@@ -1,9 +1,10 @@
 import { Module } from "@nestjs/common";
-import { RedisService } from "src/redis/redis.service";
+import { RedisServiceModule } from "src/redis/redis.service.module";
 import { MatchService } from "./match.service";
 
 @Module({
-  providers: [MatchService, RedisService],
+  imports: [RedisServiceModule],
+  providers: [MatchService],
   exports: [MatchService],
 })
 export class MatchServiceModule {}
