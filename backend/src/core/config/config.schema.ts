@@ -12,6 +12,9 @@ export interface ConfigSchema {
     authToken: string;
     verificationSid: string;
   };
+  redis: {
+    url: string;
+  };
 }
 
 addFormats({
@@ -66,6 +69,13 @@ export const schema: Schema<ConfigSchema> = {
       format: "required-string",
       default: "",
       sensitive: true,
+    },
+  },
+  redis: {
+    url: {
+      env: "REDIS_URL",
+      format: "required-string",
+      default: "",
     },
   },
 };

@@ -1,15 +1,14 @@
 import { Injectable, OnApplicationShutdown } from "@nestjs/common";
 import { createClient, RedisClientType } from "redis";
 
+import { ConfigService } from "src/core/config/config.service";
+
 @Injectable()
 export class RedisService implements OnApplicationShutdown {
   redisClient: RedisClientType;
 
-  constructor() {
-    // TODO: Use different URL for dev and prod instance
-    this.redisClient = createClient({
-      url: "redis://localhost:6379",
-    });
+  constructor(url: string) {
+    this.redisClient = createClient({ url: url });
 
     this.redisClient.on("connection", () => {
       console.log("Redis client connected successfully");
@@ -29,8 +28,8 @@ export class RedisService implements OnApplicationShutdown {
    * for this class.
    * It allows us to leverage the `async`-`await` syntax.
    */
-  static async create() {
-    const redisService = new RedisService();
+  static async create(configService: ConfigService) {
+    const redisService = new RedisService(configService.get("redis.url"));
     await redisService.connect();
     return redisService;
   }
