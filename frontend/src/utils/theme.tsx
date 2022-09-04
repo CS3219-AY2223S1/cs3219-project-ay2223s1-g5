@@ -13,6 +13,16 @@ const theme = createTheme({
     primary: {
       main: colors.blue,
     },
+    secondary: {
+      main: colors.orange,
+    },
+  },
+  components: {
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
   },
 });
 

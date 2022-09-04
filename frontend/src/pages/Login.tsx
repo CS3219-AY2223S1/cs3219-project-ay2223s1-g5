@@ -1,19 +1,12 @@
 import { useState } from "react";
-
+import { AccountCircle, Lock, MailOutline } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Container, Grid, Stack, Tab } from "@mui/material";
-import {
-  AccountCircle,
-  Lock,
-  LockReset,
-  MailOutline,
-} from "@mui/icons-material";
-
-import { InputWithIcon } from "../components/InputWithIcon";
-import { StyledButton } from "../components/StyledButton";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
+import { InputWithIcon } from "../components/InputWithIcon";
+import { StyledButton } from "../components/StyledButton";
 
 export const Login = () => {
   const [formType, setFormType] = useState<
@@ -40,13 +33,24 @@ export const Login = () => {
         <Stack spacing={4} width="100%" height="100%" justifyContent="center">
           <Container component="img" src={LogoImage} sx={{ width: "35%" }} />
           {formType === "resetpassword" ? (
-            <Stack spacing={4}>
+            <Stack spacing={4} sx={{ px: "4%" }}>
               <Stack spacing={4} alignItems="center">
                 <InputWithIcon label="Email" Icon={MailOutline} />
-                <InputWithIcon label="New Password" Icon={LockReset} />
-                <InputWithIcon label="Confirm New Password" Icon={LockReset} />
               </Stack>
               <Stack direction="row" justifyContent="space-around">
+                <Button
+                  variant="text"
+                  onClick={(e) => handleChange(e, "login")}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                    },
+                    fontWeight: "bold",
+                    textTransform: "none",
+                  }}
+                >
+                  Back to login
+                </Button>
                 <StyledButton label="Continue" />
               </Stack>
             </Stack>
@@ -57,7 +61,6 @@ export const Login = () => {
                   <Tab
                     label="Login"
                     value="login"
-                    disableRipple={true}
                     sx={{
                       fontWeight: "bold",
                       fontSize: "130%",
@@ -67,7 +70,6 @@ export const Login = () => {
                   <Tab
                     label="Sign Up"
                     value="signup"
-                    disableRipple={true}
                     sx={{
                       fontWeight: "bold",
                       fontSize: "130%",
@@ -86,6 +88,7 @@ export const Login = () => {
                     <InputWithIcon label="Email" Icon={MailOutline} />
                     <InputWithIcon label="Username" Icon={AccountCircle} />
                     <InputWithIcon label="Password" Icon={Lock} />
+                    <InputWithIcon label="Confirm Password" Icon={Lock} />
                   </Stack>
                 </TabPanel>
               </TabContext>
@@ -97,7 +100,6 @@ export const Login = () => {
                 <Stack direction="row" justifyContent="space-around">
                   <Button
                     variant="text"
-                    disableRipple={true}
                     onClick={(e) => handleChange(e, "resetpassword")}
                     sx={{
                       "&:hover": {

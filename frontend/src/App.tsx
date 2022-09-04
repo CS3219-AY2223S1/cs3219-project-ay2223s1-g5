@@ -1,9 +1,10 @@
-import { Login } from "./pages/Login";
+// import { Login } from "./pages/Login";
+import { PasswordReset } from "./pages/PasswordReset";
 
 const App = () => {
   return (
     <div>
-      <Login />
+      <PasswordReset />
     </div>
   );
 };
