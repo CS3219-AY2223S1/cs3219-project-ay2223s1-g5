@@ -4,9 +4,10 @@ import { Card, Input } from "@mui/material";
 interface TextBoxProps {
   Icon: SvgIconComponent;
   label: string;
+  type?: string;
 }
 
-export const InputWithIcon = ({ Icon, label }: TextBoxProps) => {
+export const InputWithIcon = ({ Icon, label, type }: TextBoxProps) => {
   return (
     <Card
       sx={{
@@ -23,7 +24,7 @@ export const InputWithIcon = ({ Icon, label }: TextBoxProps) => {
           alignSelf: "center",
         }}
       />
-      {label === "Password" ? (
+      {type === "password" ? (
         <Input
           sx={{
             marginLeft: "10px",

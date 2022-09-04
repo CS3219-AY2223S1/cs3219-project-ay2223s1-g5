@@ -21,8 +21,16 @@ export const PasswordReset = () => {
           <Container component="img" src={LogoImage} sx={{ width: "35%" }} />
           <Stack spacing={4} sx={{ px: "4%" }}>
             <Stack spacing={4} alignItems="center">
-              <InputWithIcon label="New Password" Icon={LockReset} />
-              <InputWithIcon label="Confirm New Password" Icon={LockReset} />
+              <InputWithIcon
+                type="password"
+                label="New Password"
+                Icon={LockReset}
+              />
+              <InputWithIcon
+                type="password"
+                label="Confirm New Password"
+                Icon={LockReset}
+              />
             </Stack>
             <Stack direction="row" justifyContent="space-around">
               <StyledButton label="Continue" />

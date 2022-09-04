@@ -80,15 +80,27 @@ export const Login = () => {
                 <TabPanel value="login">
                   <Stack spacing={4} alignItems="center">
                     <InputWithIcon label="Email" Icon={MailOutline} />
-                    <InputWithIcon label="Password" Icon={Lock} />
+                    <InputWithIcon
+                      type="password"
+                      label="Password"
+                      Icon={Lock}
+                    />
                   </Stack>
                 </TabPanel>
                 <TabPanel value="signup">
                   <Stack spacing={4} alignItems="center">
                     <InputWithIcon label="Email" Icon={MailOutline} />
                     <InputWithIcon label="Username" Icon={AccountCircle} />
-                    <InputWithIcon label="Password" Icon={Lock} />
-                    <InputWithIcon label="Confirm Password" Icon={Lock} />
+                    <InputWithIcon
+                      type="password"
+                      label="Password"
+                      Icon={Lock}
+                    />
+                    <InputWithIcon
+                      type="password"
+                      label="Confirm Password"
+                      Icon={Lock}
+                    />
                   </Stack>
                 </TabPanel>
               </TabContext>
