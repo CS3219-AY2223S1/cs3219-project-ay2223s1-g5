@@ -4,9 +4,10 @@ import { Card, Input } from "@mui/material";
 interface TextBoxProps {
   Icon: SvgIconComponent;
   label: string;
+  type?: string;
 }
 
-export const InputWithIcon = ({ Icon, label }: TextBoxProps) => {
+export const InputWithIcon = ({ Icon, label, type = "text" }: TextBoxProps) => {
   return (
     <Card
       sx={{
@@ -30,6 +31,7 @@ export const InputWithIcon = ({ Icon, label }: TextBoxProps) => {
         }}
         disableUnderline={true}
         placeholder={label}
+        type={type}
       />
     </Card>
   );
