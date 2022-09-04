@@ -1,10 +1,13 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
 import "./index.css";
+
+import React from "react";
+import { ThemeProvider } from "@emotion/react";
+
+import ReactDOM from "react-dom/client";
+
+import theme from "./utils/theme";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import theme from "./utils/theme";
-import { ThemeProvider } from "@emotion/react";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,

@@ -1,5 +1,5 @@
 module.exports = {
-  plugins: ["@typescript-eslint", "react", "react-hooks"],
+  plugins: ["@typescript-eslint", "react", "react-hooks", "simple-import-sort"],
   extends: [
     "eslint:recommended",
     "plugin:react/recommended",
@@ -41,5 +41,23 @@ module.exports = {
         endOfLine: "auto",
       },
     ],
+    "simple-import-sort/imports": [
+      "error",
+      {
+        groups: [
+          // Side effect imports.
+          ["^\\u0000"],
+          // Packages: Start with a letter (or digit or underscore), or `@` followed by a letter.
+          ["^react", "^@?\\w"],
+          // Absolute imports, must include `/` and cannot include `@`
+          ["^([\\w-]+)/"],
+          // Parent imports. Place `..` last.
+          ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+          // Other relative imports. Place same folder imports and `.` last.
+          ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+        ],
+      },
+    ],
+    "simple-import-sort/exports": "error",
   },
 };

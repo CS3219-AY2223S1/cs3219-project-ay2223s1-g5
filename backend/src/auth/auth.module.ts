@@ -1,13 +1,15 @@
 import { Module } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { UserServiceModule } from "src/user/user.service.module";
-import { LocalStrategy } from "./local.strategy";
-import { LocalAuthGuard } from "./local.guard";
-import { AuthController } from "./auth.controller";
 import { JwtModule } from "@nestjs/jwt";
-import { JwtStrategy } from "./jwt.strategy";
+
 import { ConfigService } from "src/core/config/config.service";
 import { CoreModule } from "src/core/core.module";
+import { UserServiceModule } from "src/user/user.service.module";
+
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
+import { JwtStrategy } from "./jwt.strategy";
+import { LocalAuthGuard } from "./local.guard";
+import { LocalStrategy } from "./local.strategy";
 
 @Module({
   imports: [

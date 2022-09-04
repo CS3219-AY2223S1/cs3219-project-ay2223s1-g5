@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
-import { PrismaService } from "src/core/prisma.service";
 import { compare, hash } from "bcrypt";
+
+import { PrismaService } from "src/core/prisma.service";
 
 const SALT_ROUNDS = 10;
 

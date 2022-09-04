@@ -1,11 +1,12 @@
 import {
   Controller,
-  Request,
-  Post,
-  UseGuards,
   InternalServerErrorException,
+  Post,
+  Request,
+  UseGuards,
 } from "@nestjs/common";
 import { Request as ExpressRequest } from "express";
+
 import { AuthService } from "./auth.service";
 import { LocalAuthGuard } from "./local.guard";
 

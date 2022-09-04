@@ -16,7 +16,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "simple-import-sort"],
   root: true,
   ignorePatterns: [".eslintrc.js"],
   rules: {
@@ -41,5 +41,23 @@ module.exports = {
         endOfLine: "auto",
       },
     ],
+    "simple-import-sort/imports": [
+      "error",
+      {
+        groups: [
+          // Side effect imports.
+          ["^\\u0000"],
+          // Packages: Start with a letter (or digit or underscore), or `@` followed by a letter.
+          ["^@?\\w"],
+          // Absolute imports, must include `/` and cannot include `@`
+          ["^([\\w-]+)/"],
+          // Parent imports. Place `..` last.
+          ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+          // Other relative imports. Place same folder imports and `.` last.
+          ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+        ],
+      },
+    ],
+    "simple-import-sort/exports": "error",
   },
 };
