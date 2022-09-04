@@ -1,4 +1,12 @@
-import { Body, Controller, Patch, Post } from "@nestjs/common";
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Patch,
+  Post,
+} from "@nestjs/common";
+
+import { VerificationError } from "src/common/errors/verification.error";
 
 import { VerificationService } from "./verification.service";
 
@@ -8,7 +16,14 @@ export class VerificationController {
 
   @Post()
   async resendVerificationEmail(@Body() { email }: { email: string }) {
-    return this.service.sendVerificationEmail(email);
+    try {
+      return await this.service.sendVerificationEmail(email);
+    } catch (e: unknown) {
+      if (!(e instanceof VerificationError)) {
+        throw e;
+      }
+      throw new ConflictException(e.message);
+    }
   }
 
   @Patch()
