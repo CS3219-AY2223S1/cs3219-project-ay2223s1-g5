@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { AccountCircle, Lock, MailOutline } from "@mui/icons-material";
+import { Lock, MailOutline } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Button, Container, Grid, Stack, Tab } from "@mui/material";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
+import { SignUpForm } from "../components/forms/SignUpForm";
 import { InputWithIcon } from "../components/InputWithIcon";
 import { StyledButton } from "../components/StyledButton";
 
@@ -14,7 +15,7 @@ export const Login = () => {
   >("login");
 
   const handleChange = (
-    _: React.SyntheticEvent,
+    _: React.SyntheticEvent | undefined,
     formType: "login" | "signup" | "resetpassword",
   ) => {
     setFormType(formType);
@@ -88,27 +89,14 @@ export const Login = () => {
                   </Stack>
                 </TabPanel>
                 <TabPanel value="signup">
-                  <Stack spacing={4} alignItems="center">
-                    <InputWithIcon label="Email" Icon={MailOutline} />
-                    <InputWithIcon label="Username" Icon={AccountCircle} />
-                    <InputWithIcon
-                      type="password"
-                      label="Password"
-                      Icon={Lock}
+                  <Container sx={{ width: "80%", paddingX: 0 }}>
+                    <SignUpForm
+                      onSubmitCallback={() => handleChange(undefined, "login")}
                     />
-                    <InputWithIcon
-                      type="password"
-                      label="Confirm Password"
-                      Icon={Lock}
-                    />
-                  </Stack>
+                  </Container>
                 </TabPanel>
               </TabContext>
-              {formType === "signup" ? (
-                <Stack direction="row" justifyContent="space-around">
-                  <StyledButton label="Continue" />
-                </Stack>
-              ) : (
+              {formType !== "signup" && (
                 <Stack direction="row" justifyContent="space-around">
                   <Button
                     variant="text"

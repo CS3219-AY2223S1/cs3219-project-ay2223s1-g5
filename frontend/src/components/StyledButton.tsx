@@ -1,12 +1,12 @@
-import { Button } from "@mui/material";
+import { LoadingButton, LoadingButtonProps } from "@mui/lab";
 
-interface StyledButtonProps {
+type StyledButtonProps = LoadingButtonProps & {
   label: string;
-}
+};
 
-export const StyledButton = ({ label }: StyledButtonProps) => {
+export const StyledButton = ({ label, ...rest }: StyledButtonProps) => {
   return (
-    <Button
+    <LoadingButton
       variant="contained"
       disableRipple={true}
       sx={{
@@ -19,8 +19,9 @@ export const StyledButton = ({ label }: StyledButtonProps) => {
           boxShadow: "1",
         },
       }}
+      {...rest}
     >
       {label}
-    </Button>
+    </LoadingButton>
   );
 };
