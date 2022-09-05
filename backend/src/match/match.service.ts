@@ -2,6 +2,13 @@ import { Injectable } from "@nestjs/common";
 
 import { RedisService } from "src/redis/redis.service";
 
+interface Match {
+  emailOne: string;
+  emailTwo: string;
+  socketOne: string;
+  socketTwo: string;
+}
+
 @Injectable()
 export class MatchService {
   private static readonly NAMESPACE = "Match";
@@ -9,45 +16,55 @@ export class MatchService {
 
   constructor(private redisService: RedisService) {}
 
-  async joinMatch(
-    username: string,
+  async searchMatch(
+    email: string,
     difficultyLevel: string,
-  ): Promise<string[]> {
-    const matchedUser = await this.redisService
-      .getAllKeys(MatchService.NAMESPACE)
-      .then((keys) => this.findMatch(keys, difficultyLevel));
+    socketId: string,
+  ): Promise<Match | undefined> {
+    const matchedUsers = await this.redisService.getAllKeys(
+      `${MatchService.NAMESPACE}-${difficultyLevel}`,
+    );
 
-    if (matchedUser) {
-      return this.removeFromMatch(matchedUser).then(() => [
-        matchedUser,
-        username,
-      ]);
-    } else {
-      return this.redisService
-        .setKey(
-          MatchService.NAMESPACE,
-          username,
-          difficultyLevel,
-          MatchService.EXPIRATION_TIME,
-        )
-        .then(() => []);
+    if (matchedUsers.length === 0) {
+      return this.addUserToQueue(email, difficultyLevel, socketId).then();
     }
-  }
 
-  async findMatch(
-    usernames: string[],
-    difficultyLevel: string,
-  ): Promise<string | undefined> {
-    return usernames.find(async (username) => {
-      const level = await this.redisService.getValue(
-        MatchService.NAMESPACE,
-        username,
-      );
-      return level === difficultyLevel;
+    const matchedUser = matchedUsers[0];
+    const [matchedNamespace, matchedEmail] = matchedUser.split(":");
+    const matchedUserSocketId = await this.redisService.getValue(
+      matchedNamespace,
+      matchedEmail,
+    );
+
+    if (!matchedUserSocketId) {
+      return this.addUserToQueue(email, difficultyLevel, socketId).then();
+    }
+
+    return this.removeFromMatch(matchedNamespace, matchedEmail).then(() => {
+      const match: Match = {
+        emailOne: email,
+        emailTwo: matchedEmail,
+        socketOne: socketId,
+        socketTwo: matchedUserSocketId,
+      };
+      return match;
     });
   }
 
-  async removeFromMatch(username: string) {
-    await this.redisService.deleteKey(MatchService.NAMESPACE, username);
+  async addUserToQueue(
+    email: string,
+    difficultyLevel: string,
+    socketId: string,
+  ): Promise<string | null> {
+    return this.redisService.setKey(
+      `${MatchService.NAMESPACE}-${difficultyLevel}`,
+      email,
+      socketId,
+      MatchService.EXPIRATION_TIME,
+    );
+  }
+
+  async removeFromMatch(namespace: string, email: string) {
+    return await this.redisService.deleteKey(namespace, email);
   }
 }
