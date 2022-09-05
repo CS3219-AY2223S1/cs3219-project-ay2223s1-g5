@@ -51,10 +51,9 @@ export class AuthService {
   async login(user: Express.User) {
     const payload: JwtPayload = { sub: user.userId };
     return {
-      access_token: this.jwtService.sign(payload),
-      token_type: "Bearer",
+      accessToken: this.jwtService.sign(payload),
       // TODO: Read token expiry from ConfigService
-      expires_in: this.configService.get("jwt.validity"),
+      expiresIn: this.configService.get("jwt.validity"),
     };
   }
 }
