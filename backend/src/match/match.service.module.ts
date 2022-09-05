@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
+
 import { RedisServiceModule } from "src/redis/redis.service.module";
+
 import { MatchService } from "./match.service";
 
 @Module({
