@@ -38,7 +38,35 @@ export class RedisService implements OnApplicationShutdown {
   }
 
   async onApplicationShutdown(signal: string) {
-    console.log(signal);
+    this.logger.log(signal);
     await this.redisClient.quit();
+  }
+
+  async setKey(
+    namespace: string,
+    key: string,
+    value: string,
+    expirationTime?: number,
+  ): Promise<string | null> {
+    const keyWithNamespace = `${namespace}:${key}`;
+    if (expirationTime) {
+      return this.redisClient.set(keyWithNamespace, value, {
+        EX: expirationTime,
+      });
+    } else {
+      return this.redisClient.set(keyWithNamespace, value);
+    }
+  }
+
+  async getAllKeys(namespace: string): Promise<string[]> {
+    return this.redisClient.keys(`${namespace}:*`);
+  }
+
+  async deleteKey(namespace: string, key: string): Promise<number> {
+    return this.redisClient.del(`${namespace}:${key}`);
+  }
+
+  async getValue(namespace: string, key: string): Promise<string | null> {
+    return this.redisClient.get(`${namespace}:${key}`);
   }
 }
