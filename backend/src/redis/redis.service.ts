@@ -1,18 +1,32 @@
-import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { Injectable, OnApplicationShutdown } from "@nestjs/common";
+import { PinoLogger } from "nestjs-pino";
 import { createClient, RedisClientType } from "redis";
 
 import { ConfigService } from "src/core/config/config.service";
 
 @Injectable()
 export class RedisService implements OnApplicationShutdown {
-  private readonly logger = new Logger(RedisService.name);
   private redisClient: RedisClientType;
 
-  constructor(url: string) {
+  /**
+   * This static factory function serves as the user-facing constructor
+   * for this class.
+   * It allows us to leverage the `async`-`await` syntax.
+   */
+  static async create(logger: PinoLogger, configService: ConfigService) {
+    const redisService = new RedisService(
+      logger,
+      configService.get("redis.url"),
+    );
+    await redisService.connect();
+    return redisService;
+  }
+
+  constructor(private readonly logger: PinoLogger, url: string) {
     this.redisClient = createClient({ url: url });
 
     this.redisClient.on("connection", () => {
-      this.logger.log("Redis client connected successfully");
+      this.logger.info("Redis client connected successfully");
     });
 
     this.redisClient.on("error", () => {
@@ -26,19 +40,8 @@ export class RedisService implements OnApplicationShutdown {
     await this.redisClient.connect();
   }
 
-  /**
-   * This static factory function serves as the user-facing constructor
-   * for this class.
-   * It allows us to leverage the `async`-`await` syntax.
-   */
-  static async create(configService: ConfigService) {
-    const redisService = new RedisService(configService.get("redis.url"));
-    await redisService.connect();
-    return redisService;
-  }
-
   async onApplicationShutdown(signal: string) {
-    this.logger.log(signal);
+    this.logger.info(signal);
     await this.redisClient.quit();
   }
 
