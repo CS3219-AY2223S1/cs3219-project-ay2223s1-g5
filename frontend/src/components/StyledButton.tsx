@@ -8,7 +8,6 @@ export const StyledButton = ({ label, ...rest }: StyledButtonProps) => {
   return (
     <LoadingButton
       variant="contained"
-      disableRipple={true}
       sx={{
         borderRadius: "20px",
         fontWeight: "bold",
