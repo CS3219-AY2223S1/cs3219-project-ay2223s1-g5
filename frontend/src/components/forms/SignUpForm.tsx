@@ -1,8 +1,9 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AccountCircle, Lock, MailOutline } from "@mui/icons-material";
-import { Stack } from "@mui/material";
+import { Alert, Snackbar, Stack } from "@mui/material";
 import { passwordStrength } from "check-password-strength";
 import { validate } from "email-validator";
+import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
@@ -20,6 +21,7 @@ type CreateUserFormState = {
 };
 
 export const SignUpForm = (props: SignUpFormProps) => {
+  const { enqueueSnackbar } = useSnackbar();
   const { createUserMutation, isCreateUserLoading } = useCreateUser();
 
   const formMethods = useForm<CreateUserFormState>();
@@ -33,10 +35,17 @@ export const SignUpForm = (props: SignUpFormProps) => {
         name: data.name,
         password: data.password,
       });
-      // TODO: Show toast on success
+      enqueueSnackbar(
+        "Successfully created account! Please check your email.",
+        {
+          variant: "success",
+        },
+      );
       props.onSubmit();
     } catch (e: unknown) {
-      // TODO: Show error messages for conflict.
+      enqueueSnackbar(e as string, {
+        variant: "error",
+      });
     }
   });
 
