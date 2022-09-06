@@ -4,6 +4,7 @@ import {
   Controller,
   Patch,
   Post,
+  UnauthorizedException,
 } from "@nestjs/common";
 
 import { VerificationError } from "src/common/errors/verification.error";
@@ -15,7 +16,9 @@ export class VerificationController {
   constructor(private service: VerificationService) {}
 
   @Post()
-  async resendVerificationEmail(@Body() { email }: { email: string }) {
+  async resendVerificationEmail(
+    @Body() { email }: { email: string },
+  ): Promise<void> {
     try {
       return await this.service.sendVerificationEmail(email);
     } catch (e: unknown) {
@@ -29,7 +32,10 @@ export class VerificationController {
   @Patch()
   async checkVerificationCode(
     @Body() { email, code }: { email: string; code: string },
-  ) {
-    return this.service.checkVerificationCode(email, code);
+  ): Promise<void> {
+    const result = this.service.checkVerificationCode(email, code);
+    if (!result) {
+      throw new UnauthorizedException("Failed to verify user email.");
+    }
   }
 }

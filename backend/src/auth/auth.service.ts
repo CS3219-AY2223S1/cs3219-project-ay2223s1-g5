@@ -6,6 +6,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { User } from "@prisma/client";
 import { compare } from "bcrypt";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
 import { UserService } from "src/user/user.service";
@@ -19,6 +20,8 @@ export interface JwtPayload {
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectPinoLogger(AuthService.name)
+    private readonly logger: PinoLogger,
     private configService: ConfigService,
     private userService: UserService,
     private jwtService: JwtService,
@@ -50,9 +53,14 @@ export class AuthService {
 
   async login(user: Express.User) {
     const payload: JwtPayload = { sub: user.userId };
+    const userDetails = await this.userService.getById(user.userId);
+    if (!userDetails) {
+      this.logger.error(`Unable to retrieve user: ${user.userId}`);
+      throw new Error(`Unable to retrieve user: ${user.userId}`);
+    }
     return {
+      user: userDetails,
       accessToken: this.jwtService.sign(payload),
-      // TODO: Read token expiry from ConfigService
       expiresIn: this.configService.get("jwt.validity"),
     };
   }

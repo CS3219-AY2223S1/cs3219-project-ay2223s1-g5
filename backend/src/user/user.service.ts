@@ -3,6 +3,7 @@ import { Prisma, User } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { compare, hash } from "bcrypt";
 
+import { UnauthorizedError } from "src/common/errors/unauthorized.error";
 import { PrismaService } from "src/core/prisma.service";
 
 const SALT_ROUNDS = 10;
@@ -83,8 +84,7 @@ export class UserService {
       where: { id: id },
     });
     if (!user || !compare(oldPassword, user.password)) {
-      // TODO: Handle incorrect password error.
-      throw new Error();
+      throw new UnauthorizedError("Incorrect password.");
     }
     const hashedPassword = await hash(newPassword, SALT_ROUNDS);
     return this.prisma.user.update({

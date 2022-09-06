@@ -24,7 +24,7 @@ export class VerificationService {
     return this.twilioService.sendVerificationEmail(email);
   }
 
-  async checkVerificationCode(email: string, code: string) {
+  async checkVerificationCode(email: string, code: string): Promise<boolean> {
     const user = await this.userService.getByEmail(email);
     if (!user) {
       throw new EntityNotFoundError("User not found.");
@@ -34,9 +34,9 @@ export class VerificationService {
     }
     const result = await this.twilioService.verifyEmailCode(email, code);
     if (!result) {
-      // TODO: Handle failed verification.
-      throw new Error();
+      return false;
     }
-    return await this.userService.updateUserVerification(user.id);
+    await this.userService.updateUserVerification(user.id);
+    return true;
   }
 }
