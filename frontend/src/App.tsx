@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "react-query";
+import { useRoutes } from "react-router-dom";
 
 import { ReactQueryDevtools } from "react-query/devtools";
 
-import { Login } from "./pages/Login";
-// import { PasswordReset } from "./pages/PasswordReset";
+import { AppRoutes } from "./routes/app.routes";
 
 const queryClient = new QueryClient();
 
@@ -11,7 +11,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <Login />
+      {useRoutes(AppRoutes)}
     </QueryClientProvider>
   );
 };

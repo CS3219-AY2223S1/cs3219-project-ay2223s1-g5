@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Container, Grid, Stack, Tab, Typography } from "@mui/material";
 
@@ -13,6 +14,8 @@ export const Login = () => {
   const [formType, setFormType] = useState<
     "login" | "signup" | "resetpassword"
   >("login");
+
+  const navigate = useNavigate();
 
   const handleChange = (
     _: React.SyntheticEvent | undefined,
@@ -55,9 +58,7 @@ export const Login = () => {
               </Container>
               <Container sx={{ width: "80%", px: "24px", alignSelf: "center" }}>
                 <RequestPasswordResetForm
-                  onSubmit={() => {
-                    return;
-                  }}
+                  onSubmit={() => setFormType("login")}
                   loginRedirect={() => setFormType("login")}
                 />
               </Container>
@@ -88,9 +89,7 @@ export const Login = () => {
                 <Container sx={{ width: "80%", paddingX: 0 }}>
                   <LoginForm
                     // TODO: Navigate to dashboard.
-                    onSubmit={() => {
-                      return;
-                    }}
+                    onSubmit={() => navigate("/dashboard")}
                     resetPasswordRedirect={() => setFormType("resetpassword")}
                   />
                 </Container>
