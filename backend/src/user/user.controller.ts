@@ -27,7 +27,7 @@ export class UserController {
   ) {}
 
   @Post()
-  async createUser(@Body() data: CreateUserReq) {
+  async createUser(@Body() data: CreateUserReq): Promise<void> {
     const user = await this.userService.create(data);
     if (!user) {
       throw new ConflictException();
@@ -44,10 +44,10 @@ export class UserController {
     @Request() req: ExpressRequest,
     @Param("userId", ParseIntPipe) userId: number,
     @Body() data: UpdateUserReq,
-  ) {
+  ): Promise<void> {
     if (req.user?.userId != userId) {
       throw new ForbiddenException();
     }
-    return this.userService.updateUserDetails(userId, data);
+    await this.userService.updateUserDetails(userId, data);
   }
 }
