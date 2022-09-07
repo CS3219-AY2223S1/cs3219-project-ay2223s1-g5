@@ -4,6 +4,7 @@ import { SnackbarProvider } from "notistack";
 
 import { ReactQueryDevtools } from "react-query/devtools";
 
+import { AuthProvider } from "./contexts/AuthContext";
 import { AppRoutes } from "./routes/app.routes";
 
 const queryClient = new QueryClient();
@@ -13,7 +14,7 @@ const App = () => {
     <SnackbarProvider anchorOrigin={{ horizontal: "center", vertical: "top" }}>
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools initialIsOpen={false} />
-        {useRoutes(AppRoutes)}
+        <AuthProvider>{useRoutes(AppRoutes)}</AuthProvider>
       </QueryClientProvider>
     </SnackbarProvider>
   );
