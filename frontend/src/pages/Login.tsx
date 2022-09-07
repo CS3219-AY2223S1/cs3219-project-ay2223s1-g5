@@ -58,7 +58,7 @@ export const Login = () => {
                   onSubmit={() => {
                     return;
                   }}
-                  onClickBack={() => setFormType("login")}
+                  loginRedirect={() => setFormType("login")}
                 />
               </Container>
             </Stack>
