@@ -2,9 +2,12 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Lock, MailOutline } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
 import { validate } from "email-validator";
+import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
+import { useLogin } from "src/hooks/useAuth";
+import { ApiResponseError } from "src/services/ApiService";
 
 export interface LoginFormProps {
   onSubmit: () => void;
@@ -17,14 +20,21 @@ type LoginFormState = {
 };
 
 export const LoginForm = (props: LoginFormProps) => {
-  const formMethods = useForm<LoginFormState>();
+  const { enqueueSnackbar } = useSnackbar();
+  const { loginMutation, isLoginLoading } = useLogin();
 
+  const formMethods = useForm<LoginFormState>();
   const { handleSubmit } = formMethods;
 
   const onSubmit = handleSubmit(async (data: LoginFormState) => {
-    // TODO: Link up logic.
-    console.log(data);
-    props.onSubmit();
+    try {
+      await loginMutation(data);
+      props.onSubmit();
+    } catch (e: unknown) {
+      enqueueSnackbar((e as ApiResponseError).message, {
+        variant: "error",
+      });
+    }
   });
 
   return (
@@ -90,12 +100,7 @@ export const LoginForm = (props: LoginFormProps) => {
           >
             Forgot your password?
           </Button>
-          <StyledButton
-            label="Login"
-            type="submit"
-            // TODO: Link up loading state
-            loading={false}
-          />
+          <StyledButton label="Login" type="submit" loading={isLoginLoading} />
         </Stack>
       </Stack>
     </FormProvider>
