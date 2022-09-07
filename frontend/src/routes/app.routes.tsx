@@ -1,8 +1,8 @@
 import { Outlet, RouteObject } from "react-router-dom";
 
 import { DashboardPage } from "src/pages/DashboardPage";
-import { Login } from "src/pages/Login";
-import { PasswordReset } from "src/pages/PasswordReset";
+import { LoginPage } from "src/pages/LoginPage";
+import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
 
 import { ProtectedRoute } from "./ProtectedRoutes";
 
@@ -11,11 +11,11 @@ export const AppRoutes: RouteObject[] = [
     children: [
       {
         path: "",
-        element: <Login />,
+        element: <LoginPage />,
       },
       {
         path: "resetpassword",
-        element: <PasswordReset />,
+        element: <ResetPasswordPage />,
       },
       {
         element: (

@@ -7,7 +7,7 @@ import PairProgrammingImage from "../assets/images/PairProgramming/PairProgrammi
 import { InputWithIcon } from "../components/InputWithIcon";
 import { StyledButton } from "../components/StyledButton";
 
-export const PasswordReset = () => {
+export const ResetPasswordPage = () => {
   // TODO: Implement form and logic
   const { userId, code } = useParams();
 
