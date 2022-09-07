@@ -61,7 +61,6 @@ export class AuthService {
     return {
       user: userDetails,
       accessToken: this.jwtService.sign(payload),
-      expiresIn: this.configService.get("jwt.validity"),
     };
   }
 }
