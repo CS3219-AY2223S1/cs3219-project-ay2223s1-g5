@@ -61,7 +61,7 @@ export class AuthController {
       const payload = verify(req.cookies["accessToken"], this.secret, {
         ignoreExpiration: false,
       }) as unknown as JwtPayload;
-      const userId = +payload.sub;
+      const userId = payload.sub;
       const { user, accessToken } = await this.service.login({ userId });
       // We resend a new JWT to refresh its duration.
       return this.sendJwtPayload(res, user, accessToken);
