@@ -39,7 +39,7 @@ export class MatchService {
       return null;
     }
 
-    await this.removeFromMatch(namespaces, matchedUserId);
+    await this.removeFromQueue(namespaces, matchedUserId);
 
     const matchResult = [
       { userId, socketId },
@@ -61,7 +61,7 @@ export class MatchService {
     );
   }
 
-  async removeFromMatch(namespaces: string[], userId: number) {
+  async removeFromQueue(namespaces: string[], userId: number) {
     return await this.redisService.deleteKey(namespaces, userId.toString());
   }
 }
