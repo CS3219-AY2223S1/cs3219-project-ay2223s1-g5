@@ -26,8 +26,7 @@ export const SocketProvider = ({
       if (socket && namespace == name) {
         return socket;
       }
-      // TODO: Manually configure path for development vs production.
-      const client = io(`http://localhost:8080/${namespace}`, {
+      const client = io(`/${namespace}`, {
         withCredentials: true,
         transports: ["websocket"],
       });
