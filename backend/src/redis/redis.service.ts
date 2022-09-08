@@ -6,6 +6,7 @@ import { ConfigService } from "src/core/config/config.service";
 
 @Injectable()
 export class RedisService implements OnApplicationShutdown {
+  private static readonly NAMESPACE_DELIMETER = ":";
   private redisClient: RedisClientType;
 
   /**
@@ -45,13 +46,18 @@ export class RedisService implements OnApplicationShutdown {
     await this.redisClient.quit();
   }
 
+  static createNamespace(namespaces: string[]): string {
+    return namespaces.join(this.NAMESPACE_DELIMETER) + this.NAMESPACE_DELIMETER;
+  }
+
   async setKey(
-    namespace: string,
+    namespaces: string[],
     key: string,
     value: string,
     expirationTime?: number,
   ): Promise<string | null> {
-    const keyWithNamespace = `${namespace}:${key}`;
+    const namespace = RedisService.createNamespace(namespaces);
+    const keyWithNamespace = `${namespace}${key}`;
     if (expirationTime) {
       return this.redisClient.set(keyWithNamespace, value, {
         EX: expirationTime,
@@ -61,15 +67,18 @@ export class RedisService implements OnApplicationShutdown {
     }
   }
 
-  async getAllKeys(namespace: string): Promise<string[]> {
-    return this.redisClient.keys(`${namespace}:*`);
+  async getAllKeys(namespaces: string[]): Promise<string[]> {
+    const namespace = RedisService.createNamespace(namespaces);
+    return this.redisClient.keys(`${namespace}*`);
   }
 
-  async deleteKey(namespace: string, key: string): Promise<number> {
-    return this.redisClient.del(`${namespace}:${key}`);
+  async deleteKey(namespaces: string[], key: string): Promise<number> {
+    const namespace = RedisService.createNamespace(namespaces);
+    return this.redisClient.del(`${namespace}${key}`);
   }
 
-  async getValue(namespace: string, key: string): Promise<string | null> {
-    return this.redisClient.get(`${namespace}:${key}`);
+  async getValue(namespaces: string[], key: string): Promise<string | null> {
+    const namespace = RedisService.createNamespace(namespaces);
+    return this.redisClient.get(`${namespace}${key}`);
   }
 }
