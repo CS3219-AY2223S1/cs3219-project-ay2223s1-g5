@@ -40,7 +40,7 @@ export const WaitingPage = () => {
       setMessage("Unable to find a match. Returning to dashboard.");
       // TODO: Stop the loading spinner or change its color.
       // We give the user some time to read the message.
-      setTimeout(() => navigate("/"), 3000);
+      setTimeout(() => navigate("/dashboard"), 3000);
     }, 30000);
 
     socket.on("found", (data) => {

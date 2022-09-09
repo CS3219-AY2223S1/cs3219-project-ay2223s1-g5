@@ -38,7 +38,13 @@ export const SocketProvider = ({
   }, []);
 
   useEffect(() => {
-    return () => setSocket(undefined);
+    return () => {
+      setSocket((socket) => {
+        // Clean up socket connection.
+        socket?.disconnect();
+        return undefined;
+      });
+    };
   }, []);
 
   return (
