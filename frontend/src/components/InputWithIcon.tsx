@@ -3,8 +3,6 @@ import { Stack, TextField, TextFieldProps } from "@mui/material";
 
 type TextBoxProps = TextFieldProps & {
   Icon: SvgIconComponent;
-  label: string;
-  helperText?: string;
 };
 
 export const InputWithIcon = ({ Icon, ...rest }: TextBoxProps) => {
