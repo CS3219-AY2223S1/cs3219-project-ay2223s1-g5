@@ -20,3 +20,12 @@ export const useLogin = () => {
     isLoginLoading,
   };
 };
+
+// This hook does not use React Query since we do not want to cache the result.
+export const useWhoAmI = () => {
+  const whoAmI = async () => {
+    const { data } = await ApiService.get<LoginRes | undefined>(`/whoami`);
+    return data;
+  };
+  return { whoAmI };
+};

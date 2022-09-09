@@ -10,7 +10,7 @@ import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
 import { SignUpForm } from "../components/forms/SignUpForm";
 
-export const Login = () => {
+export const LoginPage = () => {
   const [formType, setFormType] = useState<
     "login" | "signup" | "resetpassword"
   >("login");

@@ -1,18 +1,34 @@
-import { RouteObject } from "react-router-dom";
+import { Outlet, RouteObject } from "react-router-dom";
 
-import { Login } from "src/pages/Login";
-import { PasswordReset } from "src/pages/PasswordReset";
+import { DashboardPage } from "src/pages/DashboardPage";
+import { LoginPage } from "src/pages/LoginPage";
+import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
+
+import { ProtectedRoute } from "./ProtectedRoutes";
 
 export const AppRoutes: RouteObject[] = [
   {
     children: [
       {
         path: "",
-        element: <Login />,
+        element: <LoginPage />,
       },
       {
         path: "resetpassword",
-        element: <PasswordReset />,
+        element: <ResetPasswordPage />,
+      },
+      {
+        element: (
+          <ProtectedRoute>
+            <Outlet />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            path: "dashboard",
+            element: <DashboardPage />,
+          },
+        ],
       },
     ],
   },

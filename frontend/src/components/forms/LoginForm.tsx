@@ -6,6 +6,7 @@ import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
+import { useAuth } from "src/contexts/AuthContext";
 import { useLogin } from "src/hooks/useAuth";
 import { ApiResponseError } from "src/services/ApiService";
 
@@ -22,6 +23,7 @@ type LoginFormState = {
 export const LoginForm = (props: LoginFormProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const { loginMutation, isLoginLoading } = useLogin();
+  const { getUser } = useAuth();
 
   const formMethods = useForm<LoginFormState>();
   const { handleSubmit } = formMethods;
@@ -29,6 +31,7 @@ export const LoginForm = (props: LoginFormProps) => {
   const onSubmit = handleSubmit(async (data: LoginFormState) => {
     try {
       await loginMutation(data);
+      await getUser();
       props.onSubmit();
     } catch (e: unknown) {
       enqueueSnackbar((e as ApiResponseError).message, {
