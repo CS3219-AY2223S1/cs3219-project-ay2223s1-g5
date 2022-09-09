@@ -1,38 +1,27 @@
 import { SvgIconComponent } from "@mui/icons-material";
-import { Card, Input } from "@mui/material";
+import { Stack, TextField, TextFieldProps } from "@mui/material";
 
-interface TextBoxProps {
+type TextBoxProps = TextFieldProps & {
   Icon: SvgIconComponent;
-  label: string;
-  type?: string;
-}
+};
 
-export const InputWithIcon = ({ Icon, label, type = "text" }: TextBoxProps) => {
+export const InputWithIcon = ({ Icon, ...rest }: TextBoxProps) => {
   return (
-    <Card
-      sx={{
-        width: "70%",
-        borderRadius: "20px",
-        display: "flex",
-        px: "4%",
-        height: "40px",
-      }}
-    >
+    <Stack direction="row" width="100%" spacing={2} alignContent="flex-start">
       <Icon
         sx={{
+          paddingTop: "8px", // To align with the input when help text is shown.
           color: "primary.main",
-          alignSelf: "center",
         }}
       />
-      <Input
+      <TextField
+        size="small"
         sx={{
-          marginLeft: "10px",
-          width: "100%",
+          flexGrow: 1,
+          px: "0",
         }}
-        disableUnderline={true}
-        placeholder={label}
-        type={type}
+        {...rest}
       />
-    </Card>
+    </Stack>
   );
 };
