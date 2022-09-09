@@ -1,3 +1,4 @@
+import { useParams } from "react-router-dom";
 import { LockReset } from "@mui/icons-material";
 import { Container, Grid, Stack } from "@mui/material";
 
@@ -7,6 +8,9 @@ import { InputWithIcon } from "../components/InputWithIcon";
 import { StyledButton } from "../components/StyledButton";
 
 export const PasswordReset = () => {
+  // TODO: Implement form and logic
+  const { userId, code } = useParams();
+
   return (
     <Grid container height="100vh">
       <Grid container item xs={8} alignItems="center" bgcolor="primary.main">
