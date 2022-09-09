@@ -2,11 +2,11 @@ import { Grid } from "@mui/material";
 
 import { NavigationBar } from "../components/NavigationBar";
 
-export const DashboardPage = () => {
+export const PeerPrepPage = () => {
   return (
     <Grid container sx={{ height: "100vh" }}>
       <NavigationBar />
-      <div>DashboardPage</div>
+      <div>PeerPrep Page</div>
     </Grid>
   );
 };
