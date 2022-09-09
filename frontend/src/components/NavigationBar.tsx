@@ -1,24 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   AccountCircleOutlined,
   LaptopOutlined,
   WebOutlined,
 } from "@mui/icons-material";
-import {
-  Container,
-  Divider,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-} from "@mui/material";
+import { Drawer, List, ListItem, Toolbar } from "@mui/material";
 
 import { DrawerButton } from "./DrawerButton";
 
 export const NavigationBar = () => {
+  const location = useLocation();
   const pages = ["Account", "Dashboard", "PeerPrep"];
   return (
     <Drawer
@@ -36,7 +27,18 @@ export const NavigationBar = () => {
             key={page}
             component={Link}
             to={`/${page.toLowerCase()}`}
+            selected={`/${page.toLowerCase()}` === location.pathname}
             disablePadding
+            sx={{
+              "&.Mui-selected": {
+                "& .MuiListItemIcon-root": {
+                  color: "secondary.main",
+                },
+                "& .MuiTypography-root": {
+                  color: "secondary.main",
+                },
+              },
+            }}
           >
             {page === "Account" ? (
               <DrawerButton

@@ -3,6 +3,7 @@ import { createTheme } from "@mui/material/styles";
 const colors = {
   blue: "#1472D3",
   orange: "#EF7C00",
+  white: "#FFFFFF",
 };
 
 const theme = createTheme({
@@ -12,6 +13,7 @@ const theme = createTheme({
   palette: {
     primary: {
       main: colors.blue,
+      light: colors.white,
     },
     secondary: {
       main: colors.orange,

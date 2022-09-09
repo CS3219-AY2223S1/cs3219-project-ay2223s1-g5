@@ -6,7 +6,7 @@ export const DashboardPage = () => {
   return (
     <Grid container sx={{ height: "100vh" }}>
       <NavigationBar />
-      <div>DashboardPage</div>
+      <div>Dashboard Page</div>
     </Grid>
   );
 };

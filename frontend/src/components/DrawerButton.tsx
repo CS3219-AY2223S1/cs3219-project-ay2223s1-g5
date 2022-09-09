@@ -23,7 +23,12 @@ export const DrawerButton = ({
         padding: "10px",
       }}
     >
-      <ListItemIcon sx={{ justifyContent: "center", color: "white" }}>
+      <ListItemIcon
+        sx={{
+          justifyContent: "center",
+          color: "primary.light",
+        }}
+      >
         <Icon />
       </ListItemIcon>
       <ListItemText
@@ -31,7 +36,7 @@ export const DrawerButton = ({
           margin: "0%",
           "& .MuiTypography-root": {
             fontSize: "14px",
-            color: "white",
+            color: "primary.light",
             textAlign: "center",
           },
         }}

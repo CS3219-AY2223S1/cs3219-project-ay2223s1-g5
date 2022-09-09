@@ -6,7 +6,7 @@ export const AccountSettingPage = () => {
   return (
     <Grid container sx={{ height: "100vh" }}>
       <NavigationBar />
-      <div>Settings Page</div>
+      <div>Account Page</div>
     </Grid>
   );
 };
