@@ -3,21 +3,30 @@ import {
   ConflictException,
   Controller,
   ForbiddenException,
+  Get,
   Param,
   ParseIntPipe,
   Post,
   Put,
   Request,
+  Response,
   UseGuards,
 } from "@nestjs/common";
-import { Request as ExpressRequest } from "express";
+import {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from "express";
 
 import { JwtAuthGuard } from "src/auth/jwt.guard";
 import { VerificationService } from "src/verification/verification.service";
 
 import { UserService } from "./user.service";
 
-import { CreateUserReq, UpdateUserReq } from "~shared/types/api";
+import {
+  CreateUserReq,
+  GetUserNameRes,
+  UpdateUserReq,
+} from "~shared/types/api";
 
 @Controller("users")
 export class UserController {
@@ -49,5 +58,21 @@ export class UserController {
       throw new ForbiddenException();
     }
     await this.userService.updateUserDetails(userId, data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(":userId(\\d+)")
+  async getUserName(
+    @Request() req: ExpressRequest,
+    @Response() res: ExpressResponse,
+    @Param("userId", ParseIntPipe) userId: number,
+  ): Promise<GetUserNameRes | null> {
+    const User = await this.userService.getNameById(userId);
+    const responseBody: GetUserNameRes = {
+      name: User?.name ?? "",
+    };
+
+    res.json(responseBody);
+    return responseBody;
   }
 }

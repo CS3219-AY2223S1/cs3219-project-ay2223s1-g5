@@ -106,4 +106,17 @@ export class UserService {
       data,
     });
   }
+
+  async getNameById(id: number): Promise<{ name: string } | null> {
+    return this.prisma.user.findUnique({
+      where: { id: id },
+      select: {
+        name: true,
+        id: false,
+        email: false,
+        password: false,
+        verified: false,
+      },
+    });
+  }
 }
