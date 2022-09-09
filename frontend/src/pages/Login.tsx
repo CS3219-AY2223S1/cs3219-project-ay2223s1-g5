@@ -96,7 +96,7 @@ export const Login = () => {
               </TabPanel>
               <TabPanel value="signup">
                 <Container sx={{ width: "80%", paddingX: 0 }}>
-                  <SignUpForm onSubmit={() => setFormType("signup")} />
+                  <SignUpForm onSubmit={() => setFormType("login")} />
                 </Container>
               </TabPanel>
             </TabContext>

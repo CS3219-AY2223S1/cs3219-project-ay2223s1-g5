@@ -1,6 +1,6 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AccountCircle, Lock, MailOutline } from "@mui/icons-material";
-import { Alert, Snackbar, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { passwordStrength } from "check-password-strength";
 import { validate } from "email-validator";
 import { useSnackbar } from "notistack";
@@ -8,6 +8,7 @@ import { useSnackbar } from "notistack";
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useCreateUser } from "src/hooks/useUsers";
+import { ApiResponseError } from "src/services/ApiService";
 
 export interface SignUpFormProps {
   onSubmit: () => void;
@@ -43,7 +44,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
       );
       props.onSubmit();
     } catch (e: unknown) {
-      enqueueSnackbar(e as string, {
+      enqueueSnackbar((e as ApiResponseError).message, {
         variant: "error",
       });
     }
