@@ -1,6 +1,7 @@
 import { UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -25,10 +26,31 @@ export class MatchGateway {
   ) {}
 
   @SubscribeMessage("find")
-  handleFind(@ConnectedSocket() client: Socket): void {
+  async handleFind(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() difficultyLevel: string,
+  ): Promise<void> {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
-    // TODO: Call service.
+    const match = await this.service.searchMatch(
+      userId,
+      difficultyLevel,
+      client.id,
+    );
+
+    if (match) {
+      // Get sockets by ID and let them join the same room
+      const sockets = await this.server.fetchSockets();
+      match.result.forEach((user) => {
+        for (const socket of sockets) {
+          if (socket.id === user.socketId) {
+            socket.join(match.roomId);
+            socket.emit("found", match.roomId);
+          }
+        }
+      });
+    }
+
     return;
   }
 

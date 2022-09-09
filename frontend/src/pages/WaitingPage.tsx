@@ -52,7 +52,8 @@ export const WaitingPage = () => {
       // TODO: Handle found match.
     });
 
-    socket.emit("find");
+    // TODO: Get the difficulty level from frontend
+    socket.emit("find", "DummyDifficultyLevel");
     return () => {
       socket.off("found");
     };
