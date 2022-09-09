@@ -31,6 +31,8 @@ export const WaitingPage = () => {
   }, [socket]);
 
   useEffect(() => {
+    // FIXME: If the socket disconnects from a connected state,
+    // we should fail the search and return the user to the dashboard.
     if (!connected || !socket) {
       return;
     }
