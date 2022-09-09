@@ -12,6 +12,7 @@ export const StyledButton = ({ label, ...rest }: StyledButtonProps) => {
         borderRadius: "20px",
         fontWeight: "bold",
         textTransform: "none",
+        // FIXME: This prop causes a bug in Safari browsers.
         px: "7%",
         "&:hover": {
           backgroundColor: "primary.main",

@@ -9,7 +9,7 @@ import { StyledButton } from "src/components/StyledButton";
 import { useCreateUser } from "src/hooks/useUsers";
 
 export interface SignUpFormProps {
-  onSubmitCallback: () => void;
+  onSubmit: () => void;
 }
 
 type CreateUserFormState = {
@@ -34,7 +34,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
         password: data.password,
       });
       // TODO: Show toast on success
-      props.onSubmitCallback();
+      props.onSubmit();
     } catch (e: unknown) {
       // TODO: Show error messages for conflict.
     }
@@ -42,7 +42,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
 
   return (
     <FormProvider {...formMethods}>
-      <Stack spacing={6} component="form" onSubmit={onSubmit} width="100%">
+      <Stack spacing={4} component="form" onSubmit={onSubmit} width="100%">
         <Controller
           name="email"
           defaultValue={""}
