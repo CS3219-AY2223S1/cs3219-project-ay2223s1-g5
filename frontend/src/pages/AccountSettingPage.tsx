@@ -1,12 +1,17 @@
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 
 import { NavigationBar } from "../components/NavigationBar";
 
 export const AccountSettingPage = () => {
   return (
-    <Grid container sx={{ height: "100vh" }}>
-      <NavigationBar />
-      <div>Account Page</div>
+    <Grid container>
+      <Grid item xs={1}>
+        <NavigationBar />
+      </Grid>
+      <Divider orientation="vertical" flexItem />
+      <Grid item xs={10}>
+        <div>Account Setting Page</div>
+      </Grid>
     </Grid>
   );
 };

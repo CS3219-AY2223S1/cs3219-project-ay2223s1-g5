@@ -20,13 +20,15 @@ export const DrawerButton = ({
       sx={{
         display: "grid",
         justifyContent: "center",
-        padding: "10px",
+        "&:hover": {
+          background: "none",
+        },
       }}
     >
       <ListItemIcon
         sx={{
           justifyContent: "center",
-          color: "primary.light",
+          color: "primary.main",
         }}
       >
         <Icon />
@@ -36,7 +38,7 @@ export const DrawerButton = ({
           margin: "0%",
           "& .MuiTypography-root": {
             fontSize: "14px",
-            color: "primary.light",
+            color: "primary.main",
             textAlign: "center",
           },
         }}

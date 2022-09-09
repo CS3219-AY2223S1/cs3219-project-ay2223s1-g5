@@ -4,7 +4,9 @@ import {
   LaptopOutlined,
   WebOutlined,
 } from "@mui/icons-material";
-import { Drawer, List, ListItem, Toolbar } from "@mui/material";
+import { Container, Divider, List, ListItem } from "@mui/material";
+
+import LogoImage from "../assets/images/Logo/Logo.png";
 
 import { DrawerButton } from "./DrawerButton";
 
@@ -12,15 +14,12 @@ export const NavigationBar = () => {
   const location = useLocation();
   const pages = ["Account", "Dashboard", "PeerPrep"];
   return (
-    <Drawer
-      variant="permanent"
-      anchor="left"
-      sx={{
-        minWidth: "100px",
-        "& .MuiPaper-root": { backgroundColor: "primary.main" },
-      }}
+    <Container
+      disableGutters
+      sx={{ backgroundColor: "primary.light", height: "100vh" }}
     >
-      <Toolbar />
+      <Container component="img" src={LogoImage} sx={{ my: "10%" }} />
+      <Divider />
       <List>
         {pages.map((page) => (
           <ListItem
@@ -31,6 +30,7 @@ export const NavigationBar = () => {
             disablePadding
             sx={{
               "&.Mui-selected": {
+                background: "none",
                 "& .MuiListItemIcon-root": {
                   color: "secondary.main",
                 },
@@ -53,6 +53,6 @@ export const NavigationBar = () => {
           </ListItem>
         ))}
       </List>
-    </Drawer>
+    </Container>
   );
 };
