@@ -1,1 +1,1 @@
-export const APP_NAME = "PeerPrep";
+export const APP_NAME = "CodeCollab";
