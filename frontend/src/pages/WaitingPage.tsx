@@ -46,7 +46,11 @@ export const WaitingPage = () => {
     }, 30000);
 
     socket.on("found", (data) => {
-      setMessage("Found a match! Loading...");
+      setMessage(
+        `Found a match between ${data.userNames[0]} and ${data.userNames[1]}! \n
+        Room ID: ${data.roomId} \n
+        Loading...`,
+      );
       clearTimeout(timeout);
       console.log(data);
       // TODO: Handle found match.
@@ -71,7 +75,11 @@ export const WaitingPage = () => {
       }}
     >
       <CircularProgress size="4rem" />
-      <Typography>{message}</Typography>
+      <Typography>
+        {message.split("\n").map((i, key) => {
+          return <div key={key}>{i}</div>;
+        })}
+      </Typography>
     </Stack>
   );
 };

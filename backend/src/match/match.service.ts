@@ -3,10 +3,12 @@ import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RedisService } from "src/redis/redis.service";
+import { UserService } from "src/user/user.service";
 
 interface Match {
   roomId: string;
   result: { userId: number; socketId: string }[];
+  userNames: string[];
 }
 
 @Injectable()
@@ -18,6 +20,7 @@ export class MatchService {
     @InjectPinoLogger()
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
+    private readonly userService: UserService,
   ) {}
 
   async searchMatch(
@@ -58,7 +61,21 @@ export class MatchService {
     return {
       roomId: nanoid(),
       result: matchResult,
+      userNames: await this.getUserNames([userId, matchedUserId]),
     } as Match;
+  }
+
+  async getUserNames(userIds: number[]): Promise<string[]> {
+    const userNames: string[] = [];
+
+    userIds.forEach(async (userId) => {
+      const user = await this.userService.getById(userId);
+      if (user) {
+        userNames.push(user.name);
+      }
+    });
+
+    return userNames;
   }
 
   async addUserToQueue(

@@ -45,7 +45,10 @@ export class MatchGateway {
         for (const socket of sockets) {
           if (socket.id === user.socketId) {
             socket.join(match.roomId);
-            socket.emit("found", match.roomId);
+            socket.emit("found", {
+              roomId: match.roomId,
+              userNames: match.userNames,
+            });
           }
         }
       });
