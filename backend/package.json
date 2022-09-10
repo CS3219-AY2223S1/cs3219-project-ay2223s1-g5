@@ -33,10 +33,13 @@
     "@nestjs/jwt": "^9.0.0",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-socket.io": "^9.0.11",
+    "@nestjs/websockets": "^9.0.11",
     "@prisma/client": "^4.2.1",
     "@types/jsonwebtoken": "^8.5.9",
     "bcrypt": "^5.0.1",
     "convict": "^6.2.3",
+    "cookie": "^0.5.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.2",
     "jsonwebtoken": "^8.5.1",
@@ -49,6 +52,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "socket.io": "^4.5.2",
     "twilio": "^3.81.0"
   },
   "devDependencies": {
