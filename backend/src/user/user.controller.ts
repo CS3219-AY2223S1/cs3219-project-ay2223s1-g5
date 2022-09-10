@@ -3,6 +3,7 @@ import {
   ConflictException,
   Controller,
   ForbiddenException,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -17,7 +18,11 @@ import { VerificationService } from "src/verification/verification.service";
 
 import { UserService } from "./user.service";
 
-import { CreateUserReq, UpdateUserReq } from "~shared/types/api";
+import {
+  CreateUserReq,
+  GetUserNameRes,
+  UpdateUserReq,
+} from "~shared/types/api";
 
 @Controller("users")
 export class UserController {
@@ -49,5 +54,18 @@ export class UserController {
       throw new ForbiddenException();
     }
     await this.userService.updateUserDetails(userId, data);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Get(":userId(\\d+)")
+  async getUserName(
+    @Param("userId", ParseIntPipe) userId: number,
+  ): Promise<GetUserNameRes | null> {
+    const user = await this.userService.getById(userId);
+    if (!user) {
+      return null;
+    }
+    const { name } = user;
+    return { name };
   }
 }

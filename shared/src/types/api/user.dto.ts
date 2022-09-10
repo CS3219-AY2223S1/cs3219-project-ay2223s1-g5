@@ -7,3 +7,7 @@ export class CreateUserReq {
 export class UpdateUserReq {
   name: string;
 }
+
+export class GetUserNameRes {
+  name: string;
+}
