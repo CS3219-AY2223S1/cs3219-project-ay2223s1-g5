@@ -56,18 +56,16 @@ export class UserController {
     await this.userService.updateUserDetails(userId, data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get(":userId(\\d+)")
   async getUserName(
     @Param("userId", ParseIntPipe) userId: number,
   ): Promise<GetUserNameRes | null> {
-    const User = await this.userService.getById(userId);
-    if (User?.name != null) {
-      const responseBody: GetUserNameRes = {
-        name: User?.name,
-      };
-      return responseBody;
+    const user = await this.userService.getById(userId);
+    if (!user) {
+      return null;
     }
-    return null;
+    const { name } = user;
+    return { name };
   }
 }
