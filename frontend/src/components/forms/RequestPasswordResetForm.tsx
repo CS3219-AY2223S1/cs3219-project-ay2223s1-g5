@@ -22,6 +22,7 @@ export const RequestPasswordResetForm = (props: RequestPasswordResetForm) => {
 
   const onSubmit = handleSubmit(async (data: RequestPasswordResetFormState) => {
     // TODO: Link up logic.
+    // eslint-disable-next-line no-console
     console.log(data);
     props.onSubmit();
   });

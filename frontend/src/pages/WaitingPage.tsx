@@ -48,8 +48,9 @@ export const WaitingPage = () => {
     socket.on("found", (data) => {
       setMessage("Found a match! Loading...");
       clearTimeout(timeout);
-      console.log(data);
       // TODO: Handle found match.
+      // eslint-disable-next-line no-console
+      console.log(data);
     });
 
     socket.emit("find");

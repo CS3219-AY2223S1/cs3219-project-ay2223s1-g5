@@ -9,6 +9,7 @@ import { StyledButton } from "../components/StyledButton";
 
 export const ResetPasswordPage = () => {
   // TODO: Implement form and logic
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { userId, code } = useParams();
 
   return (
