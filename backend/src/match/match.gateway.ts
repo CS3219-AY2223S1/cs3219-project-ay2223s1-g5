@@ -38,23 +38,21 @@ export class MatchGateway {
       client.id,
     );
 
-    if (match) {
-      // Get sockets by ID and let them join the same room
-      const sockets = await this.server.fetchSockets();
-      match.result.forEach((user) => {
-        for (const socket of sockets) {
-          if (socket.id === user.socketId) {
-            socket.join(match.roomId);
-            socket.emit("found", {
-              roomId: match.roomId,
-              userNames: match.userNames,
-            });
-          }
-        }
-      });
+    if (!match) {
+      return;
     }
 
-    return;
+    // Get sockets by ID and let them join the same room
+    const sockets = await this.server.fetchSockets();
+    match.result.forEach((user) => {
+      for (const socket of sockets) {
+        if (socket.id === user.socketId) {
+          socket.join(match.roomId);
+        }
+      }
+    });
+
+    this.server.to(match.roomId).emit("found", match);
   }
 
   @SubscribeMessage("disconnect")

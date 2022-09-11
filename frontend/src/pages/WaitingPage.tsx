@@ -5,6 +5,8 @@ import { Stack } from "@mui/system";
 
 import { useSocket } from "src/contexts/WsContext";
 
+import { Match } from "~shared/types/api/match.dto";
+
 export const WaitingPage = () => {
   const navigate = useNavigate();
   const { socket, connect } = useSocket();
@@ -45,14 +47,14 @@ export const WaitingPage = () => {
       setTimeout(() => navigate("/dashboard"), 3000);
     }, 30000);
 
-    socket.on("found", (data) => {
+    socket.on("found", (match: Match) => {
       setMessage(
-        `Found a match between ${data.userNames[0]} and ${data.userNames[1]}! \n
-        Room ID: ${data.roomId} \n
+        `Found a match between ${match.result[0].userId} and ${match.result[1].userId}! \n
+        Room ID: ${match.roomId} \n
         Loading...`,
       );
       clearTimeout(timeout);
-      console.log(data);
+      console.log(match);
       // TODO: Handle found match.
     });
 
