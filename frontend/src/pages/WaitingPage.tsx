@@ -4,12 +4,15 @@ import { CircularProgress, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 
 import { useSocket } from "src/contexts/WsContext";
+import { useGetUsername } from "src/hooks/useUsers";
 
 import { Match } from "~shared/types/api/match.dto";
 
 export const WaitingPage = () => {
   const navigate = useNavigate();
   const { socket, connect } = useSocket();
+  const { getUsername } = useGetUsername();
+
   // We use a callback on the "connect" event to set a state here
   // so that we can be sure that we will have the socket ID.
   const [connected, setConnected] = useState<boolean>(false);
@@ -47,9 +50,11 @@ export const WaitingPage = () => {
       setTimeout(() => navigate("/dashboard"), 3000);
     }, 30000);
 
-    socket.on("found", (match: Match) => {
+    socket.on("found", async (match: Match) => {
+      const username1 = await getUsername(match.result[0].userId);
+      const username2 = await getUsername(match.result[1].userId);
       setMessage(
-        `Found a match between ${match.result[0].userId} and ${match.result[1].userId}!
+        `Found a match between ${username1} and ${username2}!
         Room ID: ${match.roomId}
         Loading...`,
       );
@@ -62,7 +67,7 @@ export const WaitingPage = () => {
     return () => {
       socket.off("found");
     };
-  }, [connected, navigate, socket]);
+  }, [connected, getUsername, navigate, socket]);
 
   return (
     <Stack
