@@ -11,6 +11,8 @@ import { VerificationError } from "src/common/errors/verification.error";
 
 import { VerificationService } from "./verification.service";
 
+import { VerifyEmailReq } from "~shared/types/api/auth.dto";
+
 @Controller("/users/verifications")
 export class VerificationController {
   constructor(private service: VerificationService) {}
@@ -31,9 +33,9 @@ export class VerificationController {
 
   @Patch()
   async checkVerificationCode(
-    @Body() { email, code }: { email: string; code: string },
+    @Body() { userId, code }: VerifyEmailReq,
   ): Promise<void> {
-    const result = this.service.checkVerificationCode(email, code);
+    const result = await this.service.checkVerificationCode(userId, code);
     if (!result) {
       throw new UnauthorizedException("Failed to verify user email.");
     }

@@ -8,7 +8,7 @@ export class MockTwilioService {
     private readonly logger: PinoLogger,
   ) {}
 
-  async sendVerificationEmail(email: string): Promise<void> {
+  async sendVerificationEmail(email: string, _userId: number): Promise<void> {
     this.logger.info(`Sending verification email to ${email}`);
   }
 

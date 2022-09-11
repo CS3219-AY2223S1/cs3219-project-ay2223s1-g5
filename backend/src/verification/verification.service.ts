@@ -21,18 +21,18 @@ export class VerificationService {
     if (user.verified) {
       throw new VerificationError("User already verified.");
     }
-    return this.twilioService.sendVerificationEmail(email);
+    return this.twilioService.sendVerificationEmail(email, user.id);
   }
 
-  async checkVerificationCode(email: string, code: string): Promise<boolean> {
-    const user = await this.userService.getByEmail(email);
+  async checkVerificationCode(userId: number, code: string): Promise<boolean> {
+    const user = await this.userService.getById(userId);
     if (!user) {
       throw new EntityNotFoundError("User not found.");
     }
     if (user.verified) {
       return true;
     }
-    const result = await this.twilioService.verifyEmailCode(email, code);
+    const result = await this.twilioService.verifyEmailCode(user.email, code);
     if (!result) {
       return false;
     }
