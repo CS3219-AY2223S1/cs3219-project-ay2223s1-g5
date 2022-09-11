@@ -21,6 +21,7 @@ import { UserService } from "./user.service";
 import {
   CreateUserReq,
   GetUserNameRes,
+  UpdatePasswordReq,
   UpdateUserReq,
 } from "~shared/types/api";
 
@@ -56,7 +57,7 @@ export class UserController {
     await this.userService.updateUserDetails(userId, data);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(":userId(\\d+)")
   async getUserName(
     @Param("userId", ParseIntPipe) userId: number,
@@ -67,5 +68,20 @@ export class UserController {
     }
     const { name } = user;
     return { name };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(":userId(\\d+)")
+  async updatePassword(
+    @Request() req: ExpressRequest,
+    @Param("userId", ParseIntPipe) userId: number,
+    @Body() data: UpdatePasswordReq,
+  ): Promise<void> {
+    if (req.user?.userId != userId) {
+      throw new ForbiddenException();
+    }
+    const { newPassword } = data;
+    const { oldPassword } = data;
+    await this.userService.updateUserPassword(userId, newPassword, oldPassword);
   }
 }
