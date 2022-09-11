@@ -7,7 +7,7 @@ import {
   WebSocketServer,
 } from "@nestjs/websockets";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
-import { Server, Socket } from "socket.io";
+import { Namespace, Socket } from "socket.io";
 
 import { WsAuthGuard } from "src/auth/ws.guard";
 
@@ -17,7 +17,7 @@ import { MatchService } from "./match.service";
 @WebSocketGateway({ namespace: "match" })
 export class MatchGateway {
   @WebSocketServer()
-  server: Server;
+  server: Namespace;
 
   constructor(
     @InjectPinoLogger()
@@ -43,13 +43,8 @@ export class MatchGateway {
     }
 
     // Get sockets by ID and let them join the same room
-    const sockets = await this.server.fetchSockets();
     match.result.forEach((user) => {
-      for (const socket of sockets) {
-        if (socket.id === user.socketId) {
-          socket.join(match.roomId);
-        }
-      }
+      this.server.sockets.get(user.socketId)?.join(match.roomId);
     });
 
     this.server.to(match.roomId).emit("found", match);

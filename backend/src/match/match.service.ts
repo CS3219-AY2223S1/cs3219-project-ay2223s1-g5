@@ -17,6 +17,7 @@ export class MatchService {
     private readonly redisService: RedisService,
   ) {}
 
+  // TODO: Prevent users from matching themselves if they have multiple tabs open
   async searchMatch(
     userId: number,
     difficultyLevel: string,

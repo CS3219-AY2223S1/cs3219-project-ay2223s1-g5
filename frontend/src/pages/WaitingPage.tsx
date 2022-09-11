@@ -49,16 +49,15 @@ export const WaitingPage = () => {
 
     socket.on("found", (match: Match) => {
       setMessage(
-        `Found a match between ${match.result[0].userId} and ${match.result[1].userId}! \n
-        Room ID: ${match.roomId} \n
+        `Found a match between ${match.result[0].userId} and ${match.result[1].userId}!
+        Room ID: ${match.roomId}
         Loading...`,
       );
       clearTimeout(timeout);
-      console.log(match);
       // TODO: Handle found match.
     });
 
-    // TODO: Get the difficulty level from frontend
+    // TODO: Update after difficulty selector is implemented
     socket.emit("find", "DummyDifficultyLevel");
     return () => {
       socket.off("found");
@@ -78,8 +77,8 @@ export const WaitingPage = () => {
     >
       <CircularProgress size="4rem" />
       <Typography>
-        {message.split("\n").map((i, key) => {
-          return <div key={key}>{i}</div>;
+        {message.split("\n").map((value, key) => {
+          return <div key={key}>{value}</div>;
         })}
       </Typography>
     </Stack>
