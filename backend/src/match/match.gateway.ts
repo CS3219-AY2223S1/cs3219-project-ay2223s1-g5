@@ -1,12 +1,13 @@
 import { UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
-import { Server, Socket } from "socket.io";
+import { Namespace, Socket } from "socket.io";
 
 import { WsAuthGuard } from "src/auth/ws.guard";
 
@@ -16,7 +17,7 @@ import { MatchService } from "./match.service";
 @WebSocketGateway({ namespace: "match" })
 export class MatchGateway {
   @WebSocketServer()
-  server: Server;
+  server: Namespace;
 
   constructor(
     @InjectPinoLogger()
@@ -25,11 +26,28 @@ export class MatchGateway {
   ) {}
 
   @SubscribeMessage("find")
-  handleFind(@ConnectedSocket() client: Socket): void {
+  async handleFind(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() difficultyLevel: string,
+  ): Promise<void> {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
-    // TODO: Call service.
-    return;
+    const match = await this.service.searchMatch(
+      userId,
+      difficultyLevel,
+      client.id,
+    );
+
+    if (!match) {
+      return;
+    }
+
+    // Get sockets by ID and let them join the same room
+    match.result.forEach((user) => {
+      this.server.sockets.get(user.socketId)?.join(match.roomId);
+    });
+
+    this.server.to(match.roomId).emit("found", match);
   }
 
   @SubscribeMessage("disconnect")
