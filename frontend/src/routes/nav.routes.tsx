@@ -8,7 +8,7 @@ import {
 
 import { AccountSettingPage } from "src/pages/AccountSettingPage";
 import { DashboardPage } from "src/pages/DashboardPage";
-import { PeerPrepPage } from "src/pages/PeerPrepPage";
+import { DifficultySelectionPage } from "src/pages/DifficultySelectionPage";
 
 type NavigationRouteObject = RouteObject & {
   Icon: SvgIconComponent;
@@ -31,8 +31,8 @@ export const NavigationBarRoutes: NavigationRouteObject[] = [
     Icon: WebOutlined,
   },
   {
-    path: "peerprep",
-    element: <PeerPrepPage />,
+    path: "select-difficulty",
+    element: <DifficultySelectionPage />,
     label: "PeerPrep",
     Icon: LaptopOutlined,
   },
