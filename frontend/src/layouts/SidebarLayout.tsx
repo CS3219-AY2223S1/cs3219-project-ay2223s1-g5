@@ -9,8 +9,8 @@ export const SidebarLayout = () => {
       <Grid item xs={2}>
         <NavigationBar />
       </Grid>
-      <Divider orientation="vertical" flexItem />
-      <Grid item>
+      <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
+      <Grid item xs={10} sx={{ backgroundColor: "secondary.light" }}>
         <Outlet />
       </Grid>
     </Grid>

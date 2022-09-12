@@ -1,6 +1,8 @@
+import { useTheme } from "@mui/material/styles/";
 import ReactEcharts from "echarts-for-react";
 
 export const PieChart = () => {
+  const theme = useTheme();
   return (
     <ReactEcharts
       option={{
@@ -21,19 +23,23 @@ export const PieChart = () => {
             type: "pie",
             radius: "50%",
             data: [
-              { value: 1048, name: "Easy", itemStyle: { color: "#91cc75" } },
               {
-                value: 735,
+                value: 30,
+                name: "Easy",
+                itemStyle: { color: theme.palette.chart.green },
+              },
+              {
+                value: 30,
                 name: "Medium",
                 itemStyle: {
-                  color: "#fac858",
+                  color: theme.palette.chart.yellow,
                 },
               },
               {
-                value: 580,
+                value: 30,
                 name: "Hard",
                 itemStyle: {
-                  color: "#ee6666",
+                  color: theme.palette.chart.red,
                 },
               },
             ],

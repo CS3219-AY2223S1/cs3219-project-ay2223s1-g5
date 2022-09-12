@@ -9,11 +9,12 @@ import { DrawerButton } from "./DrawerButton";
 
 export const NavigationBar = () => {
   return (
-    <Container
-      disableGutters
-      sx={{ backgroundColor: "primary.light", height: "100vh" }}
-    >
-      <Container component="img" src={LogoImage} sx={{ my: "10%" }} />
+    <Container disableGutters sx={{ height: "100vh" }}>
+      <Container
+        component="img"
+        src={LogoImage}
+        sx={{ my: "10%", width: "80%" }}
+      />
       <List>
         {NavigationBarRoutes.map(({ path, label, Icon }) => (
           <NavLink key={label} to={path} style={{ textDecoration: "none" }}>
