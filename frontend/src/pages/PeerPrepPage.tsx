@@ -9,7 +9,7 @@ export const PeerPrepPage = () => {
         <NavigationBar />
       </Grid>
       <Divider orientation="vertical" flexItem />
-      <Grid item xs={10}>
+      <Grid item>
         <div>PeerPrep Page</div>
       </Grid>
     </Grid>

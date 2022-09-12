@@ -9,7 +9,7 @@ export const AccountSettingPage = () => {
         <NavigationBar />
       </Grid>
       <Divider orientation="vertical" flexItem />
-      <Grid item xs={10}>
+      <Grid item>
         <div>Account Setting Page</div>
       </Grid>
     </Grid>
