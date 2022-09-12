@@ -4,7 +4,7 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Container, Grid, Stack, Tab, Typography } from "@mui/material";
 
 import { LoginForm } from "src/components/forms/LoginForm";
-import { RequestPasswordResetForm } from "src/components/forms/RequestPasswordResetForm";
+import { RequestResetPasswordForm } from "src/components/forms/RequestResetPasswordForm";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
@@ -57,7 +57,7 @@ export const LoginPage = () => {
                 </Typography>
               </Container>
               <Container sx={{ width: "80%", px: "24px", alignSelf: "center" }}>
-                <RequestPasswordResetForm
+                <RequestResetPasswordForm
                   onSubmit={() => setFormType("login")}
                   loginRedirect={() => setFormType("login")}
                 />

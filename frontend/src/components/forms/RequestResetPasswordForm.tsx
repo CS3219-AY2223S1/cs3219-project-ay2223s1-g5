@@ -2,29 +2,45 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { MailOutline } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
 import { validate } from "email-validator";
+import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
+import { useRequestResetPassword } from "src/hooks/useUsers";
+import { ApiResponseError } from "src/services/ApiService";
 
-export interface RequestPasswordResetForm {
+export interface RequestResetPasswordForm {
   onSubmit: () => void;
   loginRedirect: () => void;
 }
 
-type RequestPasswordResetFormState = {
+type RequestResetPasswordFormState = {
   email: string;
 };
 
-export const RequestPasswordResetForm = (props: RequestPasswordResetForm) => {
-  const formMethods = useForm<RequestPasswordResetFormState>();
+export const RequestResetPasswordForm = (props: RequestResetPasswordForm) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const { requestResetPasswordMutation, isRequestResetPasswordLoading } =
+    useRequestResetPassword();
 
+  const formMethods = useForm<RequestResetPasswordFormState>();
   const { handleSubmit } = formMethods;
 
-  const onSubmit = handleSubmit(async (data: RequestPasswordResetFormState) => {
-    // TODO: Link up logic.
-    // eslint-disable-next-line no-console
-    console.log(data);
-    props.onSubmit();
+  const onSubmit = handleSubmit(async (data: RequestResetPasswordFormState) => {
+    try {
+      await requestResetPasswordMutation(data);
+      enqueueSnackbar(
+        "An email with password reset instructions will be sent if there is an account associated with this email.",
+        {
+          variant: "success",
+        },
+      );
+      props.onSubmit();
+    } catch (e: unknown) {
+      enqueueSnackbar((e as ApiResponseError).message, {
+        variant: "error",
+      });
+    }
   });
 
   return (
@@ -72,8 +88,7 @@ export const RequestPasswordResetForm = (props: RequestPasswordResetForm) => {
           <StyledButton
             label="Reset Password"
             type="submit"
-            // TODO: Link up loading state
-            loading={false}
+            loading={isRequestResetPasswordLoading}
           />
         </Stack>
       </Stack>
