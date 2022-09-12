@@ -1,24 +1,31 @@
 import { Injectable } from "@nestjs/common";
+import { nanoid } from "nanoid";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RedisService } from "src/redis/redis.service";
 
-interface Match {
-  // TODO: Create a room ID with password
-  result: { userId: number; socketId: string }[];
-}
+import { Match } from "~shared/types/api/match.dto";
 
 @Injectable()
 export class MatchService {
   private static readonly NAMESPACE = "Match";
   private static readonly EXPIRATION_TIME = 30;
 
-  constructor(private redisService: RedisService) {}
+  constructor(
+    @InjectPinoLogger()
+    private readonly logger: PinoLogger,
+    private readonly redisService: RedisService,
+  ) {}
 
+  // TODO: Prevent users from matching themselves if they have multiple tabs open
   async searchMatch(
     userId: number,
     difficultyLevel: string,
     socketId: string,
   ): Promise<Match | null> {
+    this.logger.info(
+      `[${socketId}] Searching for match for ${userId}: ${difficultyLevel}`,
+    );
     const namespaces = [MatchService.NAMESPACE, difficultyLevel];
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
@@ -41,11 +48,15 @@ export class MatchService {
 
     await this.removeFromQueue(namespaces, matchedUserId);
 
+    this.logger.info(`${userId} and ${matchedUserId} matched`);
     const matchResult = [
       { userId, socketId },
       { userId: matchedUserId, socketId: matchedUserSocketId },
     ];
-    return { result: matchResult } as Match;
+    return {
+      roomId: nanoid(),
+      result: matchResult,
+    } as Match;
   }
 
   async addUserToQueue(
@@ -53,6 +64,7 @@ export class MatchService {
     userId: number,
     socketId: string,
   ): Promise<string | null> {
+    this.logger.info(`${userId} added to queue`);
     return this.redisService.setKey(
       namespaces,
       userId.toString(),
@@ -62,6 +74,7 @@ export class MatchService {
   }
 
   async removeFromQueue(namespaces: string[], userId: number) {
+    this.logger.info(`${userId} removed from queue`);
     return await this.redisService.deleteKey(namespaces, userId.toString());
   }
 }
