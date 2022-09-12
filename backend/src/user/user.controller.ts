@@ -80,8 +80,7 @@ export class UserController {
     if (req.user?.userId != userId) {
       throw new ForbiddenException();
     }
-    const { newPassword } = data;
-    const { oldPassword } = data;
-    await this.userService.updateUserPassword(userId, newPassword, oldPassword);
+    const { oldPassword, newPassword } = data;
+    await this.userService.updateUserPassword(userId, oldPassword, newPassword);
   }
 }
