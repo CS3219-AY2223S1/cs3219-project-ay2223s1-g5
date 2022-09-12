@@ -4,7 +4,7 @@ services:
     image: postgres
     container_name: db
     ports:
-      - 5432:5432
+      - ${DATABASE_PORT}:5432
     volumes:
       - postgres:/var/lib/postgresql/data
     environment:
@@ -20,6 +20,18 @@ services:
     volumes:
       - redis:/data
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    ports:
+      - 9090:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@email.com
+      - PGADMIN_DEFAULT_PASSWORD=password
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+
 volumes:
   postgres:
   redis:
+  pgadmin:

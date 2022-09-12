@@ -5,6 +5,8 @@ import { Stack } from "@mui/system";
 
 import { useSocket } from "src/contexts/WsContext";
 
+import { Match } from "~shared/types/api/match.dto";
+
 export const WaitingPage = () => {
   const navigate = useNavigate();
   const { socket, connect } = useSocket();
@@ -45,14 +47,18 @@ export const WaitingPage = () => {
       setTimeout(() => navigate("/dashboard"), 3000);
     }, 30000);
 
-    socket.on("found", (data) => {
-      setMessage("Found a match! Loading...");
+    socket.on("found", (match: Match) => {
+      setMessage(
+        `Found a match between ${match.result[0].userId} and ${match.result[1].userId}!
+        Room ID: ${match.roomId}
+        Loading...`,
+      );
       clearTimeout(timeout);
-      console.log(data);
       // TODO: Handle found match.
     });
 
-    socket.emit("find");
+    // TODO: Update after difficulty selector is implemented
+    socket.emit("find", "DummyDifficultyLevel");
     return () => {
       socket.off("found");
     };
@@ -70,7 +76,11 @@ export const WaitingPage = () => {
       }}
     >
       <CircularProgress size="4rem" />
-      <Typography>{message}</Typography>
+      <Typography>
+        {message.split("\n").map((value, key) => {
+          return <div key={key}>{value}</div>;
+        })}
+      </Typography>
     </Stack>
   );
 };
