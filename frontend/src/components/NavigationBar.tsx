@@ -1,22 +1,13 @@
-import { NavLink, useLocation } from "react-router-dom";
-import {
-  AccountCircleOutlined,
-  LaptopOutlined,
-  WebOutlined,
-} from "@mui/icons-material";
+import { NavLink } from "react-router-dom";
 import { Container, List, ListItem } from "@mui/material";
+
+import { NavigationBarRoutes } from "src/routes/nav.routes";
 
 import LogoImage from "../assets/images/Logo/Logo.png";
 
 import { DrawerButton } from "./DrawerButton";
 
 export const NavigationBar = () => {
-  const location = useLocation();
-  const pages = [
-    { name: "Account", icon: AccountCircleOutlined },
-    { name: "Dashboard", icon: WebOutlined },
-    { name: "PeerPrep", icon: LaptopOutlined },
-  ];
   return (
     <Container
       disableGutters
@@ -24,30 +15,30 @@ export const NavigationBar = () => {
     >
       <Container component="img" src={LogoImage} sx={{ my: "10%" }} />
       <List>
-        {pages.map((page) => (
-          <NavLink
-            key={page.name}
-            to={`/${page.name.toLowerCase()}`}
-            style={{ textDecoration: "none" }}
-          >
-            <ListItem
-              key={page.name}
-              selected={`/${page.name.toLowerCase()}` === location.pathname}
-              disablePadding
-              sx={{
-                "&.Mui-selected": {
-                  background: "none",
-                  "& .MuiListItemIcon-root": {
-                    color: "secondary.main",
-                  },
-                  "& .MuiTypography-root": {
-                    color: "secondary.main",
-                  },
-                },
-              }}
-            >
-              <DrawerButton Icon={page.icon} buttonDescription={page.name} />
-            </ListItem>
+        {NavigationBarRoutes.map(({ path, label, Icon }) => (
+          <NavLink key={label} to={path} style={{ textDecoration: "none" }}>
+            {({ isActive }) => {
+              return (
+                <ListItem
+                  key={label}
+                  selected={isActive}
+                  disablePadding
+                  sx={{
+                    "&.Mui-selected": {
+                      background: "none",
+                      "& .MuiListItemIcon-root": {
+                        color: "secondary.main",
+                      },
+                      "& .MuiTypography-root": {
+                        color: "secondary.main",
+                      },
+                    },
+                  }}
+                >
+                  <DrawerButton Icon={Icon} buttonDescription={label} />
+                </ListItem>
+              );
+            }}
           </NavLink>
         ))}
       </List>
