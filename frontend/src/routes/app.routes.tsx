@@ -1,13 +1,12 @@
 import { Outlet, RouteObject } from "react-router-dom";
 
 import { SocketProvider } from "src/contexts/WsContext";
-import { AccountSettingPage } from "src/pages/AccountSettingPage";
-import { DashboardPage } from "src/pages/DashboardPage";
+import { SidebarLayout } from "src/layouts/SidebarLayout";
 import { LoginPage } from "src/pages/LoginPage";
-import { PeerPrepPage } from "src/pages/PeerPrepPage";
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
 import { WaitingPage } from "src/pages/WaitingPage";
 
+import { NavigationBarRoutes } from "./nav.routes";
 import { ProtectedRoute } from "./ProtectedRoutes";
 
 export const AppRoutes: RouteObject[] = [
@@ -29,20 +28,12 @@ export const AppRoutes: RouteObject[] = [
         ),
         children: [
           {
-            path: "account",
-            element: <AccountSettingPage />,
-          },
-          {
-            path: "dashboard",
-            element: <DashboardPage />,
-          },
-          {
-            path: "peerprep",
-            element: <PeerPrepPage />,
+            path: "",
+            element: <SidebarLayout />,
+            children: NavigationBarRoutes,
           },
           {
             path: "matching",
-
             element: (
               <SocketProvider>
                 <WaitingPage />
