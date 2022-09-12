@@ -5,7 +5,7 @@ import { NavigationBar } from "../components/NavigationBar";
 export const DashboardPage = () => {
   return (
     <Grid container>
-      <Grid item xs={1}>
+      <Grid item xs={2}>
         <NavigationBar />
       </Grid>
       <Divider orientation="vertical" flexItem />
