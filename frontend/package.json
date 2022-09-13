@@ -54,7 +54,7 @@
     "dev": "react-app-rewired start",
     "build": "react-app-rewired build",
     "clean": "rm -rf node_modules && rm -rf build",
-    "test": "react-app-rewired test",
+    "test": "react-app-rewired test --passWithNoTests",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -12,7 +12,7 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./build",
-    "rootDir": "./src",
+    "rootDir": ".",
     "incremental": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
