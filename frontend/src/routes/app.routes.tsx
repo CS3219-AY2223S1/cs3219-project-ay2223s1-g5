@@ -4,6 +4,7 @@ import { SocketProvider } from "src/contexts/WsContext";
 import { SidebarLayout } from "src/layouts/SidebarLayout";
 import { LoginPage } from "src/pages/LoginPage";
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
+import { VerificationPage } from "src/pages/VerificationPage";
 import { WaitingPage } from "src/pages/WaitingPage";
 
 import { NavigationBarRoutes } from "./nav.routes";
@@ -19,6 +20,10 @@ export const AppRoutes: RouteObject[] = [
       {
         path: "resetpassword",
         element: <ResetPasswordPage />,
+      },
+      {
+        path: "verify",
+        element: <VerificationPage />,
       },
       {
         element: (

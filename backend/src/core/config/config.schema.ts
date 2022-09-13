@@ -3,6 +3,7 @@ import { addFormats, Schema } from "convict";
 export interface ConfigSchema {
   port: number;
   environment: "development" | "staging" | "production" | "test";
+  domain: string;
   jwt: {
     secret: string;
     validity: number;
@@ -37,6 +38,11 @@ export const schema: Schema<ConfigSchema> = {
     env: "NODE_ENV",
     format: ["development", "staging", "production", "test"],
     default: "development",
+  },
+  domain: {
+    env: "DOMAIN",
+    format: "required-string",
+    default: "",
   },
   jwt: {
     secret: {
