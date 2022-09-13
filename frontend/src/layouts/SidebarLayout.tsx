@@ -5,12 +5,19 @@ import { NavigationBar } from "../components/NavigationBar";
 
 export const SidebarLayout = () => {
   return (
-    <Grid container>
-      <Grid item xs={2}>
+    <Grid container wrap="nowrap">
+      <Grid item sx={{ width: "200px" }}>
         <NavigationBar />
       </Grid>
       <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
-      <Grid item xs={10} sx={{ backgroundColor: "secondary.light" }}>
+      <Grid
+        item
+        sx={{
+          backgroundColor: "secondary.light",
+          p: "2%",
+          flexGrow: "1",
+        }}
+      >
         <Outlet />
       </Grid>
     </Grid>
