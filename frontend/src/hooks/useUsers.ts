@@ -1,5 +1,4 @@
-import { useCallback } from "react";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 
 import { ApiService } from "src/services/ApiService";
 
@@ -17,13 +16,22 @@ export const useCreateUser = () => {
   };
 };
 
-export const useGetUsername = () => {
-  const getUsername = useCallback(async (userId: number) => {
+export const useGetUserName = (userId?: number) => {
+  const getUserName = async () => {
     const { data } = await ApiService.get<GetUserNameRes | undefined>(
       `/users/${userId}`,
     );
-    return data?.name;
-  }, []);
-
-  return { getUsername };
+    return data;
+  };
+  const { data: user, isLoading: isGetUserNameLoading } = useQuery(
+    ["USER", userId?.toString() || ""],
+    getUserName,
+    {
+      enabled: !!userId,
+    },
+  );
+  return {
+    user,
+    isGetUserNameLoading,
+  };
 };
