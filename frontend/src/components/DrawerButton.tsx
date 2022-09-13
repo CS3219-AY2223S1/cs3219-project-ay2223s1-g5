@@ -25,7 +25,7 @@ export const DrawerButton = ({
       <ListItemIcon
         sx={{
           justifyContent: "center",
-          color: "primary.main",
+          color: "primary.500",
         }}
       >
         <Icon />
@@ -34,7 +34,7 @@ export const DrawerButton = ({
         sx={{
           "& .MuiTypography-root": {
             fontSize: "14px",
-            color: "primary.main",
+            color: "primary.500",
             textAlign: "center",
           },
         }}

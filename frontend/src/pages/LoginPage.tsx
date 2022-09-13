@@ -26,7 +26,7 @@ export const LoginPage = () => {
 
   return (
     <Grid container height="100vh">
-      <Grid container item xs={7} alignItems="center" bgcolor="primary.main">
+      <Grid container item xs={7} alignItems="center" bgcolor="primary.500">
         <Container
           component="img"
           src={PairProgrammingImage}
@@ -46,7 +46,7 @@ export const LoginPage = () => {
               <Container sx={{ display: "flex", justifyContent: "center" }}>
                 <Typography
                   sx={{
-                    color: "primary.main",
+                    color: "primary.500",
                     fontWeight: "bold",
                     fontSize: "130%",
                     textTransform: "none",

@@ -14,8 +14,9 @@ export const StyledButton = ({ label, ...rest }: StyledButtonProps) => {
         textTransform: "none",
         // FIXME: This prop causes a bug in Safari browsers.
         px: "7%",
+        backgroundColor: "primary.500",
         "&:hover": {
-          backgroundColor: "primary.main",
+          backgroundColor: "primary.500",
           boxShadow: "1",
         },
       }}

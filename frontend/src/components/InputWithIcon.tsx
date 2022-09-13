@@ -11,7 +11,7 @@ export const InputWithIcon = ({ Icon, ...rest }: TextBoxProps) => {
       <Icon
         sx={{
           paddingTop: "8px", // To align with the input when help text is shown.
-          color: "primary.main",
+          color: "primary.500",
         }}
       />
       <TextField
