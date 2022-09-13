@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CircularProgress, Container } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { useSnackbar } from "notistack";
 
+import { Center } from "src/components/Center";
 import { useVerifyEmail } from "src/hooks/useAuth";
 import { ApiResponseError } from "src/services/ApiService";
 
@@ -12,11 +13,9 @@ export const VerificationPage = () => {
   const userId = params.get("userId");
   const code = params.get("code");
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
-
-  const previousCode = useRef<string>("");
-
   const { verifyEmailMutation } = useVerifyEmail();
+  const navigate = useNavigate();
+  const previousCode = useRef<string>("");
 
   useEffect(() => {
     if (userId === null || code === null) {
@@ -57,16 +56,8 @@ export const VerificationPage = () => {
   }, []);
 
   return (
-    <Container
-      sx={{
-        height: "100vh",
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <Center sx={{ height: "100vh" }}>
       <CircularProgress size="4rem" />
-    </Container>
+    </Center>
   );
 };
