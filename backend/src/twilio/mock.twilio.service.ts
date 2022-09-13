@@ -7,9 +7,9 @@ import { RedisService } from "src/redis/redis.service";
 
 @Injectable()
 export class MockTwilioService {
-  private static NAMESPACE = "TWILIO";
-  private static VERIFICATION_NAMESPACE = "VERIFY";
-  private static RESET_PASSWORD_NAMESPACE = "RESET";
+  private static readonly NAMESPACE = "TWILIO";
+  private static readonly VERIFICATION_NAMESPACE = "VERIFY";
+  private static readonly RESET_PASSWORD_NAMESPACE = "RESET";
   private domain: string;
 
   constructor(
@@ -41,7 +41,17 @@ export class MockTwilioService {
       [MockTwilioService.NAMESPACE, MockTwilioService.VERIFICATION_NAMESPACE],
       email,
     );
-    return !!expected && expected === code;
+    if (!!expected && expected === code) {
+      await this.redisService.deleteKey(
+        [
+          MockTwilioService.NAMESPACE,
+          MockTwilioService.RESET_PASSWORD_NAMESPACE,
+        ],
+        email,
+      );
+      return true;
+    }
+    return false;
   }
 
   async sendResetPasswordEmail(
@@ -69,7 +79,13 @@ export class MockTwilioService {
       email,
     );
     if (!!expected && expected === code) {
-      await this.redisService.deleteKey([MockTwilioService.NAMESPACE], email);
+      await this.redisService.deleteKey(
+        [
+          MockTwilioService.NAMESPACE,
+          MockTwilioService.RESET_PASSWORD_NAMESPACE,
+        ],
+        email,
+      );
       return true;
     }
     return false;
