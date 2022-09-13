@@ -2,6 +2,7 @@ import { Outlet, RouteObject } from "react-router-dom";
 
 import { SocketProvider } from "src/contexts/WsContext";
 import { DashboardPage } from "src/pages/DashboardPage";
+import { EditorPage } from "src/pages/EditorPage";
 import { LoginPage } from "src/pages/LoginPage";
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
 import { WaitingPage } from "src/pages/WaitingPage";
@@ -18,6 +19,10 @@ export const AppRoutes: RouteObject[] = [
       {
         path: "resetpassword",
         element: <ResetPasswordPage />,
+      },
+      {
+        path: "editor",
+        element: <EditorPage />,
       },
       {
         element: (

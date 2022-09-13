@@ -6,6 +6,7 @@ import { MatchModule } from "src/match/match.module";
 import { UserModule } from "src/user/user.module";
 import { VerificationModule } from "src/verification/verification.module";
 
+import { EditorModule } from "./editor/editor.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 
@@ -26,6 +27,7 @@ import { AppService } from "./app.service";
     AuthModule,
     VerificationModule,
     MatchModule,
+    EditorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
