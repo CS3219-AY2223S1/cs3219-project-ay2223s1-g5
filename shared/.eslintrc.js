@@ -21,7 +21,10 @@ module.exports = {
   ignorePatterns: [".eslintrc.js"],
   rules: {
     "no-console": "warn",
-    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { argsIgnorePattern: "^_", ignoreRestSiblings: true },
+    ],
     "@typescript-eslint/member-delimiter-style": [
       "error",
       {

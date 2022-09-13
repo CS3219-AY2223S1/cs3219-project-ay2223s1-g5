@@ -4,16 +4,33 @@ import { CircularProgress, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 
 import { useSocket } from "src/contexts/WsContext";
+import { useGetUserName } from "src/hooks/useUsers";
 
 import { Match } from "~shared/types/api/match.dto";
 
 export const WaitingPage = () => {
   const navigate = useNavigate();
   const { socket, connect } = useSocket();
+  const [userOne, setUserOne] = useState<number | undefined>(undefined);
+  const [userTwo, setUserTwo] = useState<number | undefined>(undefined);
+  const [roomId, setRoomId] = useState<string | undefined>(undefined);
+  const { user: userNameOne } = useGetUserName(userOne);
+  const { user: userNameTwo } = useGetUserName(userTwo);
+
   // We use a callback on the "connect" event to set a state here
   // so that we can be sure that we will have the socket ID.
   const [connected, setConnected] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("Loading...");
+
+  useEffect(() => {
+    if (roomId && userNameOne && userNameTwo) {
+      setMessage(
+        `Found a match between ${userNameOne.name} and ${userNameTwo.name}!
+        Room ID: ${roomId}
+        Loading...`,
+      );
+    }
+  }, [roomId, userNameOne, userNameTwo]);
 
   useEffect(() => {
     connect("match");
@@ -48,11 +65,10 @@ export const WaitingPage = () => {
     }, 30000);
 
     socket.on("found", (match: Match) => {
-      setMessage(
-        `Found a match between ${match.result[0].userId} and ${match.result[1].userId}!
-        Room ID: ${match.roomId}
-        Loading...`,
-      );
+      setUserOne(match.result[0].userId);
+      setUserTwo(match.result[1].userId);
+      setRoomId(match.roomId);
+      setMessage("Match found. Loading information...");
       clearTimeout(timeout);
       // TODO: Handle found match.
     });
@@ -76,7 +92,7 @@ export const WaitingPage = () => {
       }}
     >
       <CircularProgress size="4rem" />
-      <Typography>
+      <Typography component={"span"}>
         {message.split("\n").map((value, key) => {
           return <div key={key}>{value}</div>;
         })}

@@ -20,7 +20,7 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "paths": {
-      "~shared/*": ["../shared/build/*"]
+      "~shared/*": ["../shared/build/src/*"]
     }
   },
   "references": [{ "path": "../shared" }],

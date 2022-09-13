@@ -3,6 +3,7 @@ import { addFormats, Schema } from "convict";
 export interface ConfigSchema {
   port: number;
   environment: "development" | "staging" | "production" | "test";
+  domain: string;
   jwt: {
     secret: string;
     validity: number;
@@ -11,6 +12,7 @@ export interface ConfigSchema {
     accountSid: string;
     authToken: string;
     verificationSid: string;
+    resetPasswordSid: string;
   };
   redis: {
     url: string;
@@ -37,6 +39,11 @@ export const schema: Schema<ConfigSchema> = {
     env: "NODE_ENV",
     format: ["development", "staging", "production", "test"],
     default: "development",
+  },
+  domain: {
+    env: "DOMAIN",
+    format: "required-string",
+    default: "",
   },
   jwt: {
     secret: {
@@ -66,6 +73,12 @@ export const schema: Schema<ConfigSchema> = {
     },
     verificationSid: {
       env: "TWILIO_VERIFICATION_SID",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    resetPasswordSid: {
+      env: "TWILIO_RESET_PASSWORD_SID",
       format: "required-string",
       default: "",
       sensitive: true,
