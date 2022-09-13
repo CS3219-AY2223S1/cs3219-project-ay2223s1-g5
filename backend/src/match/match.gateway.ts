@@ -45,16 +45,32 @@ export class MatchGateway {
     }
 
     // Get sockets by ID and let them join the same room
-    for (const user of match.result) {
-      this.server.sockets.get(user.socketId)?.join(match.roomId);
-    }
+    match.result.forEach((user) => {
+      const socket = this.server.sockets.get(user.socketId);
+      if (!socket) {
+        return;
+      }
+
+      socket.join(match.roomId);
+
+      // Inform the other user about disconnection
+      socket.on("disconnecting", () => {
+        this.server.to(match.roomId).emit("endMatch");
+      });
+    });
 
     this.server.to(match.roomId).emit(MATCH_EVENTS.MATCH_FOUND, match);
   }
 
-  @SubscribeMessage(MATCH_EVENTS.DISCONNECT)
-  handleDisconnect(@ConnectedSocket() client: Socket) {
+  @SubscribeMessage("disconnect")
+  async handleDisconnect(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() difficultyLevel: string,
+  ) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
-    // TODO: Call service.
+    const userId = Number(client.handshake.headers.authorization);
+
+    // If user has not been matched, remove user from queue
+    await this.service.removeFromQueue(difficultyLevel, userId);
   }
 }
