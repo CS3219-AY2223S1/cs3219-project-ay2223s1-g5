@@ -1,15 +1,5 @@
 import { createTheme, PaletteColorOptions } from "@mui/material/styles";
 
-const colors = {
-  blue: "#1472D3",
-  orange: "#EF7C00",
-  white: "#FFFFFF",
-  grey: "#FAFAFA",
-  green: "#91CC75",
-  yellow: "#FAC858",
-  red: "#EE6666",
-};
-
 declare module "@mui/material/styles" {
   interface Palette {
     chart: PaletteColor;
@@ -31,6 +21,16 @@ declare module "@mui/material/styles" {
     red?: string;
   }
 }
+
+const colors = {
+  blue: "#1472D3",
+  orange: "#EF7C00",
+  white: "#FFFFFF",
+  grey: "#FAFAFA",
+  green: "#91CC75",
+  yellow: "#FAC858",
+  red: "#EE6666",
+};
 
 const theme = createTheme({
   typography: {
