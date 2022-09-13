@@ -2,7 +2,12 @@ import { useMutation, useQuery } from "react-query";
 
 import { ApiService } from "src/services/ApiService";
 
-import { CreateUserReq, GetUserNameRes } from "~shared/types/api/user.dto";
+import {
+  CreateUserReq,
+  GetUserNameRes,
+  RequestResetPasswordReq,
+  ResetPasswordReq,
+} from "~shared/types/api/user.dto";
 
 export const useCreateUser = () => {
   const createUser = async (input: CreateUserReq) => {
@@ -33,5 +38,33 @@ export const useGetUserName = (userId?: number) => {
   return {
     user,
     isGetUserNameLoading,
+  };
+};
+
+export const useRequestResetPassword = () => {
+  const requestResetPassword = async (input: RequestResetPasswordReq) => {
+    await ApiService.post<void>(`/users/reset-password`, input);
+  };
+  const {
+    isLoading: isRequestResetPasswordLoading,
+    mutateAsync: requestResetPasswordMutation,
+  } = useMutation(requestResetPassword);
+  return {
+    requestResetPasswordMutation,
+    isRequestResetPasswordLoading,
+  };
+};
+
+export const useResetPassword = () => {
+  const requestResetPassword = async (input: ResetPasswordReq) => {
+    await ApiService.patch<void>(`/users/reset-password`, input);
+  };
+  const {
+    isLoading: isResetPasswordLoading,
+    mutateAsync: resetPasswordMutation,
+  } = useMutation(requestResetPassword);
+  return {
+    resetPasswordMutation,
+    isResetPasswordLoading,
   };
 };

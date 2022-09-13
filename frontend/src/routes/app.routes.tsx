@@ -18,7 +18,7 @@ export const AppRoutes: RouteObject[] = [
         element: <LoginPage />,
       },
       {
-        path: "resetpassword",
+        path: "reset-password",
         element: <ResetPasswordPage />,
       },
       {

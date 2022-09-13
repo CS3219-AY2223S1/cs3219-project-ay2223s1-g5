@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Request,
@@ -14,13 +15,18 @@ import {
 import { Request as ExpressRequest } from "express";
 
 import { JwtAuthGuard } from "src/auth/jwt.guard";
+import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
+import { UnauthorizedError } from "src/common/errors/unauthorized.error";
 import { VerificationService } from "src/verification/verification.service";
 
+import { ResetPasswordService } from "./reset-password.service";
 import { UserService } from "./user.service";
 
 import {
   CreateUserReq,
   GetUserNameRes,
+  RequestResetPasswordReq,
+  ResetPasswordReq,
   UpdateUserReq,
 } from "~shared/types/api";
 
@@ -29,6 +35,7 @@ export class UserController {
   constructor(
     private userService: UserService,
     private verificationService: VerificationService,
+    private resetPasswordService: ResetPasswordService,
   ) {}
 
   @Post()
@@ -67,5 +74,27 @@ export class UserController {
     }
     const { name } = user;
     return { name };
+  }
+
+  @Post("reset-password")
+  async requestResetPassword(
+    @Body() { email }: RequestResetPasswordReq,
+  ): Promise<void> {
+    try {
+      await this.resetPasswordService.sendResetPasswordEmail(email);
+    } catch (e: unknown) {
+      // We silently fail invalid emails.
+      if (!(e instanceof EntityNotFoundError)) {
+        return;
+      }
+      throw e;
+    }
+  }
+
+  @Patch("reset-password")
+  async resetPassword(
+    @Body() { userId, code, password }: ResetPasswordReq,
+  ): Promise<void> {
+    await this.resetPasswordService.resetPassword(userId, code, password);
   }
 }
