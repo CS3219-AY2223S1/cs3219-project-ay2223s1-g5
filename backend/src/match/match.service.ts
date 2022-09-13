@@ -49,7 +49,7 @@ export class MatchService {
       return null;
     }
 
-    await this.removeFromQueue(namespaces, matchedUserId);
+    await this.removeFromQueue(difficultyLevel, matchedUserId);
 
     this.logger.info(`${userId} and ${matchedUserId} matched`);
     const matchResult = [
@@ -76,8 +76,19 @@ export class MatchService {
     );
   }
 
-  async removeFromQueue(namespaces: string[], userId: number) {
-    this.logger.info(`${userId} removed from queue`);
-    return await this.redisService.deleteKey(namespaces, userId.toString());
+  async removeFromQueue(
+    difficultyLevel: string,
+    userId: number,
+  ): Promise<void> {
+    const result = await this.redisService.deleteKey(
+      [MatchService.NAMESPACE, difficultyLevel],
+      userId.toString(),
+    );
+    if (result === 0) {
+      this.logger.info(`${userId} not in queue`);
+    } else {
+      this.logger.info(`${userId} removed from queue`);
+    }
+    return;
   }
 }

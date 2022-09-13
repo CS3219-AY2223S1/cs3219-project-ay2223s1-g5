@@ -74,6 +74,11 @@ export const WaitingPage = () => {
       // TODO: Handle found match.
     });
 
+    socket.on("endMatch", () => {
+      setMessage("The other user has disconnected. Ending match...");
+      setTimeout(() => navigate("/dashboard"), 3000);
+    });
+
     // TODO: Update after difficulty selector is implemented
     socket.emit(MATCH_EVENTS.ENTER_QUEUE, "DummyDifficultyLevel");
     return () => {
