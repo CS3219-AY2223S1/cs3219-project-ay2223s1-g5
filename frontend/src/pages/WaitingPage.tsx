@@ -71,8 +71,6 @@ export const WaitingPage = () => {
       setMessage("Match found. Loading information...");
       clearTimeout(timeout);
       // TODO: Handle found match.
-      // eslint-disable-next-line no-console
-      console.log(data);
     });
 
     // TODO: Update after difficulty selector is implemented
