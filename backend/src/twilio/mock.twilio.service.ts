@@ -34,6 +34,10 @@ export class MockTwilioService {
       [MockTwilioService.NAMESPACE],
       email,
     );
-    return !!expected && expected === code;
+    if (!!expected && expected === code) {
+      await this.redisService.deleteKey([MockTwilioService.NAMESPACE], email);
+      return true;
+    }
+    return false;
   }
 }
