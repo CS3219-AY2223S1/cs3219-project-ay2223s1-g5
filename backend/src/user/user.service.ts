@@ -83,7 +83,7 @@ export class UserService {
     const user = await this.prisma.user.findUnique({
       where: { id: id },
     });
-    if (!user || !compare(oldPassword, user.password)) {
+    if (!user || !(await compare(oldPassword, user.password))) {
       throw new UnauthorizedError("Incorrect password.");
     }
     const hashedPassword = await hash(newPassword, SALT_ROUNDS);
