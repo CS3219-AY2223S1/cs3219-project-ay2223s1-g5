@@ -23,6 +23,10 @@ export const WaitingPage = () => {
   const [connected, setConnected] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("Loading...");
 
+  // For identifying the type of disconnection
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLeaveRoom, setIsLeaveRoom] = useState<boolean>(false);
+
   useEffect(() => {
     if (roomId && userNameOne && userNameTwo) {
       setMessage(
@@ -75,8 +79,34 @@ export const WaitingPage = () => {
     });
 
     socket.on("endMatch", () => {
-      setMessage("The other user has disconnected. Ending match...");
+      setMessage("The other user has left the room. Ending match...");
       setTimeout(() => navigate("/dashboard"), 3000);
+    });
+
+    socket.on("disconnect", () => {
+      // User has not been matched yet.
+      if (!roomId) {
+        // TODO: Update after difficulty selector is implemented
+        socket.emit("disconnectWithoutMatch", "DummyDifficultyLevel");
+        return;
+      }
+
+      if (isLeaveRoom) {
+        socket.emit("leaveRoom");
+      } else {
+        socket.emit("endMatch");
+      }
+    });
+
+    socket.on("userEndMatch", () => {
+      setMessage(
+        "The other user has disconnected. Waiting for reconnection...",
+      );
+      // TODO: Wait for reconnection
+    });
+
+    socket.on("userLeaveRoom", () => {
+      setMessage("The other user has left the room");
     });
 
     // TODO: Update after difficulty selector is implemented
@@ -84,7 +114,7 @@ export const WaitingPage = () => {
     return () => {
       socket.off(MATCH_EVENTS.MATCH_FOUND);
     };
-  }, [connected, navigate, socket]);
+  }, [connected, isLeaveRoom, navigate, roomId, socket]);
 
   return (
     <Stack

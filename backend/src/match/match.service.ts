@@ -33,7 +33,7 @@ export class MatchService {
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
     if (matchedUsers.length === 0) {
-      await this.addUserToQueue(namespaces, userId, socketId);
+      await this.addUserToQueue(difficultyLevel, userId, socketId);
       return null;
     }
 
@@ -45,7 +45,7 @@ export class MatchService {
     );
 
     if (!matchedUserSocketId) {
-      await this.addUserToQueue(namespaces, userId, socketId);
+      await this.addUserToQueue(difficultyLevel, userId, socketId);
       return null;
     }
 
@@ -63,13 +63,13 @@ export class MatchService {
   }
 
   async addUserToQueue(
-    namespaces: string[],
+    difficultyLevel: string,
     userId: number,
     socketId: string,
   ): Promise<string | null> {
     this.logger.info(`${userId} added to queue`);
     return this.redisService.setKey(
-      namespaces,
+      [MatchService.NAMESPACE, difficultyLevel],
       userId.toString(),
       socketId,
       MatchService.EXPIRATION_TIME,
