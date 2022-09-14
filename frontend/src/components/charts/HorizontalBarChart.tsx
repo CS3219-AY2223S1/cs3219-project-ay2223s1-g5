@@ -1,27 +1,31 @@
 import { useTheme } from "@mui/material/styles/";
 import ReactEcharts from "echarts-for-react";
 
-export const BarChart = () => {
+export const HorizontalBarChart = () => {
   const theme = useTheme();
   return (
     <ReactEcharts
       option={{
         title: {
-          text: "Question Sources",
+          // text: "Question Sources",
           left: "center",
+        },
+        tooltip: {
+          trigger: "item",
         },
         dataset: {
           source: [
             ["score", "quantity", "company"],
-            [50, 50, "Facebook"],
+            [45, 45, "Facebook"],
             [10, 10, "Amazon"],
+            [20, 20, "Apple"],
             [25, 25, "Netflix"],
             [40, 40, "Google"],
           ],
         },
         grid: { containLabel: true },
         xAxis: { name: "Quantity" },
-        yAxis: { type: "category" },
+        yAxis: { name: "Company", type: "category" },
         visualMap: {
           orient: "horizontal",
           left: "center",
@@ -49,6 +53,14 @@ export const BarChart = () => {
             },
           },
         ],
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)",
+          },
+          focus: "self",
+        },
       }}
     />
   );

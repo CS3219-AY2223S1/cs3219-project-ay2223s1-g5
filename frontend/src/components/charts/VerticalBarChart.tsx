@@ -1,48 +1,49 @@
 import { useTheme } from "@mui/material/styles/";
 import ReactEcharts from "echarts-for-react";
 
-export const PieChart = () => {
+export const VerticalBarChart = () => {
   const theme = useTheme();
   return (
     <ReactEcharts
       option={{
         title: {
-          // text: "Questions Attempted",
-          subtext: "By Difficulty",
           left: "center",
         },
         tooltip: {
           trigger: "item",
         },
-        legend: {
-          orient: "horizontal",
-          bottom: "bottom",
+        xAxis: {
+          name: "Difficulty",
+          type: "category",
+          data: ["Easy", "Medium", "Hard"],
+        },
+        yAxis: {
+          name: "Minutes",
+          type: "value",
         },
         series: [
           {
-            type: "pie",
-            radius: "50%",
             data: [
               {
-                value: 30,
-                name: "Easy",
-                itemStyle: { color: theme.palette.chart.green },
+                value: 5,
+                itemStyle: {
+                  color: theme.palette.chart.green,
+                },
               },
               {
-                value: 30,
-                name: "Medium",
+                value: 10,
                 itemStyle: {
                   color: theme.palette.chart.yellow,
                 },
               },
               {
-                value: 30,
-                name: "Hard",
+                value: 15,
                 itemStyle: {
                   color: theme.palette.chart.red,
                 },
               },
             ],
+            type: "bar",
             emphasis: {
               itemStyle: {
                 shadowBlur: 10,
