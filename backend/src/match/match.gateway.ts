@@ -54,23 +54,27 @@ export class MatchGateway {
       socket.join(match.roomId);
 
       // Inform the other user about disconnection
-      socket.on("disconnecting", () => {
-        this.server.to(match.roomId).emit("endMatch");
+      socket.on("endMatch", () => {
+        this.server.to(match.roomId).emit("userEndMatch");
+      });
+
+      socket.on("leaveRoom", () => {
+        this.server.to(match.roomId).emit("userLeaveRoom");
       });
     });
 
     this.server.to(match.roomId).emit(MATCH_EVENTS.MATCH_FOUND, match);
   }
 
-  @SubscribeMessage("disconnect")
-  async handleDisconnect(
+  @SubscribeMessage("disconnectWithoutMatch")
+  async handleDisconnectWithoutMatch(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
   ) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
-    // If user has not been matched, remove user from queue
+    // Remove user from queue
     await this.service.removeFromQueue(difficultyLevel, userId);
   }
 }
