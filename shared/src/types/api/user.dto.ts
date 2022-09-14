@@ -11,3 +11,13 @@ export class UpdateUserReq {
 export class GetUserNameRes {
   name: string;
 }
+
+export class RequestResetPasswordReq {
+  email: string;
+}
+
+export class ResetPasswordReq {
+  userId: number;
+  code: string;
+  password: string;
+}

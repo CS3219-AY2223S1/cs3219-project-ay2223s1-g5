@@ -106,4 +106,15 @@ export class UserService {
       data,
     });
   }
+
+  async resetUserPassword(id: number, password: string): Promise<User> {
+    const hashedPassword = await hash(password, SALT_ROUNDS);
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        password: hashedPassword,
+        failedLogins: 0,
+      },
+    });
+  }
 }
