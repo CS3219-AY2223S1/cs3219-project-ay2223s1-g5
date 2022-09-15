@@ -27,13 +27,27 @@ export class MatchGateway {
     private readonly service: MatchService,
   ) {}
 
-  @SubscribeMessage(MATCH_EVENTS.ENTER_QUEUE)
-  async handleFind(
+  @SubscribeMessage("find")
+  async handlefind(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
-  ): Promise<void> {
+  ) {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
+    const existingRoom = await this.service.getRoom(userId);
+    if (existingRoom) {
+      // TODO: Allow reconnection
+      client.emit("existingMatch");
+      return;
+    }
+
+    this.handleQueue(client, difficultyLevel);
+  }
+
+  async handleQueue(client: Socket, difficultyLevel: string): Promise<void> {
+    this.logger.info(`Joining queue: ${client.id}`);
+    const userId = Number(client.handshake.headers.authorization);
+
     const match = await this.service.searchMatch(
       userId,
       difficultyLevel,
@@ -45,36 +59,55 @@ export class MatchGateway {
     }
 
     // Get sockets by ID and let them join the same room
-    match.result.forEach((user) => {
+    for (const user of match.result) {
       const socket = this.server.sockets.get(user.socketId);
       if (!socket) {
         return;
       }
 
       socket.join(match.roomId);
+    }
 
-      // Inform the other user about disconnection
-      socket.on("endMatch", () => {
-        this.server.to(match.roomId).emit("userEndMatch");
-      });
-
-      socket.on("leaveRoom", () => {
-        this.server.to(match.roomId).emit("userLeaveRoom");
-      });
-    });
-
-    this.server.to(match.roomId).emit(MATCH_EVENTS.MATCH_FOUND, match);
+    this.server.to(match.roomId).emit("found", match);
   }
 
-  @SubscribeMessage("disconnectWithoutMatch")
-  async handleDisconnectWithoutMatch(
+  @SubscribeMessage("leaveRoom")
+  async handleLeaveRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() roomId: string,
+  ) {
+    const userId = Number(client.handshake.headers.authorization);
+    this.logger.info(`${userId} left rooom`);
+    this.server.to(roomId).emit("endMatch");
+
+    // Remove mappings stored in redis
+    await this.service.removeRoom(roomId);
+  }
+
+  @SubscribeMessage("disconnectWithMatch")
+  async handleDisconnectWithMatch(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() roomId: string,
+  ) {
+    this.logger.info(`Websocket disconnected with match: ${client.id}`);
+    this.server.to(roomId).emit("wait");
+  }
+
+  @SubscribeMessage("disconnect")
+  async handleDisconnect(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
   ) {
-    this.logger.info(`Websocket disconnected: ${client.id}`);
+    this.logger.info(`Websocket disconnected without match: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
-    // Remove user from queue
+    // If user has not been matched, remove user from queue
     await this.service.removeFromQueue(difficultyLevel, userId);
+
+    // If user has been matched, notify the other user
+    const roomId = await this.service.getRoom(userId);
+    if (roomId) {
+      this.server.to(roomId).emit("wait");
+    }
   }
 }
