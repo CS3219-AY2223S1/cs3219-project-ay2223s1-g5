@@ -2,8 +2,7 @@ import "./index.css";
 
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
-import { CssBaseline } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import ReactDOM from "react-dom/client";
 
