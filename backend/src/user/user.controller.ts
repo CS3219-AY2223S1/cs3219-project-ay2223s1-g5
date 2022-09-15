@@ -16,7 +16,6 @@ import { Request as ExpressRequest } from "express";
 
 import { JwtAuthGuard } from "src/auth/jwt.guard";
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
-import { UnauthorizedError } from "src/common/errors/unauthorized.error";
 import { VerificationService } from "src/verification/verification.service";
 
 import { ResetPasswordService } from "./reset-password.service";

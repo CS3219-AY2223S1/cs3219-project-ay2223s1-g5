@@ -14,7 +14,8 @@ import { useSnackbar } from "notistack";
 import { useWhoAmI } from "src/hooks/useAuth";
 import { ApiResponseError } from "src/services/ApiService";
 
-import { LoginRes } from "~shared/types/api/auth.dto";
+import { JWT_COOKIE_NAME } from "~shared/constants";
+import { LoginRes } from "~shared/types/api";
 
 type AuthContextProps = {
   user: LoginRes | null | undefined;
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
         setUser(retrievedUser);
       } else {
         setUser(null);
-        Cookie.remove("accessToken");
+        Cookie.remove(JWT_COOKIE_NAME);
       }
     } catch (e: unknown) {
       // eslint-disable-next-line no-console
@@ -50,7 +51,7 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
   }, []);
 
   const logout = useCallback(async () => {
-    Cookie.remove("accessToken");
+    Cookie.remove(JWT_COOKIE_NAME);
     navigate("/");
   }, [navigate]);
 
