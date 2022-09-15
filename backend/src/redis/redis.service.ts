@@ -81,4 +81,18 @@ export class RedisService implements OnApplicationShutdown {
     const namespace = RedisService.createNamespace(namespaces);
     return this.redisClient.get(`${namespace}${key}`);
   }
+
+  async getSet(namespaces: string[], key: string): Promise<string[]> {
+    const namespace = RedisService.createNamespace(namespaces);
+    return this.redisClient.sMembers(`${namespace}${key}`);
+  }
+
+  async addKeySet(
+    namespaces: string[],
+    key: string,
+    value: string,
+  ): Promise<void> {
+    const namespace = RedisService.createNamespace(namespaces);
+    this.redisClient.sAdd(`${namespace}${key}`, value);
+  }
 }

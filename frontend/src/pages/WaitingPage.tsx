@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 
 import { useSocket } from "src/contexts/WsContext";
@@ -17,15 +17,12 @@ export const WaitingPage = () => {
   const [roomId, setRoomId] = useState<string | undefined>(undefined);
   const { user: userNameOne } = useGetUserName(userOne);
   const { user: userNameTwo } = useGetUserName(userTwo);
+  const [leaveRoom, setIsLeaveRoom] = useState<boolean>(false);
 
   // We use a callback on the "connect" event to set a state here
   // so that we can be sure that we will have the socket ID.
   const [connected, setConnected] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("Loading...");
-
-  // For identifying the type of disconnection
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLeaveRoom, setIsLeaveRoom] = useState<boolean>(false);
 
   useEffect(() => {
     if (roomId && userNameOne && userNameTwo) {
@@ -41,6 +38,15 @@ export const WaitingPage = () => {
     connect(MATCH_NAMESPACE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (leaveRoom && socket) {
+      if (roomId) {
+        socket.emit("leaveRoom", roomId);
+      }
+      navigate("/dashboard");
+    }
+  }, [leaveRoom, socket, roomId, navigate]);
 
   useEffect(() => {
     if (!socket) {
@@ -83,38 +89,28 @@ export const WaitingPage = () => {
       setTimeout(() => navigate("/dashboard"), 3000);
     });
 
-    socket.on("disconnect", () => {
-      // User has not been matched yet.
-      if (!roomId) {
-        // TODO: Update after difficulty selector is implemented
-        socket.emit("disconnectWithoutMatch", "DummyDifficultyLevel");
-        return;
-      }
-
-      if (isLeaveRoom) {
-        socket.emit("leaveRoom");
-      } else {
-        socket.emit("endMatch");
-      }
+    socket.on("existingMatch", () => {
+      setMessage("Exsiting match found. Do you want to join back?");
     });
 
-    socket.on("userEndMatch", () => {
+    socket.on("wait", () => {
       setMessage(
         "The other user has disconnected. Waiting for reconnection...",
       );
       // TODO: Wait for reconnection
     });
 
-    socket.on("userLeaveRoom", () => {
-      setMessage("The other user has left the room");
+    socket.on("endMatch", () => {
+      setMessage("The other user has left the room. Returning to dashboard...");
     });
 
     // TODO: Update after difficulty selector is implemented
-    socket.emit(MATCH_EVENTS.ENTER_QUEUE, "DummyDifficultyLevel");
+    socket.emit("find", "DummyDifficultyLevel");
+
     return () => {
       socket.off(MATCH_EVENTS.MATCH_FOUND);
     };
-  }, [connected, isLeaveRoom, navigate, roomId, socket]);
+  }, [connected, navigate, roomId, socket]);
 
   return (
     <Stack
@@ -133,6 +129,13 @@ export const WaitingPage = () => {
           return <div key={key}>{value}</div>;
         })}
       </Typography>
+      <Button
+        onClick={() => {
+          setIsLeaveRoom(true);
+        }}
+      >
+        Leave Room
+      </Button>
     </Stack>
   );
 };
