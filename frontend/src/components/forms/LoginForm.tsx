@@ -1,6 +1,6 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Lock, MailOutline } from "@mui/icons-material";
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { validate } from "email-validator";
 import { useSnackbar } from "notistack";
 
@@ -9,6 +9,8 @@ import { StyledButton } from "src/components/StyledButton";
 import { useAuth } from "src/contexts/AuthContext";
 import { useLogin } from "src/hooks/useAuth";
 import { ApiResponseError } from "src/services/ApiService";
+
+import { TextButton } from "../TextButton";
 
 export interface LoginFormProps {
   onSubmit: () => void;
@@ -90,19 +92,9 @@ export const LoginForm = (props: LoginFormProps) => {
           )}
         />
         <Stack direction="row" justifyContent="space-between">
-          <Button
-            variant="text"
-            onClick={props.resetPasswordRedirect}
-            sx={{
-              "&:hover": {
-                backgroundColor: "transparent",
-              },
-              fontWeight: "bold",
-              textTransform: "none",
-            }}
-          >
+          <TextButton onClick={props.resetPasswordRedirect}>
             Forgot your password?
-          </Button>
+          </TextButton>
           <StyledButton label="Login" type="submit" loading={isLoginLoading} />
         </Stack>
       </Stack>

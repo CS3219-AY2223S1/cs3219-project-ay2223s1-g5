@@ -1,24 +1,31 @@
 import { SvgIconComponent } from "@mui/icons-material";
 import { Stack, TextField, TextFieldProps } from "@mui/material";
 
+import { Center } from "./Center";
+
 type TextBoxProps = TextFieldProps & {
   Icon: SvgIconComponent;
 };
 
-export const InputWithIcon = ({ Icon, ...rest }: TextBoxProps) => {
+export const InputWithIcon = ({ Icon, size, ...rest }: TextBoxProps) => {
   return (
     <Stack direction="row" width="100%" spacing={2} alignContent="flex-start">
-      <Icon
-        sx={{
-          paddingTop: "8px", // To align with the input when help text is shown.
-          color: "primary.main",
-        }}
-      />
+      <Center
+        // Weird height value to synchorize with text field when helper text is shown.
+        sx={{ height: "43.27px", width: "fit-content", "&&": { px: 0 } }}
+        id="xxx"
+      >
+        <Icon
+          sx={{
+            color: "primary.500",
+          }}
+        />
+      </Center>
       <TextField
         size="small"
         sx={{
           flexGrow: 1,
-          px: "0",
+          px: 0,
         }}
         {...rest}
       />

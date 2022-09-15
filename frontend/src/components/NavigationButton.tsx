@@ -1,42 +1,41 @@
+import { useMemo } from "react";
 import { SvgIconComponent } from "@mui/icons-material";
 import {
-  ButtonProps,
   ListItemButton,
+  ListItemButtonProps,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
 
-type DrawerButtonProps = ButtonProps & {
+type NavigationButtonProps = ListItemButtonProps & {
   Icon: SvgIconComponent;
   buttonDescription: string;
 };
 
-export const DrawerButton = ({
+export const NavigationButton = ({
   Icon,
   buttonDescription,
-}: DrawerButtonProps) => {
+  selected,
+  ...rest
+}: NavigationButtonProps) => {
+  const color = useMemo(
+    () => (selected ? "primary.500" : "blueGrey.500"),
+    [selected],
+  );
+
   return (
-    <ListItemButton
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
+    <ListItemButton {...rest}>
       <ListItemIcon
         sx={{
           justifyContent: "center",
-          color: "primary.main",
+          color,
         }}
       >
         <Icon />
       </ListItemIcon>
       <ListItemText
         sx={{
-          "& .MuiTypography-root": {
-            fontSize: "14px",
-            color: "primary.main",
-            textAlign: "center",
-          },
+          color,
         }}
         primary={buttonDescription}
       />
