@@ -6,7 +6,8 @@ import { Stack } from "@mui/system";
 import { useSocket } from "src/contexts/WsContext";
 import { useGetUserName } from "src/hooks/useUsers";
 
-import { Match } from "~shared/types/api/match.dto";
+import { MATCH_EVENTS, MATCH_NAMESPACE } from "~shared/constants";
+import { MatchRes } from "~shared/types/api";
 
 export const WaitingPage = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export const WaitingPage = () => {
   }, [roomId, userNameOne, userNameTwo]);
 
   useEffect(() => {
-    connect("match");
+    connect(MATCH_NAMESPACE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -41,7 +42,7 @@ export const WaitingPage = () => {
     if (!socket) {
       return;
     }
-    socket.on("connect", () => {
+    socket.on(MATCH_EVENTS.CONNECT, () => {
       setConnected(true);
     });
     return () => {
@@ -64,7 +65,7 @@ export const WaitingPage = () => {
       setTimeout(() => navigate("/dashboard"), 3000);
     }, 30000);
 
-    socket.on("found", (match: Match) => {
+    socket.on(MATCH_EVENTS.MATCH_FOUND, (match: MatchRes) => {
       setUserOne(match.result[0].userId);
       setUserTwo(match.result[1].userId);
       setRoomId(match.roomId);
@@ -74,9 +75,9 @@ export const WaitingPage = () => {
     });
 
     // TODO: Update after difficulty selector is implemented
-    socket.emit("find", "DummyDifficultyLevel");
+    socket.emit(MATCH_EVENTS.ENTER_QUEUE, "DummyDifficultyLevel");
     return () => {
-      socket.off("found");
+      socket.off(MATCH_EVENTS.MATCH_FOUND);
     };
   }, [connected, navigate, socket]);
 

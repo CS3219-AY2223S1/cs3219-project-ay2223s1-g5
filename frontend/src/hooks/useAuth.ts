@@ -2,7 +2,7 @@ import { useMutation } from "react-query";
 
 import { ApiService } from "src/services/ApiService";
 
-import { LoginReq, LoginRes, VerifyEmailReq } from "~shared/types/api/auth.dto";
+import { LoginReq, LoginRes, VerifyEmailReq } from "~shared/types/api";
 
 export const useLogin = () => {
   const login = async (input: LoginReq) => {

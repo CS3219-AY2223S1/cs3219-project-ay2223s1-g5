@@ -6,13 +6,15 @@ import { ConfigService } from "src/core/config/config.service";
 
 import { JwtPayload } from "./auth.service";
 
+import { JWT_COOKIE_NAME } from "~shared/constants";
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
-          return request.cookies["accessToken"] || null;
+          return request.cookies[JWT_COOKIE_NAME] || null;
         },
       ]),
       ignoreExpiration: false,

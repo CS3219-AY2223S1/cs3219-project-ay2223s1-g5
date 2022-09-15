@@ -11,7 +11,7 @@ import { VerificationError } from "src/common/errors/verification.error";
 
 import { VerificationService } from "./verification.service";
 
-import { VerifyEmailReq } from "~shared/types/api/auth.dto";
+import { VerifyEmailReq } from "~shared/types/api";
 
 @Controller("/users/verifications")
 export class VerificationController {
