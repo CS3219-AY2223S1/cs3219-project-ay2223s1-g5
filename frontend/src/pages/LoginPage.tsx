@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Container, Grid, Stack, Tab, Typography } from "@mui/material";
+import { Container, Stack, Tab, Typography } from "@mui/material";
 
+import { Center } from "src/components/Center";
 import { LoginForm } from "src/components/forms/LoginForm";
 import { RequestResetPasswordForm } from "src/components/forms/RequestResetPasswordForm";
 
-import LogoImage from "../assets/images/Logo/Logo.png";
-import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
 import { SignUpForm } from "../components/forms/SignUpForm";
 
 export const LoginPage = () => {
@@ -24,85 +23,71 @@ export const LoginPage = () => {
     setFormType(formType);
   };
 
-  return (
-    <Grid container height="100vh">
-      <Grid container item xs={7} alignItems="center" bgcolor="primary.500">
-        <Container
-          component="img"
-          src={PairProgrammingImage}
-          sx={{ width: "50%" }}
+  return formType === "resetpassword" ? (
+    <Stack
+      spacing={4}
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      sx={{ px: 3 }}
+    >
+      <Center sx={{ height: "50px" }}>
+        <Typography
+          sx={{
+            color: "primary.500",
+            fontWeight: "bold",
+            fontSize: "1.3rem",
+            textTransform: "none",
+          }}
+        >
+          Reset Password
+        </Typography>
+      </Center>
+      <Container sx={{ width: "80%", p: 3, alignSelf: "center" }}>
+        <RequestResetPasswordForm
+          onSubmit={() => setFormType("login")}
+          loginRedirect={() => setFormType("login")}
         />
-      </Grid>
-      <Grid item xs={5}>
-        <Stack spacing={4} width="100%" height="100%" justifyContent="center">
-          <Container component="img" src={LogoImage} sx={{ width: "35%" }} />
-          {formType === "resetpassword" ? (
-            <Stack
-              spacing={2}
-              display="flex"
-              justifyContent="center"
-              sx={{ px: "24px" }}
-            >
-              <Container sx={{ display: "flex", justifyContent: "center" }}>
-                <Typography
-                  sx={{
-                    color: "primary.500",
-                    fontWeight: "bold",
-                    fontSize: "130%",
-                    textTransform: "none",
-                    py: "12px",
-                  }}
-                >
-                  Reset Password
-                </Typography>
-              </Container>
-              <Container sx={{ width: "80%", px: "24px", alignSelf: "center" }}>
-                <RequestResetPasswordForm
-                  onSubmit={() => setFormType("login")}
-                  loginRedirect={() => setFormType("login")}
-                />
-              </Container>
-            </Stack>
-          ) : (
-            <TabContext value={formType}>
-              <TabList centered onChange={handleChange}>
-                <Tab
-                  label="Login"
-                  value="login"
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "130%",
-                    textTransform: "none",
-                  }}
-                />
-                <Tab
-                  label="Sign Up"
-                  value="signup"
-                  sx={{
-                    fontWeight: "bold",
-                    fontSize: "130%",
-                    textTransform: "none",
-                  }}
-                />
-              </TabList>
-              <TabPanel value="login">
-                <Container sx={{ width: "80%", paddingX: 0 }}>
-                  <LoginForm
-                    // TODO: Navigate to dashboard.
-                    onSubmit={() => navigate("/dashboard")}
-                    resetPasswordRedirect={() => setFormType("resetpassword")}
-                  />
-                </Container>
-              </TabPanel>
-              <TabPanel value="signup">
-                <Container sx={{ width: "80%", paddingX: 0 }}>
-                  <SignUpForm onSubmit={() => setFormType("login")} />
-                </Container>
-              </TabPanel>
-            </TabContext>
-          )}
-        </Stack>
-      </Grid>
-    </Grid>
+      </Container>
+    </Stack>
+  ) : (
+    <TabContext value={formType}>
+      <TabList centered onChange={handleChange}>
+        {/* We use 50px to synchronise with the reset password screen. */}
+        <Tab
+          label="Login"
+          value="login"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.3rem",
+            textTransform: "none",
+            height: "50px",
+          }}
+        />
+        <Tab
+          label="Sign Up"
+          value="signup"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.3rem",
+            textTransform: "none",
+            height: "50px",
+          }}
+        />
+      </TabList>
+      <TabPanel value="login">
+        <Container sx={{ width: "80%", px: 0 }}>
+          <LoginForm
+            onSubmit={() => navigate("/dashboard")}
+            resetPasswordRedirect={() => setFormType("resetpassword")}
+          />
+        </Container>
+      </TabPanel>
+      <TabPanel value="signup">
+        <Container sx={{ width: "80%", px: 0 }}>
+          <SignUpForm onSubmit={() => setFormType("login")} />
+        </Container>
+      </TabPanel>
+    </TabContext>
   );
 };

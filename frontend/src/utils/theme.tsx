@@ -68,6 +68,7 @@ const theme = createTheme({
     red,
     teal,
     yellow,
+    background: { default: grey[50] },
   },
   components: {
     MuiButtonBase: {
