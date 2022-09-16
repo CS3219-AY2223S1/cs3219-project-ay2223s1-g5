@@ -29,7 +29,7 @@ export class MatchGateway {
     private readonly roomService: RoomService,
   ) {}
 
-  @SubscribeMessage("find")
+  @SubscribeMessage(MATCH_EVENTS.ENTER_QUEUE)
   async handlefind(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
@@ -39,7 +39,7 @@ export class MatchGateway {
     const existingRoom = await this.roomService.getRoom(userId);
     if (existingRoom) {
       // TODO: Allow reconnection
-      client.emit("existingMatch");
+      client.emit(MATCH_EVENTS.EXISTING_MATCH);
       return;
     }
 
@@ -70,32 +70,23 @@ export class MatchGateway {
       socket.join(match.roomId);
     }
 
-    this.server.to(match.roomId).emit("found", match);
+    this.server.to(match.roomId).emit(MATCH_EVENTS.MATCH_FOUND, match);
   }
 
-  @SubscribeMessage("leaveRoom")
+  @SubscribeMessage(MATCH_EVENTS.LEAVE_QUEUE)
   async handleLeaveRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: string,
   ) {
     const userId = Number(client.handshake.headers.authorization);
     this.logger.info(`${userId} left rooom`);
-    this.server.to(roomId).emit("endMatch");
+    this.server.to(roomId).emit(MATCH_EVENTS.END_MATCH);
 
     // Remove mappings stored in redis
     await this.roomService.removeRoom(roomId);
   }
 
-  @SubscribeMessage("disconnectWithMatch")
-  async handleDisconnectWithMatch(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
-  ) {
-    this.logger.info(`Websocket disconnected with match: ${client.id}`);
-    this.server.to(roomId).emit("wait");
-  }
-
-  @SubscribeMessage("disconnect")
+  @SubscribeMessage(MATCH_EVENTS.DISCONNECT)
   async handleDisconnect(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
@@ -109,7 +100,7 @@ export class MatchGateway {
     // If user has been matched, notify the other user
     const roomId = await this.roomService.getRoom(userId);
     if (roomId) {
-      this.server.to(roomId).emit("wait");
+      this.server.to(roomId).emit(MATCH_EVENTS.WAIT);
     }
   }
 }
