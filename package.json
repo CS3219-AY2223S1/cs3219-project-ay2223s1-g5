@@ -11,7 +11,7 @@
     "dev:full": "npm run all \"docker-compose --env-file backend/.env up\" \"npm run dev\"",
     "build": "npm run --prefix shared build && npm run all \"npm:on-* build\"",
     "clean": "npm run all \"npm --prefix shared run clean\" \"npm --prefix frontend run clean\" \"npm --prefix backend run clean\" && rm -rf node_modules",
-    "postinstall": "npm run all \"npm --prefix backend install\" \"npm --prefix frontend install\" \"npm --prefix shared install\" && npm run --prefix shared build",
+    "postinstall": "npm run all \"npm --prefix backend install\" \"npm --prefix frontend install\" \"npm --prefix shared install\" && npm run --prefix shared build && npm run --prefix frontend build",
     "prepare": "husky install"
   },
   "repository": {

@@ -1,6 +1,5 @@
-import { Color } from "@mui/material";
+import { Color, createTheme, PaletteColorOptions } from "@mui/material";
 import { blueGrey, green, grey, red, teal, yellow } from "@mui/material/colors";
-import { createTheme, PaletteColorOptions } from "@mui/material/styles";
 declare module "@mui/material/styles" {
   export interface Palette {
     green: Partial<Color>;

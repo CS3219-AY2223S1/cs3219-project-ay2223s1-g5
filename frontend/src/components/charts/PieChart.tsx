@@ -1,4 +1,4 @@
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material";
 import ReactEcharts from "echarts-for-react";
 
 export const PieChart = () => {
