@@ -7,7 +7,7 @@ export const TextButton = ({ variant, sx, children, ...rest }: ButtonProps) => {
       sx={{
         ml: -1,
         "&:hover": {
-          backgroundColor: "transparent",
+          bgcolor: "transparent",
           color: "primary.700",
         },
         fontWeight: "bold",
