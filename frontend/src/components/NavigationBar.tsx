@@ -24,32 +24,42 @@ export const NavigationBar = () => {
   const [expanded, setExpanded] = useState<boolean>(false);
 
   const handleChange = () => {
-    setExpanded(expanded ? false : true);
+    setExpanded(!expanded);
   };
 
   return (
     <Container disableGutters sx={{ height: "100vh" }}>
-      <Box sx={{ textAlign: "center", mt: "8%" }}>
-        <IconButton onClick={handleChange}>
-          <Avatar sx={{ width: "50px", height: "50px" }} />
+      <Box sx={{ textAlign: "center", mt: 3 }}>
+        <IconButton sx={{ mb: 1, p: "4px" }} onClick={handleChange}>
+          <Avatar
+            sx={{
+              width: "48px",
+              height: "48px",
+              bgcolor: "primary.A700",
+            }}
+          />
         </IconButton>
         <Accordion expanded={expanded} sx={{ boxShadow: "none" }}>
           <AccordionSummary
             sx={{
-              minHeight: "0px",
-              "& .MuiAccordionSummary-content": {
-                m: 0,
-              },
+              minHeight: 0,
+              maxHeight: 0,
               "&.Mui-expanded": {
-                minHeight: "0px",
-                "& .MuiAccordionSummary-content": {
-                  m: 0,
-                },
+                minHeight: 0,
               },
             }}
           ></AccordionSummary>
-          <AccordionDetails sx={{ p: 0, backgroundColor: "blueGrey.50" }}>
-            <List sx={{ pb: 0 }}>
+          <AccordionDetails sx={{ p: 0 }}>
+            <List
+              sx={{
+                py: 0,
+                borderColor: "blueGrey.200",
+                borderStyle: "solid",
+                borderWidth: "2px",
+                borderLeftWidth: 0,
+                borderRightWidth: 0,
+              }}
+            >
               {HiddenNavigationBarRoutes.map(({ path, label, Icon }) => (
                 <NavLink
                   key={label}
@@ -69,7 +79,7 @@ export const NavigationBar = () => {
                   }}
                 </NavLink>
               ))}
-              <ListItem key={"Logout"} component={Link} to={`/`} disablePadding>
+              <ListItem key={"Logout"} disablePadding>
                 <NavigationButton Icon={Logout} buttonDescription={"Logout"} />
               </ListItem>
             </List>
