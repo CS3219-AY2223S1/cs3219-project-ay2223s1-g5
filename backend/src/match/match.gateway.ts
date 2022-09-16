@@ -10,6 +10,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
 import { WsAuthGuard } from "src/auth/ws.guard";
+import { RoomService } from "src/room/room.service";
 
 import { MatchService } from "./match.service";
 
@@ -24,7 +25,8 @@ export class MatchGateway {
   constructor(
     @InjectPinoLogger()
     private readonly logger: PinoLogger,
-    private readonly service: MatchService,
+    private readonly matchService: MatchService,
+    private readonly roomService: RoomService,
   ) {}
 
   @SubscribeMessage("find")
@@ -34,7 +36,7 @@ export class MatchGateway {
   ) {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
-    const existingRoom = await this.service.getRoom(userId);
+    const existingRoom = await this.roomService.getRoom(userId);
     if (existingRoom) {
       // TODO: Allow reconnection
       client.emit("existingMatch");
@@ -48,7 +50,7 @@ export class MatchGateway {
     this.logger.info(`Joining queue: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
-    const match = await this.service.searchMatch(
+    const match = await this.matchService.searchMatch(
       userId,
       difficultyLevel,
       client.id,
@@ -81,7 +83,7 @@ export class MatchGateway {
     this.server.to(roomId).emit("endMatch");
 
     // Remove mappings stored in redis
-    await this.service.removeRoom(roomId);
+    await this.roomService.removeRoom(roomId);
   }
 
   @SubscribeMessage("disconnectWithMatch")
@@ -102,10 +104,10 @@ export class MatchGateway {
     const userId = Number(client.handshake.headers.authorization);
 
     // If user has not been matched, remove user from queue
-    await this.service.removeFromQueue(difficultyLevel, userId);
+    await this.matchService.removeFromQueue(difficultyLevel, userId);
 
     // If user has been matched, notify the other user
-    const roomId = await this.service.getRoom(userId);
+    const roomId = await this.roomService.getRoom(userId);
     if (roomId) {
       this.server.to(roomId).emit("wait");
     }
