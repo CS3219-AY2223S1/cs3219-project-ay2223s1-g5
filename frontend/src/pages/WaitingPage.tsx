@@ -42,7 +42,7 @@ export const WaitingPage = () => {
   useEffect(() => {
     if (leaveRoom && socket) {
       if (roomId) {
-        socket.emit("leaveRoom", roomId);
+        socket.emit(MATCH_EVENTS.LEAVE_QUEUE, roomId);
       }
       navigate("/dashboard");
     }
@@ -84,28 +84,28 @@ export const WaitingPage = () => {
       // TODO: Handle found match.
     });
 
-    socket.on("endMatch", () => {
+    socket.on(MATCH_EVENTS.END_MATCH, () => {
       setMessage("The other user has left the room. Ending match...");
       setTimeout(() => navigate("/dashboard"), 3000);
     });
 
-    socket.on("existingMatch", () => {
+    socket.on(MATCH_EVENTS.EXISTING_MATCH, () => {
       setMessage("Exsiting match found. Do you want to join back?");
     });
 
-    socket.on("wait", () => {
+    socket.on(MATCH_EVENTS.WAIT, () => {
       setMessage(
         "The other user has disconnected. Waiting for reconnection...",
       );
       // TODO: Wait for reconnection
     });
 
-    socket.on("endMatch", () => {
+    socket.on(MATCH_EVENTS.END_MATCH, () => {
       setMessage("The other user has left the room. Returning to dashboard...");
     });
 
     // TODO: Update after difficulty selector is implemented
-    socket.emit("find", "DummyDifficultyLevel");
+    socket.emit(MATCH_EVENTS.ENTER_QUEUE, "DummyDifficultyLevel");
 
     return () => {
       socket.off(MATCH_EVENTS.MATCH_FOUND);
