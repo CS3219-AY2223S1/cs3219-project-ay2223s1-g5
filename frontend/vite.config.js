@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-import typescript from "@rollup/plugin-typescript";
 import react from "@vitejs/plugin-react";
+import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -14,11 +14,23 @@ export default defineConfig({
       },
     },
   },
+  resolve: {
+    alias: [
+      {
+        find: "src",
+        replacement: resolve(__dirname, "./src"),
+      },
+      {
+        find: "~shared",
+        replacement: resolve(__dirname, "../shared/src"),
+      },
+    ],
+  },
   build: {
     outDir: "build",
   },
   test: {
     passWithNoTests: true,
   },
-  plugins: [react(), typescript()],
+  plugins: [react()],
 });
