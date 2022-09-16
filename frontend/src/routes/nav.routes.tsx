@@ -1,7 +1,7 @@
 import { RouteObject } from "react-router-dom";
 import {
-  AccountCircleOutlined,
   LaptopOutlined,
+  Settings,
   SvgIconComponent,
   WebOutlined,
 } from "@mui/icons-material";
@@ -17,13 +17,7 @@ type NavigationRouteObject = RouteObject & {
   children?: NavigationRouteObject[];
 };
 
-export const NavigationBarRoutes: NavigationRouteObject[] = [
-  {
-    path: "account",
-    element: <AccountSettingPage />,
-    label: "Account",
-    Icon: AccountCircleOutlined,
-  },
+export const DisplayedNavigationBarRoutes = [
   {
     path: "dashboard",
     element: <DashboardPage />,
@@ -36,4 +30,18 @@ export const NavigationBarRoutes: NavigationRouteObject[] = [
     label: "PeerPrep",
     Icon: LaptopOutlined,
   },
+];
+
+export const HiddenNavigationBarRoutes = [
+  {
+    path: "settings",
+    element: <AccountSettingPage />,
+    label: "Settings",
+    Icon: Settings,
+  },
+];
+
+export const NavigationBarRoutes: NavigationRouteObject[] = [
+  ...HiddenNavigationBarRoutes,
+  ...DisplayedNavigationBarRoutes,
 ];

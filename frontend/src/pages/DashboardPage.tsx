@@ -10,7 +10,7 @@ export const DashboardPage = () => {
         <Grid container direction="row">
           <Grid
             item
-            sx={{ backgroundColor: "primary.900", width: "16px" }}
+            sx={{ backgroundColor: "primary.500", width: "16px" }}
           ></Grid>
           <Grid item sx={{ flex: 1 }}>
             <Typography variant="body1" sx={{ pl: 2, py: 1 }}>
