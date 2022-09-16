@@ -9,14 +9,19 @@ import { VerificationPage } from "src/pages/VerificationPage";
 import { WaitingPage } from "src/pages/WaitingPage";
 
 import { NavigationBarRoutes } from "./nav.routes";
-import { ProtectedRoute } from "./ProtectedRoutes";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { PublicRoute } from "./PublicRoute";
 
 export const AppRoutes: RouteObject[] = [
   {
     children: [
       {
         path: "",
-        element: <LandingLayout />,
+        element: (
+          <PublicRoute>
+            <LandingLayout />
+          </PublicRoute>
+        ),
         children: [
           {
             path: "",
