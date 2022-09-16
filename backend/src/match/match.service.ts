@@ -4,7 +4,10 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RedisService } from "src/redis/redis.service";
 
-import { Match } from "~shared/types/api/match.dto";
+type Match = {
+  roomId: string;
+  result: { userId: number; socketId: string }[];
+};
 
 @Injectable()
 export class MatchService {

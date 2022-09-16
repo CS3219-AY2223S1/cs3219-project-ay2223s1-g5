@@ -13,8 +13,10 @@ import { WsAuthGuard } from "src/auth/ws.guard";
 
 import { MatchService } from "./match.service";
 
+import { MATCH_EVENTS, MATCH_NAMESPACE } from "~shared/constants";
+
 @UseGuards(WsAuthGuard)
-@WebSocketGateway({ namespace: "match" })
+@WebSocketGateway({ namespace: MATCH_NAMESPACE })
 export class MatchGateway {
   @WebSocketServer()
   server: Namespace;
@@ -25,7 +27,7 @@ export class MatchGateway {
     private readonly service: MatchService,
   ) {}
 
-  @SubscribeMessage("find")
+  @SubscribeMessage(MATCH_EVENTS.ENTER_QUEUE)
   async handleFind(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
@@ -43,14 +45,14 @@ export class MatchGateway {
     }
 
     // Get sockets by ID and let them join the same room
-    match.result.forEach((user) => {
+    for (const user of match.result) {
       this.server.sockets.get(user.socketId)?.join(match.roomId);
-    });
+    }
 
-    this.server.to(match.roomId).emit("found", match);
+    this.server.to(match.roomId).emit(MATCH_EVENTS.MATCH_FOUND, match);
   }
 
-  @SubscribeMessage("disconnect")
+  @SubscribeMessage(MATCH_EVENTS.DISCONNECT)
   handleDisconnect(@ConnectedSocket() client: Socket) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
     // TODO: Call service.

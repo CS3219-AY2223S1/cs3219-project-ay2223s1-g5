@@ -1,6 +1,7 @@
 import { Outlet, RouteObject } from "react-router-dom";
 
 import { SocketProvider } from "src/contexts/WsContext";
+import { LandingLayout } from "src/layouts/LandingLayout";
 import { SidebarLayout } from "src/layouts/SidebarLayout";
 import { LoginPage } from "src/pages/LoginPage";
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
@@ -15,11 +16,17 @@ export const AppRoutes: RouteObject[] = [
     children: [
       {
         path: "",
-        element: <LoginPage />,
-      },
-      {
-        path: "reset-password",
-        element: <ResetPasswordPage />,
+        element: <LandingLayout />,
+        children: [
+          {
+            path: "",
+            element: <LoginPage />,
+          },
+          {
+            path: "reset-password",
+            element: <ResetPasswordPage />,
+          },
+        ],
       },
       {
         path: "verify",

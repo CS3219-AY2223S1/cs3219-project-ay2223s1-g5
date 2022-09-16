@@ -20,7 +20,8 @@ import { ConfigService } from "src/core/config/config.service";
 import { AuthService, JwtPayload } from "./auth.service";
 import { LocalAuthGuard } from "./local.guard";
 
-import { LoginRes } from "~shared/types/api/auth.dto";
+import { JWT_COOKIE_NAME } from "~shared/constants";
+import { LoginRes } from "~shared/types/api";
 
 @Controller()
 export class AuthController {
@@ -52,13 +53,13 @@ export class AuthController {
     @Request() req: ExpressRequest,
     @Response() res: ExpressResponse,
   ) {
-    if (!req.cookies["accessToken"]) {
+    if (!req.cookies[JWT_COOKIE_NAME]) {
       res.json();
       return;
     }
     // We perform the validation manually to prevent throwing 401 error.
     try {
-      const payload = verify(req.cookies["accessToken"], this.secret, {
+      const payload = verify(req.cookies[JWT_COOKIE_NAME], this.secret, {
         ignoreExpiration: false,
       }) as unknown as JwtPayload;
       const userId = payload.sub;
@@ -90,7 +91,7 @@ export class AuthController {
     };
 
     return res
-      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie(JWT_COOKIE_NAME, accessToken, cookieOptions)
       .status(200)
       .json(responseBody);
   }

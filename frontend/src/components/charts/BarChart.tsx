@@ -32,9 +32,9 @@ export const BarChart = () => {
           dimension: 0,
           inRange: {
             color: [
-              theme.palette.chart.red,
-              theme.palette.chart.yellow,
-              theme.palette.chart.green,
+              theme.palette.red[500],
+              theme.palette.yellow[500],
+              theme.palette.green[500],
             ],
           },
         },

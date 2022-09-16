@@ -8,6 +8,8 @@ import { ConfigService } from "src/core/config/config.service";
 
 import { JwtPayload } from "./auth.service";
 
+import { JWT_COOKIE_NAME } from "~shared/constants";
+
 @Injectable()
 export class WsAuthGuard implements CanActivate {
   private readonly secret: string;
@@ -23,11 +25,11 @@ export class WsAuthGuard implements CanActivate {
       return false;
     }
     const cookies = parse(client.handshake.headers.cookie);
-    if (!cookies["accessToken"]) {
+    if (!cookies[JWT_COOKIE_NAME]) {
       return false;
     }
     try {
-      const payload = verify(cookies["accessToken"], this.secret, {
+      const payload = verify(cookies[JWT_COOKIE_NAME], this.secret, {
         ignoreExpiration: false,
       }) as unknown as JwtPayload;
       // We store the userId in the authorization header of the access token for

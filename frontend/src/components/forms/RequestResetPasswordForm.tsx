@@ -1,6 +1,6 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { MailOutline } from "@mui/icons-material";
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { validate } from "email-validator";
 import { useSnackbar } from "notistack";
 
@@ -8,6 +8,8 @@ import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useRequestResetPassword } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
+
+import { TextButton } from "../TextButton";
 
 export interface RequestResetPasswordForm {
   onSubmit: () => void;
@@ -72,19 +74,7 @@ export const RequestResetPasswordForm = (props: RequestResetPasswordForm) => {
           )}
         />
         <Stack direction="row" justifyContent="space-between">
-          <Button
-            variant="text"
-            onClick={props.loginRedirect}
-            sx={{
-              "&:hover": {
-                backgroundColor: "transparent",
-              },
-              fontWeight: "bold",
-              textTransform: "none",
-            }}
-          >
-            Back to login
-          </Button>
+          <TextButton onClick={props.loginRedirect}>Back to login</TextButton>
           <StyledButton
             label="Reset Password"
             type="submit"

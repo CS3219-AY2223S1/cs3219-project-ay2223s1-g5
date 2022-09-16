@@ -7,7 +7,7 @@ import {
   GetUserNameRes,
   RequestResetPasswordReq,
   ResetPasswordReq,
-} from "~shared/types/api/user.dto";
+} from "~shared/types/api";
 
 export const useCreateUser = () => {
   const createUser = async (input: CreateUserReq) => {

@@ -18,7 +18,7 @@ import {
   HiddenNavigationBarRoutes,
 } from "src/routes/nav.routes";
 
-import { DrawerButton } from "./DrawerButton";
+import { NavigationButton } from "./NavigationButton";
 
 export const NavigationBar = () => {
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -48,7 +48,7 @@ export const NavigationBar = () => {
               },
             }}
           ></AccordionSummary>
-          <AccordionDetails sx={{ p: 0 }}>
+          <AccordionDetails sx={{ p: 0, backgroundColor: "blueGrey.50" }}>
             <List sx={{ pb: 0 }}>
               {HiddenNavigationBarRoutes.map(({ path, label, Icon }) => (
                 <NavLink
@@ -58,46 +58,19 @@ export const NavigationBar = () => {
                 >
                   {({ isActive }) => {
                     return (
-                      <ListItem
-                        key={label}
-                        selected={isActive}
-                        disablePadding
-                        sx={{
-                          "&.Mui-selected": {
-                            background: "none",
-                            "& .MuiListItemIcon-root": {
-                              color: "secondary.main",
-                            },
-                            "& .MuiTypography-root": {
-                              color: "secondary.main",
-                            },
-                          },
-                        }}
-                      >
-                        <DrawerButton Icon={Icon} buttonDescription={label} />
+                      <ListItem key={label} disablePadding>
+                        <NavigationButton
+                          Icon={Icon}
+                          selected={isActive}
+                          buttonDescription={label}
+                        />
                       </ListItem>
                     );
                   }}
                 </NavLink>
               ))}
-              <ListItem
-                key={"Logout"}
-                component={Link}
-                to={`/`}
-                disablePadding
-                sx={{
-                  "&.Mui-selected": {
-                    background: "none",
-                    "& .MuiListItemIcon-root": {
-                      color: "secondary.main",
-                    },
-                    "& .MuiTypography-root": {
-                      color: "secondary.main",
-                    },
-                  },
-                }}
-              >
-                <DrawerButton Icon={Logout} buttonDescription={"Logout"} />
+              <ListItem key={"Logout"} component={Link} to={`/`} disablePadding>
+                <NavigationButton Icon={Logout} buttonDescription={"Logout"} />
               </ListItem>
             </List>
           </AccordionDetails>
@@ -108,23 +81,12 @@ export const NavigationBar = () => {
           <NavLink key={label} to={path} style={{ textDecoration: "none" }}>
             {({ isActive }) => {
               return (
-                <ListItem
-                  key={label}
-                  selected={isActive}
-                  disablePadding
-                  sx={{
-                    "&.Mui-selected": {
-                      background: "none",
-                      "& .MuiListItemIcon-root": {
-                        color: "secondary.main",
-                      },
-                      "& .MuiTypography-root": {
-                        color: "secondary.main",
-                      },
-                    },
-                  }}
-                >
-                  <DrawerButton Icon={Icon} buttonDescription={label} />
+                <ListItem key={label} disablePadding>
+                  <NavigationButton
+                    Icon={Icon}
+                    selected={isActive}
+                    buttonDescription={label}
+                  />
                 </ListItem>
               );
             }}
