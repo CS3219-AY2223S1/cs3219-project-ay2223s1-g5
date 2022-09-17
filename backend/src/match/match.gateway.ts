@@ -42,12 +42,15 @@ export class MatchGateway {
       return;
     }
 
-    this.handleQueue(client, difficultyLevel);
+    await this.handleQueue(client, difficultyLevel);
   }
 
   async handleQueue(client: Socket, difficultyLevel: string): Promise<void> {
     this.logger.info(`Joining queue: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
+    client.on(MATCH_EVENTS.DISCONNECT, () => {
+      this.handleDisconnect(client, difficultyLevel);
+    });
 
     const match = await this.matchService.searchMatch(
       userId,
@@ -59,42 +62,16 @@ export class MatchGateway {
       return;
     }
 
-    // Get sockets by ID and let them join the same room
     for (const user of match.result) {
       this.server.sockets
         .get(user.socketId)
-        ?.emit("MATCH_EVENTS.MATCH_FOUND", match);
+        ?.emit(MATCH_EVENTS.MATCH_FOUND, match);
     }
   }
 
-  @SubscribeMessage(MATCH_EVENTS.LEAVE_QUEUE)
-  async handleLeaveRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
-  ) {
+  async handleDisconnect(client: Socket, difficultyLevel: string) {
+    this.logger.info(`Websocket disconnected: ${client.id} ${difficultyLevel}`);
     const userId = Number(client.handshake.headers.authorization);
-    this.logger.info(`${userId} left rooom`);
-    this.server.to(roomId).emit(MATCH_EVENTS.END_MATCH);
-
-    // Remove mappings stored in redis
-    await this.roomService.removeRoom(roomId);
-  }
-
-  @SubscribeMessage(MATCH_EVENTS.DISCONNECT)
-  async handleDisconnect(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() difficultyLevel: string,
-  ) {
-    this.logger.info(`Websocket disconnected: ${client.id}`);
-    const userId = Number(client.handshake.headers.authorization);
-
-    // If user has not been matched, remove user from queue
     await this.matchService.removeFromQueue(difficultyLevel, userId);
-
-    // If user has been matched, notify the other user
-    const roomId = await this.roomService.getRoom(userId);
-    if (roomId) {
-      this.server.to(roomId).emit(MATCH_EVENTS.WAIT);
-    }
   }
 }

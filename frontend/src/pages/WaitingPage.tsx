@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, CircularProgress, Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
 
@@ -48,7 +48,6 @@ export const WaitingPage = () => {
   const [roomId, setRoomId] = useState<string | undefined>(undefined);
   const { user: userNameOne } = useGetUserName(userOne);
   const { user: userNameTwo } = useGetUserName(userTwo);
-  const [leaveRoom, setIsLeaveRoom] = useState<boolean>(false);
 
   // We use a callback on the "connect" event to set a state here
   // so that we can be sure that we will have the socket ID.
@@ -60,7 +59,7 @@ export const WaitingPage = () => {
       setMessage(
         `Found a match between ${userNameOne.name} and ${userNameTwo.name}!
         Room ID: ${roomId}
-        Loading...`,
+        Navigating to room...`,
       );
     }
   }, [roomId, userNameOne, userNameTwo]);
@@ -69,15 +68,6 @@ export const WaitingPage = () => {
     connect(MATCH_NAMESPACE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (leaveRoom && socket) {
-      if (roomId) {
-        socket.emit(MATCH_EVENTS.LEAVE_QUEUE, roomId);
-      }
-      navigate("/dashboard");
-    }
-  }, [leaveRoom, socket, roomId, navigate]);
 
   useEffect(() => {
     if (!socket) {
@@ -99,7 +89,7 @@ export const WaitingPage = () => {
     }
     setMessage("Finding a match...");
 
-    const timeout = setTimeout(() => {
+    setTimeout(() => {
       setMessage("Unable to find a match. Returning to dashboard.");
       // TODO: Stop the loading spinner or change its color.
       // We give the user some time to read the message.
@@ -110,30 +100,14 @@ export const WaitingPage = () => {
       setUserOne(match.result[0].userId);
       setUserTwo(match.result[1].userId);
       setRoomId(match.roomId);
-      setMessage("Match found. Loading information...");
-      clearTimeout(timeout);
-      // TODO: Handle found match.
+      setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
     });
 
-    socket.on(MATCH_EVENTS.END_MATCH, () => {
-      setMessage("The other user has left the room. Ending match...");
-      setTimeout(() => navigate("/dashboard"), 3000);
+    socket.on(MATCH_EVENTS.EXISTING_MATCH, (roomId: string) => {
+      setMessage("Exsiting match found. Joining back...");
+      setTimeout(() => navigate(`/room/${roomId}`), 1000);
     });
 
-    socket.on(MATCH_EVENTS.EXISTING_MATCH, () => {
-      setMessage("Exsiting match found. Do you want to join back?");
-    });
-
-    socket.on(MATCH_EVENTS.WAIT, () => {
-      setMessage(
-        "The other user has disconnected. Waiting for reconnection...",
-      );
-      // TODO: Wait for reconnection
-    });
-
-    socket.on(MATCH_EVENTS.END_MATCH, () => {
-      setMessage("The other user has left the room. Returning to dashboard...");
-    });
     socket.emit(MATCH_EVENTS.ENTER_QUEUE, difficulty?.toUpperCase());
 
     return () => {
@@ -158,13 +132,6 @@ export const WaitingPage = () => {
           return <div key={key}>{value}</div>;
         })}
       </Typography>
-      <Button
-        onClick={() => {
-          setIsLeaveRoom(true);
-        }}
-      >
-        Leave Room
-      </Button>
     </Stack>
   );
 };
