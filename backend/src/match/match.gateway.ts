@@ -38,8 +38,7 @@ export class MatchGateway {
     const userId = Number(client.handshake.headers.authorization);
     const existingRoom = await this.roomService.getRoom(userId);
     if (existingRoom) {
-      // TODO: Allow reconnection
-      client.emit(MATCH_EVENTS.EXISTING_MATCH);
+      client.emit(MATCH_EVENTS.EXISTING_MATCH, existingRoom);
       return;
     }
 
@@ -62,15 +61,10 @@ export class MatchGateway {
 
     // Get sockets by ID and let them join the same room
     for (const user of match.result) {
-      const socket = this.server.sockets.get(user.socketId);
-      if (!socket) {
-        return;
-      }
-
-      socket.join(match.roomId);
+      this.server.sockets
+        .get(user.socketId)
+        ?.emit("MATCH_EVENTS.MATCH_FOUND", match);
     }
-
-    this.server.to(match.roomId).emit(MATCH_EVENTS.MATCH_FOUND, match);
   }
 
   @SubscribeMessage(MATCH_EVENTS.LEAVE_QUEUE)
@@ -91,7 +85,7 @@ export class MatchGateway {
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
   ) {
-    this.logger.info(`Websocket disconnected without match: ${client.id}`);
+    this.logger.info(`Websocket disconnected: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
     // If user has not been matched, remove user from queue

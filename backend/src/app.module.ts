@@ -10,6 +10,7 @@ import { VerificationModule } from "src/verification/verification.module";
 
 import { PrismaServiceModule } from "./core/prisma.service.module";
 import { RedisServiceModule } from "./redis/redis.service.module";
+import { RoomModule } from "./room/room.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 
@@ -46,6 +47,7 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     AuthModule,
     VerificationModule,
     MatchModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [AppService],
