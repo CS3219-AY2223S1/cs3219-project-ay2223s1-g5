@@ -8,10 +8,7 @@ export const DashboardPage = () => {
     <Grid container>
       <Grid item xs={4}>
         <Grid container direction="row">
-          <Grid
-            item
-            sx={{ backgroundColor: "primary.500", width: "16px" }}
-          ></Grid>
+          <Grid item sx={{ bgcolor: "primary.500", width: "16px" }}></Grid>
           <Grid item sx={{ flex: 1 }}>
             <Typography variant="body1" sx={{ pl: 2, py: 1 }}>
               Questions Attempted
@@ -23,13 +20,9 @@ export const DashboardPage = () => {
           <PieChart />
         </Grid>
       </Grid>
-
       <Grid item xs={8}>
         <Grid container direction="row">
-          <Grid
-            item
-            sx={{ backgroundColor: "primary.500", width: "16px" }}
-          ></Grid>
+          <Grid item sx={{ bgcolor: "primary.500", width: "16px" }}></Grid>
           <Grid item sx={{ flex: 1 }}>
             <Typography variant="body1" sx={{ pl: 2, py: 1 }}>
               Question Sources

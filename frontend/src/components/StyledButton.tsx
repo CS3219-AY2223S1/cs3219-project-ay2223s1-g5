@@ -16,7 +16,7 @@ export const StyledButton = ({ label, sx, ...rest }: StyledButtonProps) => {
         // FIXME: This prop causes a bug in Safari browsers.
         px: 3,
         "&:hover": {
-          backgroundColor: "primary.700",
+          bgcolor: "primary.700",
           boxShadow: "1",
         },
         ...sx,

@@ -5,6 +5,7 @@ import { LandingLayout } from "src/layouts/LandingLayout";
 import { SidebarLayout } from "src/layouts/SidebarLayout";
 import { LoginPage } from "src/pages/LoginPage";
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
+import { RoomPage } from "src/pages/RoomPage";
 import { VerificationPage } from "src/pages/VerificationPage";
 import { WaitingPage } from "src/pages/WaitingPage";
 
@@ -54,6 +55,14 @@ export const AppRoutes: RouteObject[] = [
             element: (
               <SocketProvider>
                 <WaitingPage />
+              </SocketProvider>
+            ),
+          },
+          {
+            path: "room",
+            element: (
+              <SocketProvider>
+                <RoomPage />
               </SocketProvider>
             ),
           },

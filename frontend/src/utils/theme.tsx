@@ -49,9 +49,9 @@ const colors = {
     A100: "#fffdfc",
     A200: "#ffe0c9",
     A400: "#ffc396",
-    A700: "ffb47c",
+    A700: "#ffb47c",
   },
-  white: "#FFFFFF",
+  white: "#ffffff",
 };
 
 const theme = createTheme({
