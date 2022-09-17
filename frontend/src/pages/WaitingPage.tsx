@@ -1,16 +1,47 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
+import { useSnackbar } from "notistack";
 
 import { useSocket } from "src/contexts/WsContext";
 import { useGetUserName } from "src/hooks/useUsers";
 
 import { MATCH_EVENTS, MATCH_NAMESPACE } from "~shared/constants";
 import { MatchRes } from "~shared/types/api";
+import { DifficultyLevel } from "~shared/types/base";
 
 export const WaitingPage = () => {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const difficulty = params.get("difficulty");
+
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (!difficulty) {
+      enqueueSnackbar("No difficulty level specified", {
+        variant: "error",
+        key: "missing-difficulty",
+      });
+      navigate("/select-difficulty");
+      return;
+    }
+
+    const normalized = difficulty.toUpperCase();
+    if (
+      Object.values(DifficultyLevel).filter((value) => normalized === value)
+        .length === 0
+    ) {
+      enqueueSnackbar("Invalid difficulty level", {
+        variant: "error",
+        key: "invalid-difficulty",
+      });
+      navigate("/select-difficulty");
+    }
+  }, [difficulty, navigate, enqueueSnackbar]);
+
   const { socket, connect } = useSocket();
   const [userOne, setUserOne] = useState<number | undefined>(undefined);
   const [userTwo, setUserTwo] = useState<number | undefined>(undefined);
@@ -103,14 +134,12 @@ export const WaitingPage = () => {
     socket.on(MATCH_EVENTS.END_MATCH, () => {
       setMessage("The other user has left the room. Returning to dashboard...");
     });
-
-    // TODO: Update after difficulty selector is implemented
-    socket.emit(MATCH_EVENTS.ENTER_QUEUE, "DummyDifficultyLevel");
+    socket.emit(MATCH_EVENTS.ENTER_QUEUE, difficulty?.toUpperCase());
 
     return () => {
       socket.off(MATCH_EVENTS.MATCH_FOUND);
     };
-  }, [connected, navigate, roomId, socket]);
+  }, [connected, navigate, roomId, socket, difficulty]);
 
   return (
     <Stack

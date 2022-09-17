@@ -23,8 +23,7 @@ export const VerificationPage = () => {
         variant: "error",
         // Prevent double snackbar during development caused by
         // React.StrictMode's double invocation
-        key: "Generic Error",
-        preventDuplicate: true,
+        key: "error",
       });
       navigate("/");
       return;
