@@ -37,14 +37,23 @@ export const RoomPage = () => {
               }}
             />
           </Stack>
-          <StyledButton label={"Leave Room"} sx={{ bgcolor: "red.500" }} />
+          <StyledButton
+            label={"Leave Room"}
+            sx={{
+              bgcolor: "red.500",
+              "&:hover": {
+                bgcolor: "red.700",
+                boxShadow: "1",
+              },
+            }}
+          />
         </Grid>
         <Divider />
         <Stack direction="row" spacing={2} sx={{ p: 3 }}>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <Question />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={8}>
             <Editor />
           </Grid>
         </Stack>

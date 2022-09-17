@@ -60,7 +60,11 @@ export const AppRoutes: RouteObject[] = [
           },
           {
             path: "room",
-            element: <RoomPage />,
+            element: (
+              <SocketProvider>
+                <RoomPage />
+              </SocketProvider>
+            ),
           },
         ],
       },
