@@ -22,9 +22,13 @@ export const RoomPage = () => {
           container
           item
           xs={12}
-          sx={{ p: "1%", justifyContent: "space-between" }}
+          sx={{ py: 2, px: 3, justifyContent: "space-between" }}
         >
-          <Stack direction="row" spacing={1}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ display: "flex", alignItems: "center" }}
+          >
             <Avatar
               sx={{
                 width: "36px",
@@ -43,15 +47,13 @@ export const RoomPage = () => {
           <StyledButton label={"Leave Room"} sx={{ bgcolor: "red.500" }} />
         </Grid>
         <Divider />
-        <Stack direction="row" spacing={3} sx={{ p: "1%" }}>
+        <Stack direction="row" spacing={2} sx={{ p: 3 }}>
           <Grid item xs={6}>
-            <Paper elevation={1} sx={{ p: "4%" }}>
+            <Paper elevation={1} sx={{ p: 3 }}>
               <Stack direction="column" spacing={3}>
-                <Grid item xs={12}>
-                  <Typography variant="h5" sx={{ textAlign: "center" }}>
-                    Problem Title
-                  </Typography>
-                </Grid>
+                <Typography variant="h5" sx={{ textAlign: "center" }}>
+                  Problem Title
+                </Typography>
                 <Divider />
                 <Typography variant="body2" sx={{ textAlign: "justify" }}>
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -98,12 +100,10 @@ export const RoomPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={6}>
-            <Paper elevation={1} sx={{ p: "3%" }}>
-              <Grid item xs={12}>
-                <Typography variant="h5" sx={{ textAlign: "center" }}>
-                  Editor
-                </Typography>
-              </Grid>
+            <Paper elevation={1} sx={{ p: 3 }}>
+              <Typography variant="h5" sx={{ textAlign: "center" }}>
+                Editor
+              </Typography>
             </Paper>
           </Grid>
         </Stack>
