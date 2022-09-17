@@ -1,10 +1,29 @@
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Avatar, Divider, Grid, Paper, Stack, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
 
 import { Editor } from "../components/Editor";
 import { Question } from "../components/Question";
 import { StyledButton } from "../components/StyledButton";
 
 export const RoomPage = () => {
+  const { roomId } = useParams();
+
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (!roomId) {
+      enqueueSnackbar("Invalid room ID", {
+        variant: "error",
+        key: "missing-room",
+      });
+      navigate("/select-difficulty");
+      return;
+    }
+  }, [roomId, navigate, enqueueSnackbar]);
+
   return (
     <Grid
       container
@@ -58,6 +77,7 @@ export const RoomPage = () => {
           </Grid>
         </Stack>
       </Grid>
+      <div>{roomId}</div>;
     </Grid>
   );
 };

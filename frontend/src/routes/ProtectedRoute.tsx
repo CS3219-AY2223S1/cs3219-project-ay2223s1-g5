@@ -17,7 +17,6 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
         // Prevent double snackbar during development caused by
         // React.StrictMode's double invocation
         key: "unauthorized",
-        preventDuplicate: true,
       });
       navigate("/");
     }
