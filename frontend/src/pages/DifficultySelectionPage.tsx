@@ -71,7 +71,9 @@ export const DifficultySelectionPage = () => {
         <Grid container sx={{ justifyContent: "flex-end" }}>
           <StyledButton
             label="Match Me!"
-            onClick={() => navigate("/matching")}
+            onClick={() =>
+              navigate(`/matching?difficulty=${selectedDifficulty}`)
+            }
             disabled={selectedDifficulty === null}
           />
         </Grid>
