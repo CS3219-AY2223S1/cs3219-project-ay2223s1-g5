@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Avatar, Divider, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Avatar, Divider, Grid, Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 
 import { useSocket } from "src/contexts/WsContext";
@@ -51,12 +51,11 @@ export const RoomPage = () => {
     }
     socket.emit("join", roomId);
 
-    socket.on(ROOM_EVENTS.END_MATCH, () => {
-      setMessage("The other user has left the room. Ending match...");
-      setTimeout(() => navigate("/dashboard"), 3000);
+    socket.on(ROOM_EVENTS.PARTNER_LEAVE, () => {
+      setMessage("The other user has left the room.");
     });
 
-    socket.on(ROOM_EVENTS.WAIT, () => {
+    socket.on(ROOM_EVENTS.PARTNER_DISCONNECT, () => {
       setMessage(
         "The other user has disconnected. Waiting for reconnection...",
       );
@@ -98,6 +97,8 @@ export const RoomPage = () => {
                 bgcolor: "primary.A700",
               }}
             />
+            {/* TODO: Display message in snackbar */}
+            <Typography>{message}</Typography>
           </Stack>
           <StyledButton
             label={"Leave Room"}
@@ -123,8 +124,6 @@ export const RoomPage = () => {
           </Grid>
         </Stack>
       </Grid>
-      <div>{roomId}</div>
-      <div>{message}</div>
     </Grid>
   );
 };

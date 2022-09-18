@@ -30,7 +30,7 @@ export class MatchGateway {
   ) {}
 
   @SubscribeMessage(MATCH_EVENTS.ENTER_QUEUE)
-  async handlefind(
+  async handleFind(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
   ) {

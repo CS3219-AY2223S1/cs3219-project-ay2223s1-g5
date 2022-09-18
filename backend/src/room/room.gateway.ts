@@ -2,6 +2,7 @@ import { UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -17,7 +18,7 @@ import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
 
 @UseGuards(WsAuthGuard)
 @WebSocketGateway({ namespace: ROOM_NAMESPACE })
-export class RoomGateway {
+export class RoomGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server: Namespace;
 
@@ -35,10 +36,12 @@ export class RoomGateway {
     this.logger.info(`Joining room: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
-    if (await this.roomService.getRoom(userId)) {
-      this.server.to(roomId).emit(ROOM_EVENTS.RECONNECTED);
+    if (!(await this.roomService.getRoom(userId))) {
+      this.logger.error(`User ${userId} should not be in room`);
+      throw new Error(`User ${userId} should not be in room`);
     }
 
+    this.server.to(roomId).emit(ROOM_EVENTS.RECONNECTED);
     client.join(roomId);
   }
 
@@ -49,20 +52,17 @@ export class RoomGateway {
   ) {
     const userId = Number(client.handshake.headers.authorization);
     this.logger.info(`${userId} left rooom`);
-    this.server.to(roomId).emit(ROOM_EVENTS.END_MATCH);
-
-    // Remove mappings stored in redis
-    await this.roomService.removeRoom(roomId);
+    this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_LEAVE);
+    await this.roomService.removeUser(userId, roomId);
   }
 
-  @SubscribeMessage(ROOM_EVENTS.DISCONNECT)
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
     const roomId = await this.roomService.getRoom(userId);
     if (roomId) {
-      this.server.to(roomId).emit(ROOM_EVENTS.WAIT);
+      this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_DISCONNECT);
     }
   }
 }

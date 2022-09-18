@@ -33,17 +33,24 @@ export class RoomService {
     return roomId;
   }
 
-  async removeRoom(roomId: string): Promise<void> {
-    this.logger.info(`Removing room ${roomId}`);
-    const users = await this.redisService.getSet(
+  async removeUser(userId: number, roomId: string): Promise<void> {
+    this.logger.info(`Removing user ${userId} from room ${roomId}`);
+    await this.redisService.deleteKey(
+      [RoomService.NAMESPACE],
+      userId.toString(),
+    );
+    await this.redisService.deleteFromSet(
       [RoomService.NAMESPACE],
       roomId,
+      userId.toString(),
     );
 
-    await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
-
-    for (const user of users) {
-      await this.redisService.deleteKey([RoomService.NAMESPACE], user);
+    if (
+      (await this.redisService.getSetSize([RoomService.NAMESPACE], roomId)) ===
+      0
+    ) {
+      this.logger.info(`No more user in room ${roomId}`);
+      await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
     }
   }
 
