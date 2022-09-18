@@ -50,7 +50,7 @@ export class MatchService {
       return null;
     }
 
-    await this.removeFromQueue(difficultyLevel, matchedUserId);
+    await this.removeFromQueue(matchedUserId);
 
     this.logger.info(`${userId} and ${matchedUserId} matched`);
     const roomId = await this.roomService.createRoom([userId, matchedUserId]);
@@ -70,6 +70,11 @@ export class MatchService {
     socketId: string,
   ): Promise<string | null> {
     this.logger.info(`${userId} added to queue`);
+    await this.redisService.setKey(
+      [MatchService.NAMESPACE],
+      userId.toString(),
+      difficultyLevel,
+    );
     return this.redisService.setKey(
       [MatchService.NAMESPACE, difficultyLevel],
       userId.toString(),
@@ -78,10 +83,21 @@ export class MatchService {
     );
   }
 
-  async removeFromQueue(
-    difficultyLevel: string,
-    userId: number,
-  ): Promise<void> {
+  async removeFromQueue(userId: number): Promise<void> {
+    const difficultyLevel = await this.redisService.getValue(
+      [MatchService.NAMESPACE],
+      userId.toString(),
+    );
+
+    await this.redisService.deleteKey(
+      [MatchService.NAMESPACE],
+      userId.toString(),
+    );
+
+    if (!difficultyLevel) {
+      return;
+    }
+
     const result = await this.redisService.deleteKey(
       [MatchService.NAMESPACE, difficultyLevel],
       userId.toString(),

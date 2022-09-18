@@ -43,6 +43,11 @@ export class RoomGateway implements OnGatewayDisconnect {
 
     this.server.to(roomId).emit(ROOM_EVENTS.RECONNECTED);
     client.join(roomId);
+
+    // TODO: Remove
+    client.on("disconnect", (reason: string) => {
+      console.log(`User disconnected because ${reason}`);
+    });
   }
 
   @SubscribeMessage(ROOM_EVENTS.LEAVE)

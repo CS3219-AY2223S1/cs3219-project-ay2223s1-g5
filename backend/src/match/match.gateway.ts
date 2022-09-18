@@ -2,6 +2,7 @@ import { UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -18,7 +19,7 @@ import { MATCH_EVENTS, MATCH_NAMESPACE } from "~shared/constants";
 
 @UseGuards(WsAuthGuard)
 @WebSocketGateway({ namespace: MATCH_NAMESPACE })
-export class MatchGateway {
+export class MatchGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server: Namespace;
 
@@ -38,7 +39,7 @@ export class MatchGateway {
     const userId = Number(client.handshake.headers.authorization);
     const existingRoom = await this.roomService.getRoom(userId);
     if (existingRoom) {
-      client.emit(MATCH_EVENTS.EXISTING_MATCH, existingRoom);
+      this.server.to(client.id).emit(MATCH_EVENTS.EXISTING_MATCH, existingRoom);
       return;
     }
 
@@ -48,9 +49,6 @@ export class MatchGateway {
   async handleQueue(client: Socket, difficultyLevel: string): Promise<void> {
     this.logger.info(`Joining queue: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
-    client.on(MATCH_EVENTS.DISCONNECT, () => {
-      this.handleDisconnect(client, difficultyLevel);
-    });
 
     const match = await this.matchService.searchMatch(
       userId,
@@ -63,15 +61,13 @@ export class MatchGateway {
     }
 
     for (const user of match.result) {
-      this.server.sockets
-        .get(user.socketId)
-        ?.emit(MATCH_EVENTS.MATCH_FOUND, match);
+      this.server.to(user.socketId).emit(MATCH_EVENTS.MATCH_FOUND, match);
     }
   }
 
-  async handleDisconnect(client: Socket, difficultyLevel: string) {
-    this.logger.info(`Websocket disconnected: ${client.id} ${difficultyLevel}`);
+  async handleDisconnect(client: Socket) {
+    this.logger.info(`Websocket disconnected: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
-    await this.matchService.removeFromQueue(difficultyLevel, userId);
+    await this.matchService.removeFromQueue(userId);
   }
 }

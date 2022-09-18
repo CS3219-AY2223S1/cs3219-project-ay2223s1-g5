@@ -49,7 +49,8 @@ export const RoomPage = () => {
     if (!socket || !roomId) {
       return;
     }
-    socket.emit("join", roomId);
+
+    socket.emit(ROOM_EVENTS.JOIN, roomId);
 
     socket.on(ROOM_EVENTS.PARTNER_LEAVE, () => {
       setMessage("The other user has left the room.");
@@ -61,7 +62,7 @@ export const RoomPage = () => {
       );
     });
 
-    socket.on("reconnected", () => {
+    socket.on(ROOM_EVENTS.RECONNECTED, () => {
       setMessage("");
     });
   }, [socket, roomId, navigate]);
