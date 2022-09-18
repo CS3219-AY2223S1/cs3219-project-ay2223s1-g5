@@ -5,7 +5,9 @@ import { Observable } from "rxjs";
 import { Socket } from "socket.io";
 
 import { ConfigService } from "src/core/config/config.service";
+import { RedisService } from "src/redis/redis.service";
 
+import { JWT_NAMESPACE } from "./auth.controller";
 import { JwtPayload } from "./auth.service";
 
 import { JWT_COOKIE_NAME } from "~shared/constants";
@@ -13,19 +15,28 @@ import { JWT_COOKIE_NAME } from "~shared/constants";
 @Injectable()
 export class WsAuthGuard implements CanActivate {
   private readonly secret: string;
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
+  ) {
     this.secret = configService.get("jwt.secret");
   }
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient<Socket>();
     if (!client.handshake.headers.cookie) {
       return false;
     }
     const cookies = parse(client.handshake.headers.cookie);
     if (!cookies[JWT_COOKIE_NAME]) {
+      return false;
+    }
+    if (
+      await this.redisService.getValue(
+        [JWT_NAMESPACE],
+        cookies[JWT_COOKIE_NAME],
+      )
+    ) {
       return false;
     }
     try {

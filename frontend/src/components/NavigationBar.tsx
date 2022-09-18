@@ -13,6 +13,7 @@ import {
   ListItem,
 } from "@mui/material";
 
+import { useAuth } from "src/contexts/AuthContext";
 import {
   DisplayedNavigationBarRoutes,
   HiddenNavigationBarRoutes,
@@ -20,8 +21,18 @@ import {
 
 import { NavigationButton } from "./NavigationButton";
 
+const nameToInitials = (name: string | undefined) => {
+  if (!name) {
+    return " ";
+  }
+  const firstLetter = name.split(" ")[0][0];
+  const secondLetter = name.split(" ")[1]?.[0];
+  return `${firstLetter}${secondLetter ?? ""}`;
+};
+
 export const NavigationBar = () => {
   const [expanded, setExpanded] = useState<boolean>(false);
+  const { user, logout } = useAuth();
 
   const handleChange = () => {
     setExpanded(!expanded);
@@ -37,7 +48,9 @@ export const NavigationBar = () => {
               height: "48px",
               bgcolor: "primary.A700",
             }}
-          />
+          >
+            {nameToInitials(user?.name)}
+          </Avatar>
         </IconButton>
         <Accordion expanded={expanded} sx={{ boxShadow: "none" }}>
           <AccordionSummary
@@ -80,7 +93,11 @@ export const NavigationBar = () => {
                 </NavLink>
               ))}
               <ListItem key={"Logout"} disablePadding>
-                <NavigationButton Icon={Logout} buttonDescription={"Logout"} />
+                <NavigationButton
+                  Icon={Logout}
+                  buttonDescription={"Logout"}
+                  onClick={logout}
+                />
               </ListItem>
             </List>
           </AccordionDetails>

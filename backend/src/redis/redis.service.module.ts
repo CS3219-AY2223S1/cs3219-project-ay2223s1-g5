@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
@@ -6,6 +6,7 @@ import { CoreModule } from "src/core/core.module";
 
 import { RedisService } from "./redis.service";
 
+@Global()
 @Module({
   imports: [CoreModule],
   providers: [
