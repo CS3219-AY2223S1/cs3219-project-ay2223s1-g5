@@ -21,6 +21,19 @@ export const useLogin = () => {
   };
 };
 
+export const useLogout = () => {
+  const logout = async () => {
+    const result = await ApiService.delete<LoginRes>(`/sessions`);
+    return result;
+  };
+  const { isLoading: isLogoutLoading, mutateAsync: logoutMutation } =
+    useMutation(logout);
+  return {
+    logoutMutation,
+    isLogoutLoading,
+  };
+};
+
 export const useVerifyEmail = () => {
   const verifyEmail = async (input: VerifyEmailReq) => {
     await ApiService.patch<void>(`/users/verifications`, input);
