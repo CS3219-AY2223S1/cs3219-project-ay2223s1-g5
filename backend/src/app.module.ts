@@ -8,6 +8,9 @@ import { MatchModule } from "src/match/match.module";
 import { UserModule } from "src/user/user.module";
 import { VerificationModule } from "src/verification/verification.module";
 
+import { PrismaServiceModule } from "./core/prisma.service.module";
+import { RedisServiceModule } from "./redis/redis.service.module";
+import { RoomModule } from "./room/room.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 
@@ -38,10 +41,13 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
         },
       },
     }),
+    RedisServiceModule,
+    PrismaServiceModule,
     UserModule,
     AuthModule,
     VerificationModule,
     MatchModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   InternalServerErrorException,
   Post,
@@ -16,12 +17,17 @@ import {
 import { verify } from "jsonwebtoken";
 
 import { ConfigService } from "src/core/config/config.service";
+import { RedisService } from "src/redis/redis.service";
 
 import { AuthService, JwtPayload } from "./auth.service";
+import { JwtAuthGuard } from "./jwt.guard";
 import { LocalAuthGuard } from "./local.guard";
 
 import { JWT_COOKIE_NAME } from "~shared/constants";
 import { LoginRes } from "~shared/types/api";
+
+export const JWT_NAMESPACE = "JWT_INVALIDATION";
+export const INVALID_FLAG = "INVALID";
 
 @Controller()
 export class AuthController {
@@ -30,6 +36,7 @@ export class AuthController {
   constructor(
     private service: AuthService,
     private configService: ConfigService,
+    private redisService: RedisService,
   ) {
     this.secret = configService.get("jwt.secret");
   }
@@ -57,6 +64,15 @@ export class AuthController {
       res.json();
       return;
     }
+    if (
+      await this.redisService.getValue(
+        [JWT_NAMESPACE],
+        req.cookies[JWT_COOKIE_NAME],
+      )
+    ) {
+      res.json();
+      return;
+    }
     // We perform the validation manually to prevent throwing 401 error.
     try {
       const payload = verify(req.cookies[JWT_COOKIE_NAME], this.secret, {
@@ -70,6 +86,21 @@ export class AuthController {
       // Token is invalid or expired.
       res.json();
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete("sessions")
+  async logout(
+    @Request() req: ExpressRequest,
+    @Response() res: ExpressResponse,
+  ) {
+    await this.redisService.setKey(
+      [JWT_NAMESPACE],
+      req.cookies[JWT_COOKIE_NAME],
+      INVALID_FLAG,
+      this.configService.get("jwt.validity"),
+    );
+    res.clearCookie(JWT_COOKIE_NAME).send();
   }
 
   private sendJwtPayload(

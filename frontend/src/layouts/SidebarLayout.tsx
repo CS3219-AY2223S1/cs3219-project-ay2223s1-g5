@@ -11,7 +11,7 @@ export const SidebarLayout = () => {
         sx={{
           minWidth: "200px",
           width: "200px",
-          backgroundColor: "blueGrey.50",
+          bgcolor: "blueGrey.50",
         }}
       >
         <NavigationBar />
