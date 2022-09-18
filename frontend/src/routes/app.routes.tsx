@@ -59,7 +59,7 @@ export const AppRoutes: RouteObject[] = [
             ),
           },
           {
-            path: "room",
+            path: "room/:roomId",
             element: (
               <SocketProvider>
                 <RoomPage />

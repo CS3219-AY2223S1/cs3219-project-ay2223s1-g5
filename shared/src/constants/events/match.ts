@@ -2,7 +2,7 @@ import { BASE_EVENTS } from "./base";
 
 export const MATCH_EVENTS = {
   ENTER_QUEUE: "find",
-  LEAVE_QUEUE: "leave",
   MATCH_FOUND: "found",
+  EXISTING_MATCH: "existingMatch",
   ...BASE_EVENTS,
 };

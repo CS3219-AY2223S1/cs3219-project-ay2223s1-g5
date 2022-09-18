@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RedisService } from "src/redis/redis.service";
+import { RoomService } from "src/room/room.service";
 
 type Match = {
   roomId: string;
@@ -18,6 +18,7 @@ export class MatchService {
     @InjectPinoLogger()
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
+    private readonly roomService: RoomService,
   ) {}
 
   // TODO: Prevent users from matching themselves if they have multiple tabs open
@@ -33,7 +34,7 @@ export class MatchService {
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
     if (matchedUsers.length === 0) {
-      await this.addUserToQueue(namespaces, userId, socketId);
+      await this.addUserToQueue(difficultyLevel, userId, socketId);
       return null;
     }
 
@@ -45,39 +46,67 @@ export class MatchService {
     );
 
     if (!matchedUserSocketId) {
-      await this.addUserToQueue(namespaces, userId, socketId);
+      await this.addUserToQueue(difficultyLevel, userId, socketId);
       return null;
     }
 
-    await this.removeFromQueue(namespaces, matchedUserId);
+    await this.removeFromQueue(matchedUserId);
 
     this.logger.info(`${userId} and ${matchedUserId} matched`);
+    const roomId = await this.roomService.createRoom([userId, matchedUserId]);
     const matchResult = [
       { userId, socketId },
       { userId: matchedUserId, socketId: matchedUserSocketId },
     ];
     return {
-      roomId: nanoid(),
+      roomId,
       result: matchResult,
     } as Match;
   }
 
   async addUserToQueue(
-    namespaces: string[],
+    difficultyLevel: string,
     userId: number,
     socketId: string,
   ): Promise<string | null> {
     this.logger.info(`${userId} added to queue`);
+    await this.redisService.setKey(
+      [MatchService.NAMESPACE],
+      userId.toString(),
+      difficultyLevel,
+    );
     return this.redisService.setKey(
-      namespaces,
+      [MatchService.NAMESPACE, difficultyLevel],
       userId.toString(),
       socketId,
       MatchService.EXPIRATION_TIME,
     );
   }
 
-  async removeFromQueue(namespaces: string[], userId: number) {
-    this.logger.info(`${userId} removed from queue`);
-    return await this.redisService.deleteKey(namespaces, userId.toString());
+  async removeFromQueue(userId: number): Promise<void> {
+    const difficultyLevel = await this.redisService.getValue(
+      [MatchService.NAMESPACE],
+      userId.toString(),
+    );
+
+    await this.redisService.deleteKey(
+      [MatchService.NAMESPACE],
+      userId.toString(),
+    );
+
+    if (!difficultyLevel) {
+      return;
+    }
+
+    const result = await this.redisService.deleteKey(
+      [MatchService.NAMESPACE, difficultyLevel],
+      userId.toString(),
+    );
+    if (result === 0) {
+      this.logger.info(`${userId} not in queue`);
+    } else {
+      this.logger.info(`${userId} removed from queue`);
+    }
+    return;
   }
 }

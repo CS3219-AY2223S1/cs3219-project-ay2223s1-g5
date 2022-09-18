@@ -11,7 +11,10 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <SnackbarProvider anchorOrigin={{ horizontal: "center", vertical: "top" }}>
+    <SnackbarProvider
+      anchorOrigin={{ horizontal: "center", vertical: "top" }}
+      preventDuplicate={true}
+    >
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools initialIsOpen={false} />
         <AuthProvider>{useRoutes(AppRoutes)}</AuthProvider>

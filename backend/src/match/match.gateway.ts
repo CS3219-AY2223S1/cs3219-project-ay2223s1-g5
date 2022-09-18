@@ -2,6 +2,7 @@ import { UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -10,6 +11,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
 import { WsAuthGuard } from "src/auth/ws.guard";
+import { RoomService } from "src/room/room.service";
 
 import { MatchService } from "./match.service";
 
@@ -17,14 +19,15 @@ import { MATCH_EVENTS, MATCH_NAMESPACE } from "~shared/constants";
 
 @UseGuards(WsAuthGuard)
 @WebSocketGateway({ namespace: MATCH_NAMESPACE })
-export class MatchGateway {
+export class MatchGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server: Namespace;
 
   constructor(
     @InjectPinoLogger()
     private readonly logger: PinoLogger,
-    private readonly service: MatchService,
+    private readonly matchService: MatchService,
+    private readonly roomService: RoomService,
   ) {}
 
   @SubscribeMessage(MATCH_EVENTS.ENTER_QUEUE)
@@ -34,7 +37,21 @@ export class MatchGateway {
   ): Promise<void> {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
-    const match = await this.service.searchMatch(
+    const existingRoom = await this.roomService.getRoom(userId);
+    if (existingRoom) {
+      this.logger.info(`Existing room found: ${existingRoom}`);
+      client.emit(MATCH_EVENTS.EXISTING_MATCH, existingRoom);
+      return;
+    }
+
+    await this.handleQueue(client, difficultyLevel);
+  }
+
+  async handleQueue(client: Socket, difficultyLevel: string): Promise<void> {
+    this.logger.info(`Joining queue: ${client.id}`);
+    const userId = Number(client.handshake.headers.authorization);
+
+    const match = await this.matchService.searchMatch(
       userId,
       difficultyLevel,
       client.id,
@@ -44,17 +61,14 @@ export class MatchGateway {
       return;
     }
 
-    // Get sockets by ID and let them join the same room
     for (const user of match.result) {
-      this.server.sockets.get(user.socketId)?.join(match.roomId);
+      this.server.to(user.socketId).emit(MATCH_EVENTS.MATCH_FOUND, match);
     }
-
-    this.server.to(match.roomId).emit(MATCH_EVENTS.MATCH_FOUND, match);
   }
 
-  @SubscribeMessage(MATCH_EVENTS.DISCONNECT)
-  handleDisconnect(@ConnectedSocket() client: Socket) {
+  async handleDisconnect(client: Socket) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
-    // TODO: Call service.
+    const userId = Number(client.handshake.headers.authorization);
+    await this.matchService.removeFromQueue(userId);
   }
 }
