@@ -14,9 +14,6 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     if (!user) {
       enqueueSnackbar("Unauthorized", {
         variant: "error",
-        // Prevent double snackbar during development caused by
-        // React.StrictMode's double invocation
-        key: "unauthorized",
       });
       navigate("/");
     }

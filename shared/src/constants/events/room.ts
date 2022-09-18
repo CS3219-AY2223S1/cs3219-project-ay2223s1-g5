@@ -1,7 +1,7 @@
 import { BASE_EVENTS } from "./base";
 
 export const ROOM_EVENTS = {
-  RECONNECTED: "reconnected",
+  JOINED: "reconnected",
   LEAVE: "leave",
   JOIN: "join",
   PARTNER_LEAVE: "partnerLeave",

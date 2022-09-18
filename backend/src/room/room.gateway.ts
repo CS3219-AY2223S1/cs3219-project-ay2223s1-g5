@@ -15,6 +15,7 @@ import { WsAuthGuard } from "src/auth/ws.guard";
 import { RoomService } from "./room.service";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
+import { JoinedPayload, JoinPayload, LeavePayload } from "~shared/types/api";
 
 @UseGuards(WsAuthGuard)
 @WebSocketGateway({ namespace: ROOM_NAMESPACE })
@@ -31,29 +32,32 @@ export class RoomGateway implements OnGatewayDisconnect {
   @SubscribeMessage(ROOM_EVENTS.JOIN)
   async handleJoin(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
+    @MessageBody() { roomId }: JoinPayload,
   ) {
-    this.logger.info(`Joining room ${roomId}: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
+    try {
+      const members = await this.roomService.joinRoom(userId, roomId);
+      const payload: JoinedPayload = {
+        userId,
+        members,
+      };
 
-    if (!(await this.roomService.getRoom(userId))) {
-      this.logger.error(`User ${userId} should not be in room`);
-      throw new Error(`User ${userId} should not be in room`);
+      await client.join(roomId);
+      this.server.to(roomId).emit(ROOM_EVENTS.JOINED, payload);
+    } catch (e: unknown) {
+      client.disconnect();
     }
-
-    this.server.to(roomId).emit(ROOM_EVENTS.RECONNECTED);
-    client.join(roomId);
   }
 
   @SubscribeMessage(ROOM_EVENTS.LEAVE)
   async handleLeave(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomId: string,
+    @MessageBody() { roomId }: LeavePayload,
   ) {
     const userId = Number(client.handshake.headers.authorization);
-    this.logger.info(`${userId} left rooom`);
-    this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_LEAVE);
-    await this.roomService.removeUser(userId, roomId);
+    await this.roomService.leaveRoom(userId, roomId);
+    this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_LEAVE, userId);
+    client.disconnect();
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
@@ -62,7 +66,8 @@ export class RoomGateway implements OnGatewayDisconnect {
 
     const roomId = await this.roomService.getRoom(userId);
     if (roomId) {
-      this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_DISCONNECT);
+      await this.roomService.disconnectRoom(userId, roomId);
+      this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_DISCONNECT, userId);
     }
   }
 }

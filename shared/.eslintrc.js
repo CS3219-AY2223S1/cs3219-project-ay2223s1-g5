@@ -29,7 +29,7 @@ module.exports = {
       "error",
       {
         multiline: {
-          delimiter: "none",
+          delimiter: "semi",
           requireLast: true,
         },
         singleline: {

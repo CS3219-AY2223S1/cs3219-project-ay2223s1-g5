@@ -21,7 +21,7 @@ import {
 
 import { NavigationButton } from "./NavigationButton";
 
-const nameToInitials = (name: string | undefined) => {
+export const nameToInitials = (name: string | undefined) => {
   if (!name) {
     return " ";
   }
