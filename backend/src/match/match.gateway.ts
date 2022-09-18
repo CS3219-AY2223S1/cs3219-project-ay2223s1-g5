@@ -34,12 +34,13 @@ export class MatchGateway implements OnGatewayDisconnect {
   async handleFind(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
-  ) {
+  ): Promise<void> {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
     const existingRoom = await this.roomService.getRoom(userId);
     if (existingRoom) {
-      this.server.to(client.id).emit(MATCH_EVENTS.EXISTING_MATCH, existingRoom);
+      this.logger.info(`Existing room found: ${existingRoom}`);
+      client.emit(MATCH_EVENTS.EXISTING_MATCH, existingRoom);
       return;
     }
 

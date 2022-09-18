@@ -33,7 +33,7 @@ export class RoomGateway implements OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() roomId: string,
   ) {
-    this.logger.info(`Joining room: ${client.id}`);
+    this.logger.info(`Joining room ${roomId}: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
     if (!(await this.roomService.getRoom(userId))) {
@@ -43,11 +43,6 @@ export class RoomGateway implements OnGatewayDisconnect {
 
     this.server.to(roomId).emit(ROOM_EVENTS.RECONNECTED);
     client.join(roomId);
-
-    // TODO: Remove
-    client.on("disconnect", (reason: string) => {
-      console.log(`User disconnected because ${reason}`);
-    });
   }
 
   @SubscribeMessage(ROOM_EVENTS.LEAVE)

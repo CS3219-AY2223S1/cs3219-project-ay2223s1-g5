@@ -46,6 +46,7 @@ export const WaitingPage = () => {
   const [userOne, setUserOne] = useState<number | undefined>(undefined);
   const [userTwo, setUserTwo] = useState<number | undefined>(undefined);
   const [roomId, setRoomId] = useState<string | undefined>(undefined);
+  const [pageTimeout, setPageTimeout] = useState<number | undefined>(undefined);
   const { user: userNameOne } = useGetUserName(userOne);
   const { user: userNameTwo } = useGetUserName(userTwo);
 
@@ -82,29 +83,21 @@ export const WaitingPage = () => {
   }, [socket]);
 
   useEffect(() => {
-    // FIXME: If the socket disconnects from a connected state,
-    // we should fail the search and return the user to the dashboard.
-    if (!connected || !socket) {
+    if (!socket || !pageTimeout || !connected) {
       return;
     }
-    setMessage("Finding a match...");
-
-    setTimeout(() => {
-      setMessage("Unable to find a match. Returning to dashboard.");
-      // TODO: Stop the loading spinner or change its color.
-      // We give the user some time to read the message.
-      setTimeout(() => navigate("/dashboard"), 3000);
-    }, 30000);
 
     socket.on(MATCH_EVENTS.MATCH_FOUND, (match: MatchRes) => {
       setUserOne(match.result[0].userId);
       setUserTwo(match.result[1].userId);
       setRoomId(match.roomId);
+      clearTimeout(pageTimeout);
       setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
     });
 
     socket.on(MATCH_EVENTS.EXISTING_MATCH, (roomId: string) => {
       setMessage("Exsiting match found. Joining back...");
+      clearTimeout(pageTimeout);
       setTimeout(() => navigate(`/room/${roomId}`), 1000);
     });
 
@@ -113,7 +106,24 @@ export const WaitingPage = () => {
     return () => {
       socket.off(MATCH_EVENTS.MATCH_FOUND);
     };
-  }, [connected, navigate, roomId, socket, difficulty]);
+  }, [socket, pageTimeout, navigate, difficulty, connected]);
+
+  useEffect(() => {
+    // FIXME: If the socket disconnects from a connected state,
+    // we should fail the search and return the user to the dashboard.
+    if (!connected || !socket) {
+      return;
+    }
+    setMessage("Finding a match...");
+
+    const timeout = setTimeout(() => {
+      setMessage("Unable to find a match. Returning to dashboard.");
+      // TODO: Stop the loading spinner or change its color.
+      // We give the user some time to read the message.
+      setTimeout(() => navigate("/dashboard"), 3000);
+    }, 30000);
+    setPageTimeout(timeout);
+  }, [connected, navigate, socket]);
 
   return (
     <Stack
