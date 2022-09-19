@@ -21,7 +21,6 @@ export class MatchService {
     private readonly roomService: RoomService,
   ) {}
 
-  // TODO: Prevent users from matching themselves if they have multiple tabs open
   async searchMatch(
     userId: number,
     difficultyLevel: string,
@@ -33,13 +32,16 @@ export class MatchService {
     const namespaces = [MatchService.NAMESPACE, difficultyLevel];
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
+    if (this.isUserInQueue(matchedUsers, userId)) {
+      return null;
+    }
+
     if (matchedUsers.length === 0) {
       await this.addUserToQueue(difficultyLevel, userId, socketId);
       return null;
     }
 
-    const matchedArr = matchedUsers[0].split(":");
-    const matchedUserId = Number(matchedArr[matchedArr.length - 1]);
+    const matchedUserId = this.getUserId(matchedUsers[0]);
     const matchedUserSocketId = await this.redisService.getValue(
       namespaces,
       matchedUserId.toString(),
@@ -62,6 +64,17 @@ export class MatchService {
       roomId,
       result: matchResult,
     } as Match;
+  }
+
+  getUserId(matchedUser: string): number {
+    const arr = matchedUser.split(":");
+    return Number(arr[arr.length - 1]);
+  }
+
+  isUserInQueue(matchedUsers: string[], userId: number): boolean {
+    return matchedUsers.some(
+      (matchedUser: string) => this.getUserId(matchedUser) === userId,
+    );
   }
 
   async addUserToQueue(
