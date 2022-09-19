@@ -20,7 +20,7 @@
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
     "test:wait-for": "./wait-for localhost:5432 -- echo \"Database is ready for connections\" && sleep 3;",
     "test:full": "npm run test:setup && npm run test; npm run test:teardown",
-    "test:setup": "docker compose -f docker-compose.test.yml up -d && npm run test:wait-for && npx prisma migrate deploy",
+    "test:setup": "docker compose -f docker-compose.test.yml up -d && npm run test:wait-for && npx prisma migrate deploy && npx prisma generate",
     "test": "jest -i",
     "test:teardown": "docker compose -f docker-compose.test.yml down",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
