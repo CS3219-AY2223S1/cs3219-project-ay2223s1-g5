@@ -14,11 +14,15 @@ export class ResetPasswordService {
   ) {}
 
   async sendResetPasswordEmail(email: string) {
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userService.getByEmail(email.toLowerCase());
     if (!user) {
       throw new EntityNotFoundError("User not found.");
     }
-    return this.twilioService.sendResetPasswordEmail(email, user.id, user.name);
+    return this.twilioService.sendResetPasswordEmail(
+      user.email,
+      user.id,
+      user.name,
+    );
   }
 
   async resetPassword(

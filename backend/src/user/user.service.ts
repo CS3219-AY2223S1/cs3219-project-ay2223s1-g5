@@ -17,7 +17,9 @@ export class UserService {
   }
 
   async getByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { email: email } });
+    return this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
   }
 
   async create(data: {
@@ -25,11 +27,13 @@ export class UserService {
     name: string;
     password: string;
   }): Promise<User | null> {
+    const lowercaseEmail = data.email.toLowerCase();
     const hashedPassword = await hash(data.password, SALT_ROUNDS);
     try {
       return await this.prisma.user.create({
         data: {
           ...data,
+          email: lowercaseEmail,
           password: hashedPassword,
         },
       });
