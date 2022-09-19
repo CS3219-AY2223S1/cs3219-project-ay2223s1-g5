@@ -24,7 +24,7 @@ export const DifficultySelectionPage = () => {
           sx={{ fontWeight: "bold", textAlign: "center" }}
           variant="h6"
         >
-          Please select difficulty
+          Please select a difficulty
         </Typography>
         <Stack direction="row" spacing={3}>
           <StyledButton
