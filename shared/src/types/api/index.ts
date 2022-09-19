@@ -1,6 +1,12 @@
 export { LoginReq, LoginRes, VerifyEmailReq } from "./auth.dto";
 export { MatchRes } from "./match.dto";
-export * from "./room.dto";
+export {
+  JoinedPayload,
+  JoinPayload,
+  LeavePayload,
+  PartnerDisconnectPayload,
+  PartnerLeavePayload,
+} from "./room.dto";
 export {
   CreateUserReq,
   GetUserNameRes,

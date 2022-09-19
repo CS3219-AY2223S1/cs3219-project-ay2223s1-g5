@@ -1,4 +1,4 @@
-export const SOCKET_IO_DISCONNECT_REASION = {
+export const SOCKET_IO_DISCONNECT_REASON = {
   SERVER_CLOSE: "io server disconnect",
   CLIENT_CLOSE: "io client disconnect",
   TIMEOUT: "ping timeout",

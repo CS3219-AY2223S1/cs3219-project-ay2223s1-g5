@@ -84,7 +84,7 @@ export const QueuePage = () => {
     });
 
     socket.on(MATCH_EVENTS.EXISTING_MATCH, (roomId: string) => {
-      setMessage("Exsiting match found. Rejoining...");
+      setMessage("Existing match found. Rejoining...");
       clearTimeout(timeout);
       setTimeout(() => navigate(`/room/${roomId}`), 1000);
     });
