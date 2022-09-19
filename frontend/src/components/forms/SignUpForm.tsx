@@ -58,8 +58,13 @@ export const SignUpForm = (props: SignUpFormProps) => {
           defaultValue={""}
           rules={{
             required: "Email is required.",
-            validate: (value: string) =>
-              validate(value) || "Please enter a valid email",
+            validate: {
+              isValidEmail: (email: string) =>
+                validate(email) || "Please enter a valid email",
+              isLowerCase: (email: string) =>
+                email.toLowerCase() === email ||
+                "Please enter email in lowercase characters",
+            },
           }}
           render={({
             field: { value, onBlur, onChange: formOnChange },
