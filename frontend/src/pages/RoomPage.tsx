@@ -3,10 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Avatar, Divider, Grid, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 
-import { nameToInitials } from "src/components/NavigationBar";
+import { SOCKET_IO_DISCONNECT_REASION } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
 import { useSocket } from "src/contexts/WsContext";
 import { useGetUserName } from "src/hooks/useUsers";
+import { nameToInitials } from "src/utils/string";
 
 import { Editor } from "../components/Editor";
 import { Question } from "../components/Question";
@@ -78,7 +79,7 @@ export const RoomPage = () => {
     }
 
     socket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
-      if (reason === "io server disconnect") {
+      if (reason === SOCKET_IO_DISCONNECT_REASION.SERVER_CLOSE) {
         navigate("/dashboard");
         return;
       }
