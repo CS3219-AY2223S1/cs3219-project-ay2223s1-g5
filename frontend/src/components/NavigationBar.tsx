@@ -18,17 +18,9 @@ import {
   DisplayedNavigationBarRoutes,
   HiddenNavigationBarRoutes,
 } from "src/routes/nav.routes";
+import { nameToInitials } from "src/utils/string";
 
 import { NavigationButton } from "./NavigationButton";
-
-const nameToInitials = (name: string | undefined) => {
-  if (!name) {
-    return " ";
-  }
-  const firstLetter = name.split(" ")[0][0];
-  const secondLetter = name.split(" ")[1]?.[0];
-  return `${firstLetter}${secondLetter ?? ""}`;
-};
 
 export const NavigationBar = () => {
   const [expanded, setExpanded] = useState<boolean>(false);

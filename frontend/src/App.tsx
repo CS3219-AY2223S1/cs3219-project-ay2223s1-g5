@@ -14,6 +14,8 @@ const App = () => {
     <SnackbarProvider
       anchorOrigin={{ horizontal: "center", vertical: "top" }}
       preventDuplicate={true}
+      autoHideDuration={2000}
+      maxSnack={1}
     >
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools initialIsOpen={false} />

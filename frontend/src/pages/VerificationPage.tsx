@@ -21,9 +21,6 @@ export const VerificationPage = () => {
     if (userId === null || code === null) {
       enqueueSnackbar("Something went wrong", {
         variant: "error",
-        // Prevent double snackbar during development caused by
-        // React.StrictMode's double invocation
-        key: "error",
       });
       navigate("/");
       return;
