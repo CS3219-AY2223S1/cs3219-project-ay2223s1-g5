@@ -28,6 +28,7 @@ import {
   CreateUserReq,
   GetUserNameRes,
   RequestResetPasswordReq,
+  RequestVerifyEmailReq,
   ResetPasswordReq,
   UpdatePasswordReq,
   UpdateUserReq,
@@ -118,7 +119,7 @@ export class UserController {
 
   @Post("verifications")
   async resendVerificationEmail(
-    @Body() { email }: { email: string },
+    @Body() { email }: RequestVerifyEmailReq,
   ): Promise<void> {
     try {
       return await this.verificationService.sendVerificationEmail(email);

@@ -1,4 +1,4 @@
-export { LoginReq, LoginRes, VerifyEmailReq } from "./auth.dto";
+export { LoginReq, LoginRes } from "./auth.dto";
 export { MatchRes } from "./match.dto";
 export {
   JoinedPayload,
@@ -11,7 +11,9 @@ export {
   CreateUserReq,
   GetUserNameRes,
   RequestResetPasswordReq,
+  RequestVerifyEmailReq,
   ResetPasswordReq,
   UpdatePasswordReq,
   UpdateUserReq,
+  VerifyEmailReq,
 } from "./user.dto";
