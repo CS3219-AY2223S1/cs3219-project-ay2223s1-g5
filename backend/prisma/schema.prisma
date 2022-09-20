@@ -10,6 +10,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Language {
+  CPP
+  JAVA
+  JAVASCRIPT
+  PYTHON
+}
+
 model User {
   id           Int     @id @default(autoincrement())
   email        String  @unique
@@ -17,4 +30,45 @@ model User {
   password     String
   failedLogins Int     @default(0)
   verified     Boolean @default(false)
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  questions Question[]
+}
+
+model Topic {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  questions Question[]
+}
+
+model SolutionTemplate {
+  id         Int      @id @default(autoincrement())
+  language   Language
+  template   String
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+}
+
+model TestCases {
+  id         Int      @id @default(autoincrement())
+  inputs     String[]
+  output     String
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+}
+
+model Question {
+  id         Int                @id @default(autoincrement())
+  title      String             @unique
+  difficulty Difficulty
+  category   Category           @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  topics     Topic[]
+  question   String
+  hints      String[]
+  templates  SolutionTemplate[]
+  testcases  TestCases[]
 }
