@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { EditorService } from "src/editor/editor.service";
 import { RedisService } from "src/redis/redis.service";
 
 enum Status {
@@ -15,9 +16,10 @@ export class RoomService {
   private static readonly DELIMITER = ":";
 
   constructor(
-    @InjectPinoLogger()
+    @InjectPinoLogger(RoomService.name)
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
+    private readonly editorService: EditorService,
   ) {}
 
   async createRoom(userIds: number[]): Promise<string> {
@@ -88,12 +90,17 @@ export class RoomService {
     );
 
     if (
-      (await this.redisService.getSetSize([RoomService.NAMESPACE], roomId)) ===
-      0
+      !(await this.redisService.getSetSize([RoomService.NAMESPACE], roomId))
     ) {
-      this.logger.info(`Closing room: ${roomId}`);
-      await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
+      await this.terminateRoom(roomId);
     }
+  }
+
+  async terminateRoom(roomId: string): Promise<void> {
+    this.logger.info(`Closing room: ${roomId}`);
+    await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
+    // Document ID and room ID are the same.
+    await this.editorService.removeDocument(roomId);
   }
 
   async disconnectRoom(userId: number, roomId: string): Promise<void> {

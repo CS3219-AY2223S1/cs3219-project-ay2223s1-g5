@@ -9,6 +9,7 @@ import { UserModule } from "src/user/user.module";
 import { VerificationModule } from "src/verification/verification.module";
 
 import { PrismaServiceModule } from "./core/prisma.service.module";
+import { EditorModule } from "./editor/editor.module";
 import { RedisServiceModule } from "./redis/redis.service.module";
 import { RoomModule } from "./room/room.module";
 import { AppController } from "./app.controller";
@@ -48,6 +49,7 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     VerificationModule,
     QueueModule,
     RoomModule,
+    EditorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

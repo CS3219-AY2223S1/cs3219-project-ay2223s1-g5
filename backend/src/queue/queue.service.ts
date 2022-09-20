@@ -15,7 +15,7 @@ export class QueueService {
   private static readonly EXPIRATION_TIME = 30;
 
   constructor(
-    @InjectPinoLogger()
+    @InjectPinoLogger(QueueService.name)
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
     private readonly roomService: RoomService,
