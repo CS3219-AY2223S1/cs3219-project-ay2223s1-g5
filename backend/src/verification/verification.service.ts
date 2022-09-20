@@ -14,14 +14,14 @@ export class VerificationService {
   ) {}
 
   async sendVerificationEmail(email: string) {
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userService.getByEmail(email.toLowerCase());
     if (!user) {
       throw new EntityNotFoundError("User not found.");
     }
     if (user.verified) {
       throw new VerificationError("User already verified.");
     }
-    return this.twilioService.sendVerificationEmail(email, user.id);
+    return this.twilioService.sendVerificationEmail(user.email, user.id);
   }
 
   async checkVerificationCode(userId: number, code: string): Promise<boolean> {
