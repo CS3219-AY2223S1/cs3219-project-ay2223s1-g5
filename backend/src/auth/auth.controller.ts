@@ -84,7 +84,7 @@ export class AuthController {
       return this.sendJwtPayload(res, user, accessToken);
     } catch (e: unknown) {
       // Token is invalid or expired.
-      res.json();
+      res.clearCookie(JWT_COOKIE_NAME).json();
     }
   }
 

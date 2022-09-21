@@ -8,13 +8,11 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircularProgress, Container } from "@mui/material";
-import Cookie from "js-cookie";
 import { useSnackbar } from "notistack";
 
 import { useLogout, useWhoAmI } from "src/hooks/useAuth";
 import { ApiResponseError } from "src/services/ApiService";
 
-import { JWT_COOKIE_NAME } from "~shared/constants";
 import { LoginRes } from "~shared/types/api";
 
 type AuthContextProps = {
@@ -40,7 +38,6 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
         setUser(retrievedUser);
       } else {
         setUser(null);
-        Cookie.remove(JWT_COOKIE_NAME);
       }
     } catch (e: unknown) {
       // eslint-disable-next-line no-console
@@ -54,15 +51,15 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
   const logout = useCallback(async () => {
     try {
       await logoutMutation();
+    } catch (e: unknown) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    } finally {
       setUser(null);
       navigate("/");
       enqueueSnackbar("Logged out", {
         variant: "success",
       });
-    } catch (e: unknown) {
-      // eslint-disable-next-line no-console
-      console.error(e);
-      enqueueSnackbar((e as ApiResponseError).message);
     }
   }, [enqueueSnackbar, logoutMutation, navigate]);
 
