@@ -1,0 +1,85 @@
+name: Build and Deploy to Cloud Run
+
+on:
+  workflow_call:
+    secrets:
+      project:
+        description: "Project ID"
+        required: true
+      credentials:
+        description: "Service Account Credentials"
+        required: true
+    inputs:
+      region:
+        description: "Cloud Run Instance Region"
+        required: true
+        type: string
+      service:
+        description: "Cloud Run Service ID"
+        required: true
+        type: string
+      repository:
+        description: "GCP Artifact Registry"
+        required: true
+        type: string
+      repository-region:
+        description: "GCP Artifact Registry Region"
+        required: true
+        type: string
+      environment:
+        description: "Secrets Environment"
+        required: true
+        type: string
+      node-environment:
+        description: "Node Environment"
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: GCP Authentication
+        id: "auth"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.credentials }}"
+
+      - name: Docker Authentication
+        id: docker-auth
+        uses: "docker/login-action@v1"
+        with:
+          registry: ${{ inputs.repository-region }}-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.credentials }}
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}" ./
+          docker push "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          service: ${{ inputs.service }}
+          region: ${{ inputs.region }}
+          image: ${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}
+          env_vars: NODE_ENV=${{ inputs.node-environment }}
+          secrets: |
+            DOMAIN=DOMAIN_${{ inputs.environment }}:latest
+            DATABASE_NAME=DATABASE_NAME_${{ inputs.environment }}:latest
+            DATABASE_USERNAME=DATABASE_USERNAME_${{ inputs.environment }}:latest
+            DATABASE_PASSWORD=DATABASE_PASSWORD_${{ inputs.environment }}:latest
+            DATABASE_HOST=DATABASE_HOST_${{ inputs.environment }}:latest
+            DATABASE_PORT=DATABASE_PORT_${{ inputs.environment }}:latest
+            REDIS_URL=REDIS_URL_${{ inputs.environment }}:latest
+            JWT_SECRET=JWT_SECRET_${{ inputs.environment }}:latest
+            TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest
+            TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest
+            TWILIO_VERIFICATION_SID=TWILIO_VERIFICATION_SID:latest
+            TWILIO_RESET_PASSWORD_SID=TWILIO_RESET_PASSWORD_SID:latest
