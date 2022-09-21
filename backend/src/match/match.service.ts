@@ -66,12 +66,12 @@ export class MatchService {
     } as Match;
   }
 
-  getUserId(matchedUser: string): number {
+  private getUserId(matchedUser: string): number {
     const arr = matchedUser.split(":");
     return Number(arr[arr.length - 1]);
   }
 
-  isUserInQueue(matchedUsers: string[], userId: number): boolean {
+  private isUserInQueue(matchedUsers: string[], userId: number): boolean {
     return matchedUsers.some(
       (matchedUser: string) => this.getUserId(matchedUser) === userId,
     );
