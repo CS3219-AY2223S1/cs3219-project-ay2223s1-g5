@@ -1,2 +1,2 @@
-export const MATCH_NAMESPACE = "match";
+export const QUEUE_NAMESPACE = "queue";
 export const ROOM_NAMESPACE = "room";

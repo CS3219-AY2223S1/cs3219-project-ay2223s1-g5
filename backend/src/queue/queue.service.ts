@@ -10,8 +10,8 @@ type Match = {
 };
 
 @Injectable()
-export class MatchService {
-  private static readonly NAMESPACE = "Match";
+export class QueueService {
+  private static readonly NAMESPACE = "Queue";
   private static readonly EXPIRATION_TIME = 30;
 
   constructor(
@@ -29,7 +29,7 @@ export class MatchService {
     this.logger.info(
       `[${socketId}] Searching for match for ${userId}: ${difficultyLevel}`,
     );
-    const namespaces = [MatchService.NAMESPACE, difficultyLevel];
+    const namespaces = [QueueService.NAMESPACE, difficultyLevel];
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
     if (this.isUserInQueue(matchedUsers, userId)) {
@@ -84,26 +84,26 @@ export class MatchService {
   ): Promise<string | null> {
     this.logger.info(`${userId} added to queue`);
     await this.redisService.setKey(
-      [MatchService.NAMESPACE],
+      [QueueService.NAMESPACE],
       userId.toString(),
       difficultyLevel,
     );
     return this.redisService.setKey(
-      [MatchService.NAMESPACE, difficultyLevel],
+      [QueueService.NAMESPACE, difficultyLevel],
       userId.toString(),
       socketId,
-      MatchService.EXPIRATION_TIME,
+      QueueService.EXPIRATION_TIME,
     );
   }
 
   async removeFromQueue(userId: number): Promise<void> {
     const difficultyLevel = await this.redisService.getValue(
-      [MatchService.NAMESPACE],
+      [QueueService.NAMESPACE],
       userId.toString(),
     );
 
     await this.redisService.deleteKey(
-      [MatchService.NAMESPACE],
+      [QueueService.NAMESPACE],
       userId.toString(),
     );
 
@@ -112,7 +112,7 @@ export class MatchService {
     }
 
     const result = await this.redisService.deleteKey(
-      [MatchService.NAMESPACE, difficultyLevel],
+      [QueueService.NAMESPACE, difficultyLevel],
       userId.toString(),
     );
     if (result === 0) {

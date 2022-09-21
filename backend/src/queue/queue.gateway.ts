@@ -13,24 +13,24 @@ import { Namespace, Socket } from "socket.io";
 import { WsAuthGuard } from "src/auth/ws.guard";
 import { RoomService } from "src/room/room.service";
 
-import { MatchService } from "./match.service";
+import { QueueService } from "./queue.service";
 
-import { MATCH_EVENTS, MATCH_NAMESPACE } from "~shared/constants";
+import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
 
 @UseGuards(WsAuthGuard)
-@WebSocketGateway({ namespace: MATCH_NAMESPACE })
-export class MatchGateway implements OnGatewayDisconnect {
+@WebSocketGateway({ namespace: QUEUE_NAMESPACE })
+export class QueueGateway implements OnGatewayDisconnect {
   @WebSocketServer()
   server: Namespace;
 
   constructor(
     @InjectPinoLogger()
     private readonly logger: PinoLogger,
-    private readonly matchService: MatchService,
+    private readonly queueService: QueueService,
     private readonly roomService: RoomService,
   ) {}
 
-  @SubscribeMessage(MATCH_EVENTS.ENTER_QUEUE)
+  @SubscribeMessage(QUEUE_EVENTS.ENTER_QUEUE)
   async handleFind(
     @ConnectedSocket() client: Socket,
     @MessageBody() difficultyLevel: string,
@@ -40,7 +40,7 @@ export class MatchGateway implements OnGatewayDisconnect {
     const existingRoom = await this.roomService.getRoom(userId);
     if (existingRoom) {
       this.logger.info(`Existing room found: ${existingRoom}`);
-      client.emit(MATCH_EVENTS.EXISTING_MATCH, existingRoom);
+      client.emit(QUEUE_EVENTS.EXISTING_MATCH, existingRoom);
       return;
     }
 
@@ -51,7 +51,7 @@ export class MatchGateway implements OnGatewayDisconnect {
     this.logger.info(`Joining queue: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
 
-    const match = await this.matchService.searchMatch(
+    const match = await this.queueService.searchMatch(
       userId,
       difficultyLevel,
       client.id,
@@ -62,13 +62,13 @@ export class MatchGateway implements OnGatewayDisconnect {
     }
 
     for (const user of match.result) {
-      this.server.to(user.socketId).emit(MATCH_EVENTS.MATCH_FOUND, match);
+      this.server.to(user.socketId).emit(QUEUE_EVENTS.MATCH_FOUND, match);
     }
   }
 
   async handleDisconnect(client: Socket) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
     const userId = Number(client.handshake.headers.authorization);
-    await this.matchService.removeFromQueue(userId);
+    await this.queueService.removeFromQueue(userId);
   }
 }

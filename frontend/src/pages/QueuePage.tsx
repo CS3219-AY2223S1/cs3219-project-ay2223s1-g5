@@ -7,7 +7,7 @@ import { useSnackbar } from "notistack";
 import { Timer } from "src/components/Timer";
 import { useSocket } from "src/contexts/WsContext";
 
-import { MATCH_EVENTS, MATCH_NAMESPACE } from "~shared/constants";
+import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
 import { MatchRes } from "~shared/types/api";
 import { DifficultyLevel } from "~shared/types/base";
 
@@ -55,7 +55,7 @@ export const QueuePage = () => {
   const [message, setMessage] = useState<string>("Loading...");
 
   useEffect(() => {
-    connect(MATCH_NAMESPACE);
+    connect(QUEUE_NAMESPACE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -63,7 +63,7 @@ export const QueuePage = () => {
     if (!socket) {
       return;
     }
-    socket.on(MATCH_EVENTS.CONNECT, () => {
+    socket.on(QUEUE_EVENTS.CONNECT, () => {
       setConnected(true);
     });
     return () => {
@@ -75,7 +75,7 @@ export const QueuePage = () => {
     if (!socket || !connected) {
       return;
     }
-    socket.emit(MATCH_EVENTS.ENTER_QUEUE, difficulty?.toUpperCase());
+    socket.emit(QUEUE_EVENTS.ENTER_QUEUE, difficulty?.toUpperCase());
   }, [socket, connected, difficulty]);
 
   useEffect(() => {
@@ -98,21 +98,21 @@ export const QueuePage = () => {
 
     setMessage("Finding a match...");
 
-    socket.on(MATCH_EVENTS.MATCH_FOUND, (match: MatchRes) => {
+    socket.on(QUEUE_EVENTS.MATCH_FOUND, (match: MatchRes) => {
       setMessage("Match found. Joining...");
       clearTimeout(timeoutId);
       setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
     });
 
-    socket.on(MATCH_EVENTS.EXISTING_MATCH, (roomId: string) => {
+    socket.on(QUEUE_EVENTS.EXISTING_MATCH, (roomId: string) => {
       setMessage("Existing match found. Rejoining...");
       clearTimeout(timeoutId);
       setTimeout(() => navigate(`/room/${roomId}`), 1000);
     });
 
     return () => {
-      socket.off(MATCH_EVENTS.MATCH_FOUND);
-      socket.off(MATCH_EVENTS.EXISTING_MATCH);
+      socket.off(QUEUE_EVENTS.MATCH_FOUND);
+      socket.off(QUEUE_EVENTS.EXISTING_MATCH);
     };
   }, [socket, navigate, difficulty, connected, timeoutId]);
 
