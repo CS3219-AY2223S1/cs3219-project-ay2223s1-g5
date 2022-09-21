@@ -92,7 +92,7 @@ export const EditorProvider = ({
     setProvider(socketIOProvider);
   }, [document, provider, user, roomId, enqueueSnackbar]);
 
-  //
+  // Bind the editor to the provider.
   useEffect(() => {
     const editorModel = editor.current?.getModel();
     // We check for editorRef.current otherwise new Set([...]) will complain.

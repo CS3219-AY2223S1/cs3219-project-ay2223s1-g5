@@ -3,7 +3,6 @@ import { Outlet, RouteObject } from "react-router-dom";
 import { SocketProvider } from "src/contexts/WsContext";
 import { LandingLayout } from "src/layouts/LandingLayout";
 import { SidebarLayout } from "src/layouts/SidebarLayout";
-import { EditorPage } from "src/pages/EditorPage";
 import { LoginPage } from "src/pages/LoginPage";
 import { QueuePage } from "src/pages/QueuePage";
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
