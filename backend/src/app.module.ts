@@ -4,7 +4,7 @@ import { LoggerModule } from "nestjs-pino";
 import { join } from "path";
 
 import { AuthModule } from "src/auth/auth.module";
-import { MatchModule } from "src/match/match.module";
+import { QueueModule } from "src/queue/queue.module";
 import { UserModule } from "src/user/user.module";
 import { VerificationModule } from "src/verification/verification.module";
 
@@ -46,7 +46,7 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     UserModule,
     AuthModule,
     VerificationModule,
-    MatchModule,
+    QueueModule,
     RoomModule,
   ],
   controllers: [AppController],
