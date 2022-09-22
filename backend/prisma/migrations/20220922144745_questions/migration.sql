@@ -7,7 +7,7 @@ CREATE TYPE "Language" AS ENUM ('CPP', 'JAVA', 'JAVASCRIPT', 'PYTHON');
 -- CreateTable
 CREATE TABLE "Category" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
@@ -24,7 +24,7 @@ CREATE TABLE "Topic" (
 CREATE TABLE "SolutionTemplate" (
     "id" SERIAL NOT NULL,
     "language" "Language" NOT NULL,
-    "template" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
     "questionId" INTEGER NOT NULL,
 
     CONSTRAINT "SolutionTemplate_pkey" PRIMARY KEY ("id")
@@ -46,7 +46,7 @@ CREATE TABLE "Question" (
     "title" TEXT NOT NULL,
     "difficulty" "Difficulty" NOT NULL,
     "categoryId" INTEGER NOT NULL,
-    "question" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
     "hints" TEXT[],
 
     CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
@@ -59,7 +59,7 @@ CREATE TABLE "_QuestionToTopic" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
+CREATE UNIQUE INDEX "Category_title_key" ON "Category"("title");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Topic_name_key" ON "Topic"("name");

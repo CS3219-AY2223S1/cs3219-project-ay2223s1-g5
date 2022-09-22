@@ -34,7 +34,7 @@ model User {
 
 model Category {
   id        Int        @id @default(autoincrement())
-  name      String     @unique
+  title     String     @unique
   questions Question[]
 }
 
@@ -47,7 +47,7 @@ model Topic {
 model SolutionTemplate {
   id         Int      @id @default(autoincrement())
   language   Language
-  template   String
+  code       String
   question   Question @relation(fields: [questionId], references: [id])
   questionId Int
 }
@@ -61,14 +61,14 @@ model TestCases {
 }
 
 model Question {
-  id         Int                @id @default(autoincrement())
-  title      String             @unique
-  difficulty Difficulty
-  category   Category           @relation(fields: [categoryId], references: [id])
-  categoryId Int
-  topics     Topic[]
-  question   String
-  hints      String[]
-  templates  SolutionTemplate[]
-  testcases  TestCases[]
+  id          Int                @id @default(autoincrement())
+  title       String             @unique
+  difficulty  Difficulty
+  category    Category           @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  topics      Topic[]
+  description String
+  hints       String[]
+  templates   SolutionTemplate[]
+  testcases   TestCases[]
 }
