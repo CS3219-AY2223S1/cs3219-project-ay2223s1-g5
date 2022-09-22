@@ -18,9 +18,11 @@
     "start:prod": "node build/main",
     "lint": "eslint --ext ts,tsx,js,jsx .",
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "test:wait-for": "./wait-for localhost:5432 -- echo \"Database is ready for connections\" && sleep 3;",
+    "test:full": "npm run test:setup && npm run test; npm run test:teardown",
+    "test:setup": "docker compose -f docker-compose.test.yml up -d && npm run test:wait-for && npx prisma migrate deploy && npx prisma generate",
+    "test": "jest -i",
+    "test:teardown": "docker compose -f docker-compose.test.yml down",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "prisma:gen": "npx prisma generate",
     "migration:gen": "npx prisma migrate dev --create-only --name",
@@ -70,7 +72,7 @@
     "@types/node": "^16.0.0",
     "@types/passport-jwt": "^3.0.6",
     "@types/passport-local": "^1.0.34",
-    "@types/supertest": "^2.0.11",
+    "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",
@@ -83,7 +85,7 @@
     "prettier": "^2.3.2",
     "prisma": "^4.2.1",
     "source-map-support": "^0.5.20",
-    "supertest": "^6.1.3",
+    "supertest": "^6.2.4",
     "ts-jest": "28.0.5",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
@@ -112,7 +114,8 @@
       }
     },
     "moduleNameMapper": {
-      "~shared/(.*)": "<rootDir>/../../shared/src/$1"
+      "~shared/(.*)": "<rootDir>/../../shared/src/$1",
+      "src/(.*)": "<rootDir>/$1"
     }
   },
   "lint-staged": {

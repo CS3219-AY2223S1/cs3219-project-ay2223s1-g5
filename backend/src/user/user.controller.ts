@@ -4,6 +4,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -70,7 +71,7 @@ export class UserController {
   ): Promise<GetUserNameRes | null> {
     const user = await this.userService.getById(userId);
     if (!user) {
-      return null;
+      throw new NotFoundException("User not found.");
     }
     const { name } = user;
     return { name };

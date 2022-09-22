@@ -139,5 +139,15 @@ jobs:
         if: matrix.app != 'shared'
         run: npm run --prefix shared build
 
+      - name: Setup environment
+        if: matrix.app == 'backend'
+        run: |
+          cp ./backend/.env.test ./backend/.env
+          npm run on-backend test:setup
+
       - name: Run tests
         run: npm run --prefix ${{ matrix.app }} test
+
+      - name: Teardown environment
+        if: matrix.app == 'backend'
+        run: npm run on-backend test:teardown

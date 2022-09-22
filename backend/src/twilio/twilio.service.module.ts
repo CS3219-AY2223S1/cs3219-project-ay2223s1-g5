@@ -11,7 +11,8 @@ import { TwilioService } from "./twilio.service";
     {
       provide: TwilioService,
       useClass:
-        process.env.NODE_ENV === "development"
+        process.env.NODE_ENV === "development" ||
+        process.env.NODE_ENV === "test"
           ? MockTwilioService
           : TwilioService,
     },

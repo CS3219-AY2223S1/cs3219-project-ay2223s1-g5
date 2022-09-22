@@ -12,8 +12,6 @@ import { PrismaServiceModule } from "./core/prisma.service.module";
 import { EditorModule } from "./editor/editor.module";
 import { RedisServiceModule } from "./redis/redis.service.module";
 import { RoomModule } from "./room/room.module";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 
 const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
 
@@ -51,7 +49,5 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     RoomModule,
     EditorModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
