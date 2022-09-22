@@ -24,7 +24,7 @@ export class QueueGateway implements OnGatewayDisconnect {
   server: Namespace;
 
   constructor(
-    @InjectPinoLogger()
+    @InjectPinoLogger(QueueGateway.name)
     private readonly logger: PinoLogger,
     private readonly queueService: QueueService,
     private readonly roomService: RoomService,

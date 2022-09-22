@@ -1,7 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { parse } from "cookie";
 import { verify } from "jsonwebtoken";
-import { Observable } from "rxjs";
 import { Socket } from "socket.io";
 
 import { ConfigService } from "src/core/config/config.service";

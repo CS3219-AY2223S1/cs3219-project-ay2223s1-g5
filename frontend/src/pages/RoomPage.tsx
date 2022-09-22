@@ -3,15 +3,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Avatar, Divider, Grid, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 
+import { Editor } from "src/components/Editor";
+import { Question } from "src/components/Question";
+import { StyledButton } from "src/components/StyledButton";
 import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
+import { EditorProvider } from "src/contexts/EditorContext";
 import { useSocket } from "src/contexts/WsContext";
 import { useGetUserName } from "src/hooks/useUsers";
 import { nameToInitials } from "src/utils/string";
-
-import { Editor } from "../components/Editor";
-import { Question } from "../components/Question";
-import { StyledButton } from "../components/StyledButton";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
 import {
@@ -257,7 +257,9 @@ export const RoomPage = () => {
             <Question />
           </Grid>
           <Grid item xs={8}>
-            <Editor />
+            <EditorProvider roomId={roomId || ""}>
+              <Editor language={"javascript"} />
+            </EditorProvider>
           </Grid>
         </Stack>
       </Grid>

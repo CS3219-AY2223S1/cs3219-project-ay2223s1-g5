@@ -24,7 +24,7 @@ export class RoomGateway implements OnGatewayDisconnect {
   server: Namespace;
 
   constructor(
-    @InjectPinoLogger()
+    @InjectPinoLogger(RoomGateway.name)
     private readonly logger: PinoLogger,
     private readonly roomService: RoomService,
   ) {}
