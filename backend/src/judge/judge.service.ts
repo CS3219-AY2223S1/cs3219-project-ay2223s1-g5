@@ -5,6 +5,8 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
 
+import { Language } from "~shared/types/base/index";
+
 @Injectable()
 export class JudgeService {
   constructor(
@@ -14,7 +16,7 @@ export class JudgeService {
   ) {}
 
   async sendRequest(
-    languageId: number,
+    language: Language,
     code: string,
     stdin: string,
     expectedOutput: string,
@@ -23,6 +25,7 @@ export class JudgeService {
     const options: AxiosRequestConfig<string> = {
       method: "POST",
       url: `https://${this.configService.get("judge0.apiHost")}/submissions`,
+      // TODO: Use "wait: false" and get submission status with token
       params: { wait: true, base64_encoded: true, fields: "*" },
       headers: {
         "Content-Type": "application/json",
@@ -30,7 +33,7 @@ export class JudgeService {
         "X-RapidAPI-Host": this.configService.get("judge0.apiHost"),
       },
       data: JSON.stringify({
-        language_id: languageId,
+        language_id: language,
         source_code: code,
         stdin: stdin,
       }),
