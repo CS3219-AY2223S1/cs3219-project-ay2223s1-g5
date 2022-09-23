@@ -11,15 +11,17 @@ import {
   Post,
   Put,
   Session,
+  UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
 import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
-import { VerificationService } from "src/verification/verification.service";
+import { VerificationError } from "src/common/errors/verification.error";
 
-import { ResetPasswordService } from "./reset-password.service";
+import { ResetPasswordService } from "./reset-password/reset-password.service";
+import { VerificationService } from "./verification/verification.service";
 import { UserService } from "./user.service";
 
 import {
@@ -29,6 +31,7 @@ import {
   ResetPasswordReq,
   UpdatePasswordReq,
   UpdateUserReq,
+  VerifyEmailReq,
 } from "~shared/types/api";
 
 @Controller("users")
@@ -111,5 +114,32 @@ export class UserController {
     @Body() { userId, code, password }: ResetPasswordReq,
   ): Promise<void> {
     await this.resetPasswordService.resetPassword(userId, code, password);
+  }
+
+  @Post("verifications")
+  async resendVerificationEmail(
+    @Body() { email }: { email: string },
+  ): Promise<void> {
+    try {
+      return await this.verificationService.sendVerificationEmail(email);
+    } catch (e: unknown) {
+      if (!(e instanceof VerificationError)) {
+        throw e;
+      }
+      throw new ConflictException(e.message);
+    }
+  }
+
+  @Patch("verifications")
+  async checkVerificationCode(
+    @Body() { userId, code }: VerifyEmailReq,
+  ): Promise<void> {
+    const result = await this.verificationService.checkVerificationCode(
+      userId,
+      code,
+    );
+    if (!result) {
+      throw new UnauthorizedException("Failed to verify user email.");
+    }
   }
 }
