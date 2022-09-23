@@ -18,7 +18,7 @@ export class MockTwilioService {
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
   ) {
-    this.domain = configService.get("domain");
+    this.domain = this.configService.get("domain");
   }
 
   async sendVerificationEmail(email: string, userId: number): Promise<void> {

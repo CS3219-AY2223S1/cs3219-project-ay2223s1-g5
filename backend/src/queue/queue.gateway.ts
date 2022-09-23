@@ -1,4 +1,3 @@
-import { UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -10,14 +9,13 @@ import {
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
-import { WsAuthGuard } from "src/auth/ws.guard";
+import { session } from "src/common/adapters/websocket.adapter";
 import { RoomService } from "src/room/room.service";
 
 import { QueueService } from "./queue.service";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
 
-@UseGuards(WsAuthGuard)
 @WebSocketGateway({ namespace: QUEUE_NAMESPACE })
 export class QueueGateway implements OnGatewayDisconnect {
   @WebSocketServer()
@@ -36,7 +34,7 @@ export class QueueGateway implements OnGatewayDisconnect {
     @MessageBody() difficultyLevel: string,
   ): Promise<void> {
     this.logger.info(`Handling find match request: ${client.id}`);
-    const userId = Number(client.handshake.headers.authorization);
+    const userId = Number(session(client).passport?.user.userId);
     const existingRoom = await this.roomService.getRoom(userId);
     if (existingRoom) {
       this.logger.info(`Existing room found: ${existingRoom}`);
@@ -49,7 +47,7 @@ export class QueueGateway implements OnGatewayDisconnect {
 
   async handleQueue(client: Socket, difficultyLevel: string): Promise<void> {
     this.logger.info(`Joining queue: ${client.id}`);
-    const userId = Number(client.handshake.headers.authorization);
+    const userId = Number(session(client).passport?.user.userId);
 
     const match = await this.queueService.searchMatch(
       userId,
@@ -68,7 +66,7 @@ export class QueueGateway implements OnGatewayDisconnect {
 
   async handleDisconnect(client: Socket) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
-    const userId = Number(client.handshake.headers.authorization);
+    const userId = Number(session(client).passport?.user.userId);
     await this.queueService.removeFromQueue(userId);
   }
 }

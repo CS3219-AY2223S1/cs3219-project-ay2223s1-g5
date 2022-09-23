@@ -1,17 +1,19 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { LoggerModule } from "nestjs-pino";
+import passport from "passport";
 import { join } from "path";
 
 import { AuthModule } from "src/auth/auth.module";
+import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
+import { CoreModule } from "src/core/core.module";
+import { PrismaServiceModule } from "src/core/prisma.service.module";
+import { EditorModule } from "src/editor/editor.module";
 import { QueueModule } from "src/queue/queue.module";
+import { RedisServiceModule } from "src/redis/redis.service.module";
+import { RoomModule } from "src/room/room.module";
 import { UserModule } from "src/user/user.module";
 import { VerificationModule } from "src/verification/verification.module";
-
-import { PrismaServiceModule } from "./core/prisma.service.module";
-import { EditorModule } from "./editor/editor.module";
-import { RedisServiceModule } from "./redis/redis.service.module";
-import { RoomModule } from "./room/room.module";
 
 const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
 
@@ -45,9 +47,16 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     UserModule,
     AuthModule,
     VerificationModule,
+    CoreModule,
     QueueModule,
     RoomModule,
     EditorModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SessionMiddleware, passport.initialize(), passport.session())
+      .forRoutes("*");
+  }
+}

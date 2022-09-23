@@ -10,12 +10,12 @@ import {
   Patch,
   Post,
   Put,
-  Request,
+  Session,
   UseGuards,
 } from "@nestjs/common";
-import { Request as ExpressRequest } from "express";
+import { Request } from "express";
 
-import { JwtAuthGuard } from "src/auth/jwt.guard";
+import { SessionGuard } from "src/auth/session.guard";
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
 import { VerificationService } from "src/verification/verification.service";
 
@@ -51,20 +51,20 @@ export class UserController {
     await this.verificationService.sendVerificationEmail(user.email);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionGuard)
   @Put(":userId(\\d+)")
   async updateUser(
-    @Request() req: ExpressRequest,
+    @Session() session: Request["session"],
     @Param("userId", ParseIntPipe) userId: number,
     @Body() data: UpdateUserReq,
   ): Promise<void> {
-    if (req.user?.userId != userId) {
+    if (session.passport?.user.userId != userId) {
       throw new ForbiddenException();
     }
     await this.userService.updateUserDetails(userId, data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionGuard)
   @Get(":userId(\\d+)")
   async getUserName(
     @Param("userId", ParseIntPipe) userId: number,
@@ -77,14 +77,14 @@ export class UserController {
     return { name };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionGuard)
   @Post(":userId(\\d+)")
   async updatePassword(
-    @Request() req: ExpressRequest,
+    @Session() session: Request["session"],
     @Param("userId", ParseIntPipe) userId: number,
     @Body() data: UpdatePasswordReq,
   ): Promise<void> {
-    if (req.user?.userId != userId) {
+    if (session.passport?.user.userId != userId) {
       throw new ForbiddenException();
     }
     const { oldPassword, newPassword } = data;

@@ -1,7 +1,7 @@
 import { HttpAdapterHost, NestFactory } from "@nestjs/core";
-import cookieParser from "cookie-parser";
 import { Logger } from "nestjs-pino";
 
+import { SocketSessionAdapter } from "src/common/adapters/websocket.adapter";
 import { ExceptionFilter } from "src/common/filters/exception.filter";
 import { ConfigService } from "src/core/config/config.service";
 
@@ -16,7 +16,7 @@ async function bootstrap() {
   app.setGlobalPrefix("/api");
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new ExceptionFilter(httpAdapter));
-  app.use(cookieParser());
+  app.useWebSocketAdapter(new SocketSessionAdapter(app));
 
   const configService = app.get(ConfigService);
   await app.listen(configService.get("port"));

@@ -24,17 +24,21 @@ export class RedisService implements OnApplicationShutdown {
   }
 
   constructor(private readonly logger: PinoLogger, url: string) {
-    this.redisClient = createClient({ url: url });
+    this.redisClient = createClient({ url: url, legacyMode: true });
 
     this.redisClient.on("connection", () => {
       this.logger.info("Redis client connected successfully");
     });
 
-    this.redisClient.on("error", () => {
+    this.redisClient.on("error", (error: string) => {
       this.logger.error(
-        "Error occured while connecting or accessing redis server",
+        `Error occured while connecting or accessing redis server: ${error}`,
       );
     });
+  }
+
+  getClient(): RedisClientType {
+    return this.redisClient;
   }
 
   async connect() {
@@ -59,32 +63,33 @@ export class RedisService implements OnApplicationShutdown {
     const namespace = RedisService.createNamespace(namespaces);
     const keyWithNamespace = `${namespace}${key}`;
     if (expirationTime) {
-      return this.redisClient.set(keyWithNamespace, value, {
+      return this.redisClient.v4.set(keyWithNamespace, value, {
         EX: expirationTime,
       });
     } else {
-      return this.redisClient.set(keyWithNamespace, value);
+      return this.redisClient.v4.set(keyWithNamespace, value);
     }
   }
 
   async getAllKeys(namespaces: string[]): Promise<string[]> {
     const namespace = RedisService.createNamespace(namespaces);
-    return this.redisClient.keys(`${namespace}*`);
+    console.log(await this.redisClient.keys(`${namespace}*`));
+    return this.redisClient.v4.keys(`${namespace}*`);
   }
 
   async deleteKey(namespaces: string[], key: string): Promise<number> {
     const namespace = RedisService.createNamespace(namespaces);
-    return this.redisClient.del(`${namespace}${key}`);
+    return this.redisClient.v4.del(`${namespace}${key}`);
   }
 
   async getValue(namespaces: string[], key: string): Promise<string | null> {
     const namespace = RedisService.createNamespace(namespaces);
-    return this.redisClient.get(`${namespace}${key}`);
+    return this.redisClient.v4.get(`${namespace}${key}`);
   }
 
   async getSet(namespaces: string[], key: string): Promise<string[]> {
     const namespace = RedisService.createNamespace(namespaces);
-    return this.redisClient.sMembers(`${namespace}${key}`);
+    return this.redisClient.v4.sMembers(`${namespace}${key}`);
   }
 
   async addKeySet(
@@ -93,7 +98,7 @@ export class RedisService implements OnApplicationShutdown {
     value: string,
   ): Promise<void> {
     const namespace = RedisService.createNamespace(namespaces);
-    this.redisClient.sAdd(`${namespace}${key}`, value);
+    this.redisClient.v4.sAdd(`${namespace}${key}`, value);
   }
 
   async deleteFromSet(
@@ -102,11 +107,11 @@ export class RedisService implements OnApplicationShutdown {
     value: string,
   ): Promise<void> {
     const namespace = RedisService.createNamespace(namespaces);
-    this.redisClient.sRem(`${namespace}${key}`, value);
+    this.redisClient.v4.sRem(`${namespace}${key}`, value);
   }
 
   async getSetSize(namespaces: string[], key: string): Promise<number> {
     const namespace = RedisService.createNamespace(namespaces);
-    return this.redisClient.sCard(`${namespace}${key}`);
+    return this.redisClient.v4.sCard(`${namespace}${key}`);
   }
 }
