@@ -17,6 +17,10 @@ export interface ConfigSchema {
   redis: {
     url: string;
   };
+  judge0: {
+    apiKey: string;
+    apiHost: string;
+  };
 }
 
 addFormats({
@@ -87,6 +91,18 @@ export const schema: Schema<ConfigSchema> = {
   redis: {
     url: {
       env: "REDIS_URL",
+      format: "required-string",
+      default: "",
+    },
+  },
+  judge0: {
+    apiKey: {
+      env: "JUDGE0_API_KEY",
+      format: "required-string",
+      default: "",
+    },
+    apiHost: {
+      env: "JUDGE0_API_HOST",
       format: "required-string",
       default: "",
     },
