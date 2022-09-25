@@ -1,10 +1,12 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { APP_FILTER } from "@nestjs/core";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { LoggerModule } from "nestjs-pino";
 import passport from "passport";
 import { join } from "path";
 
 import { AuthModule } from "src/auth/auth.module";
+import { ExceptionFilter } from "src/common/filters/exception.filter";
 import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
 import { CoreModule } from "src/core/core.module";
 import { PrismaServiceModule } from "src/core/prisma.service.module";
@@ -51,6 +53,12 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     QueueModule,
     RoomModule,
     EditorModule,
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: ExceptionFilter,
+    },
   ],
 })
 export class AppModule implements NestModule {

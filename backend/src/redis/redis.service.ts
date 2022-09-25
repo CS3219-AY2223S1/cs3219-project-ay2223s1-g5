@@ -26,13 +26,13 @@ export class RedisService implements OnApplicationShutdown {
   constructor(private readonly logger: PinoLogger, url: string) {
     this.redisClient = createClient({ url: url, legacyMode: true });
 
-    this.redisClient.on("connection", () => {
+    this.redisClient.on("connect", () => {
       this.logger.info("Redis client connected successfully");
     });
 
-    this.redisClient.on("error", (error: string) => {
+    this.redisClient.on("error", (error: Error) => {
       this.logger.error(
-        `Error occured while connecting or accessing redis server: ${error}`,
+        `Error occured while connecting or accessing redis server: ${error.message}`,
       );
     });
   }
@@ -46,8 +46,8 @@ export class RedisService implements OnApplicationShutdown {
   }
 
   async onApplicationShutdown(signal: string) {
-    this.logger.info(signal);
-    await this.redisClient.quit();
+    this.logger.debug(signal);
+    await this.redisClient.v4.quit();
   }
 
   static createNamespace(namespaces: string[]): string {
@@ -73,7 +73,6 @@ export class RedisService implements OnApplicationShutdown {
 
   async getAllKeys(namespaces: string[]): Promise<string[]> {
     const namespace = RedisService.createNamespace(namespaces);
-    console.log(await this.redisClient.keys(`${namespace}*`));
     return this.redisClient.v4.keys(`${namespace}*`);
   }
 
@@ -96,18 +95,18 @@ export class RedisService implements OnApplicationShutdown {
     namespaces: string[],
     key: string,
     value: string,
-  ): Promise<void> {
+  ): Promise<number> {
     const namespace = RedisService.createNamespace(namespaces);
-    this.redisClient.v4.sAdd(`${namespace}${key}`, value);
+    return this.redisClient.sAdd(`${namespace}${key}`, value);
   }
 
   async deleteFromSet(
     namespaces: string[],
     key: string,
     value: string,
-  ): Promise<void> {
+  ): Promise<number> {
     const namespace = RedisService.createNamespace(namespaces);
-    this.redisClient.v4.sRem(`${namespace}${key}`, value);
+    return this.redisClient.v4.sRem(`${namespace}${key}`, value);
   }
 
   async getSetSize(namespaces: string[], key: string): Promise<number> {

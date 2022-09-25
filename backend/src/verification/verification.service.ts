@@ -21,7 +21,7 @@ export class VerificationService {
     if (user.verified) {
       throw new VerificationError("User already verified.");
     }
-    return this.twilioService.sendVerificationEmail(user.email, user.id);
+    await this.twilioService.sendVerificationEmail(user.email, user.id);
   }
 
   async checkVerificationCode(userId: number, code: string): Promise<boolean> {
