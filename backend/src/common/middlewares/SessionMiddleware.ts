@@ -25,7 +25,10 @@ export class SessionMiddleware implements NestMiddleware {
       },
       resave: false,
       saveUninitialized: false,
-      store: new (RedisStore(session))({ client: this.redis.getClient() }),
+      store: new (RedisStore(session))({
+        client: this.redis.getClient(),
+        prefix: "SESSION:",
+      }),
     });
   }
 
