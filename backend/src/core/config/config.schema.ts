@@ -54,7 +54,7 @@ export const schema: Schema<ConfigSchema> = {
     name: {
       env: "SESSION_NAME",
       sensitive: false,
-      default: "",
+      default: "codecollab.sid",
       format: "required-string",
     },
     secret: {

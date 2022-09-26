@@ -78,7 +78,7 @@ jobs:
             DATABASE_HOST=DATABASE_HOST_${{ inputs.environment }}:latest
             DATABASE_PORT=DATABASE_PORT_${{ inputs.environment }}:latest
             REDIS_URL=REDIS_URL_${{ inputs.environment }}:latest
-            JWT_SECRET=JWT_SECRET_${{ inputs.environment }}:latest
+            SESSION_SECRET=SESSION_SECRET_${{ inputs.environment }}:latest
             TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest
             TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest
             TWILIO_VERIFICATION_SID=TWILIO_VERIFICATION_SID:latest
