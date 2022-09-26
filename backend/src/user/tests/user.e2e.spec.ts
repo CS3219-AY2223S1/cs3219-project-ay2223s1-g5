@@ -1,25 +1,35 @@
 import { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { compareSync } from "bcrypt";
-import cookieParser from "cookie-parser";
-import { sign } from "jsonwebtoken";
 import { LoggerModule } from "nestjs-pino";
 import request from "supertest";
 
 import { AuthModule } from "src/auth/auth.module";
+import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
 import { PrismaServiceModule } from "src/core/prisma.service.module";
 import { TestClient } from "src/core/test/test-client";
 import { RedisServiceModule } from "src/redis/redis.service.module";
 
 import { UserModule } from "../user.module";
 
+const userFixtures = [
+  {
+    // User ID: 1
+    email: "janedoe@email.com",
+    name: "Jane Doe",
+    password: "password",
+  },
+];
+
 describe("User", () => {
   let app: INestApplication;
   const client: TestClient = new TestClient();
 
   beforeAll(async () => {
-    const testModule = await Test.createTestingModule({
+    const module = await Test.createTestingModule({
       imports: [
+        // Module under test
+        UserModule,
         // Global modules
         PrismaServiceModule,
         RedisServiceModule,
@@ -28,61 +38,93 @@ describe("User", () => {
             level: "silent",
           },
         }),
-        // Module under test
-        UserModule,
         // Dependencies
         AuthModule,
       ],
     }).compile();
 
-    app = testModule.createNestApplication();
-    app.use(cookieParser());
+    app = module.createNestApplication();
+    // Mock session data.
+    const mockSessionMiddleware = new MockSessionMiddleware(1);
+    app.use(mockSessionMiddleware.use.bind(mockSessionMiddleware));
     await app.init();
   });
 
   beforeEach(async () => {
     await client.reset();
+    await client.user.createMany({
+      data: userFixtures,
+    });
   });
 
-  it(`POST /users`, async () => {
-    const expected = {
-      name: "John Doe",
-      email: "johndoe@email.com",
-      verified: false,
-      failedLogins: 0,
-    };
-
-    await request(app.getHttpServer())
-      .post("/users")
-      .send({
+  describe("POST /users", () => {
+    it(`create user`, async () => {
+      const expected = {
         name: "John Doe",
         email: "johndoe@email.com",
-        password: "password",
-      })
-      .expect(201);
+        verified: false,
+        failedLogins: 0,
+      };
 
-    const actual = await client.user.findMany({
-      where: {
-        email: "johndoe@email.com",
-      },
+      await request(app.getHttpServer())
+        .post("/users")
+        .send({
+          name: "John Doe",
+          email: "johndoe@email.com",
+          password: "password",
+        })
+        .expect(201);
+
+      const actual = await client.user.findMany({
+        where: {
+          email: "johndoe@email.com",
+        },
+      });
+      expect(actual).toHaveLength(1);
+      // We use MatchObject rather than equal since we do not test for password or ID.
+      expect(actual[0]).toMatchObject(expected);
+      expect(compareSync("password", actual[0].password)).toBe(true);
     });
-    expect(actual).toHaveLength(1);
-    // We use MatchObject rather than equal since we do not test for password or ID.
-    expect(actual[0]).toMatchObject(expected);
-    expect(compareSync("password", actual[0].password)).toBe(true);
+    it(`duplicate user`, async () => {
+      await request(app.getHttpServer())
+        .post("/users")
+        .send({
+          name: "John Doe",
+          email: userFixtures[0].email,
+          password: "password",
+        })
+        .expect(409);
+
+      const actual = await client.user.findMany({
+        where: {
+          email: userFixtures[0].email,
+        },
+      });
+      expect(actual[0]?.name).toBe("Jane Doe");
+    });
   });
 
   describe("GET /users", () => {
-    it(`Unauthenticated`, async () => {
+    it(`get user`, async () => {
+      const expected = {
+        name: userFixtures[0].name,
+      };
+      const actual = await request(app.getHttpServer())
+        .get("/users/1")
+        .set("Authorization", "true")
+        .expect(200);
+
+      expect(actual.body).toMatchObject(expected);
+    });
+
+    it(`unauthenticated`, async () => {
       await request(app.getHttpServer()).get("/users/1").expect(401);
     });
 
-    it(`Authenticated`, async () => {
-      const validToken = sign({ sub: 1 }, process.env.JWT_SECRET || "");
-
+    it(`missing user`, async () => {
       await request(app.getHttpServer())
-        .get("/users/1")
-        .set("Cookie", [`accessToken=${validToken}`])
+        .get("/users/50")
+        .set("Authorization", "true")
         .expect(404);
     });
   });

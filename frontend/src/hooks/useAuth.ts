@@ -49,7 +49,7 @@ export const useVerifyEmail = () => {
 // This hook does not use React Query since we do not want to cache the result.
 export const useWhoAmI = () => {
   const whoAmI = async () => {
-    const { data } = await ApiService.get<LoginRes | undefined>(`/whoami`);
+    const { data } = await ApiService.get<LoginRes | undefined>(`/sessions`);
     return data;
   };
   return { whoAmI };

@@ -18,13 +18,13 @@ export class MockTwilioService {
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
   ) {
-    this.domain = configService.get("domain");
+    this.domain = this.configService.get("domain");
   }
 
   async sendVerificationEmail(email: string, userId: number): Promise<void> {
     const code = nanoid(10);
     // Code expires in 10 minutes
-    this.redisService.setKey(
+    await this.redisService.setKey(
       [MockTwilioService.NAMESPACE, MockTwilioService.VERIFICATION_NAMESPACE],
       email,
       code,
@@ -61,7 +61,7 @@ export class MockTwilioService {
   ): Promise<void> {
     const code = nanoid(10);
     // Code expires in 10 minutes
-    this.redisService.setKey(
+    await this.redisService.setKey(
       [MockTwilioService.NAMESPACE, MockTwilioService.RESET_PASSWORD_NAMESPACE],
       email,
       code,

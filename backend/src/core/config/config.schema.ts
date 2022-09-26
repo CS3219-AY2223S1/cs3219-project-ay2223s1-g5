@@ -4,9 +4,10 @@ export interface ConfigSchema {
   port: number;
   environment: "development" | "staging" | "production" | "test";
   domain: string;
-  jwt: {
+  session: {
+    name: string;
     secret: string;
-    validity: number;
+    maxAge: number;
   };
   twilio: {
     accountSid: string;
@@ -49,16 +50,22 @@ export const schema: Schema<ConfigSchema> = {
     format: "required-string",
     default: "",
   },
-  jwt: {
-    secret: {
-      env: "JWT_SECRET",
-      format: "required-string",
+  session: {
+    name: {
+      env: "SESSION_NAME",
+      sensitive: false,
       default: "",
-      sensitive: true,
+      format: "required-string",
     },
-    validity: {
-      env: "JWT_VALIDITY",
-      format: "int",
+    secret: {
+      env: "SESSION_SECRET",
+      sensitive: true,
+      default: "",
+      format: "required-string",
+    },
+    maxAge: {
+      env: "SESSION_MAX_AGE",
+      format: Number,
       default: 604800000,
     },
   },
