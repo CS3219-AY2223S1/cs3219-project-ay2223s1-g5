@@ -15,7 +15,6 @@ import { QueueModule } from "src/queue/queue.module";
 import { RedisServiceModule } from "src/redis/redis.service.module";
 import { RoomModule } from "src/room/room.module";
 import { UserModule } from "src/user/user.module";
-import { VerificationModule } from "src/verification/verification.module";
 
 const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
 
@@ -46,10 +45,9 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     }),
     RedisServiceModule,
     PrismaServiceModule,
-    UserModule,
-    AuthModule,
-    VerificationModule,
     CoreModule,
+    AuthModule,
+    UserModule,
     QueueModule,
     RoomModule,
     EditorModule,

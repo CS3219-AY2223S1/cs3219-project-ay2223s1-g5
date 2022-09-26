@@ -4,7 +4,7 @@ import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
 import { UnauthorizedError } from "src/common/errors/unauthorized.error";
 import { TwilioService } from "src/twilio/twilio.service";
 
-import { UserService } from "./user.service";
+import { UserService } from "../user.service";
 
 @Injectable()
 export class ResetPasswordService {
