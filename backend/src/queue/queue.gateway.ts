@@ -10,7 +10,6 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
 import { session } from "src/common/adapters/websocket.adapter";
-import { RoomService } from "src/room/room.service";
 
 import { QueueService } from "./queue.service";
 
@@ -25,7 +24,6 @@ export class QueueGateway implements OnGatewayDisconnect {
     @InjectPinoLogger(QueueGateway.name)
     private readonly logger: PinoLogger,
     private readonly queueService: QueueService,
-    private readonly roomService: RoomService,
   ) {}
 
   @SubscribeMessage(QUEUE_EVENTS.ENTER_QUEUE)
@@ -35,7 +33,7 @@ export class QueueGateway implements OnGatewayDisconnect {
   ): Promise<void> {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(session(client).passport?.user.userId);
-    const existingRoom = await this.roomService.getRoom(userId);
+    const existingRoom = await this.queueService.getExistingRoom(userId);
     if (existingRoom) {
       this.logger.info(`Existing room found: ${existingRoom}`);
       client.emit(QUEUE_EVENTS.EXISTING_MATCH, existingRoom);

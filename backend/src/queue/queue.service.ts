@@ -21,6 +21,10 @@ export class QueueService {
     private readonly roomService: RoomService,
   ) {}
 
+  async getExistingRoom(userId: number): Promise<string | null> {
+    return await this.roomService.getRoom(userId);
+  }
+
   async searchMatch(
     userId: number,
     difficultyLevel: string,
