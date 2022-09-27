@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { ChatService } from "src/chat/chat.service";
 import { EditorService } from "src/editor/editor.service";
 import { RedisService } from "src/redis/redis.service";
 
@@ -19,11 +20,15 @@ export class RoomService {
     @InjectPinoLogger(RoomService.name)
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
+    private readonly chatService: ChatService,
     private readonly editorService: EditorService,
   ) {}
 
   async createRoom(userIds: number[]): Promise<string> {
     const roomId = nanoid();
+
+    await this.chatService.createChatRoom(roomId);
+
     for (const userId of userIds) {
       await this.redisService.addKeySet(
         [RoomService.NAMESPACE],
@@ -36,6 +41,8 @@ export class RoomService {
         userId.toString(),
         roomId,
       );
+
+      await this.chatService.joinChatRoom(roomId, userId);
     }
 
     return roomId;
@@ -89,6 +96,8 @@ export class RoomService {
       `${userId.toString()}:${Status.DISCONNECTED}`,
     );
 
+    await this.chatService.leaveChatRoom(roomId, userId);
+
     if (
       !(await this.redisService.getSetSize([RoomService.NAMESPACE], roomId))
     ) {
@@ -101,6 +110,7 @@ export class RoomService {
     await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
     // Document ID and room ID are the same.
     await this.editorService.removeDocument(roomId);
+    await this.chatService.closeChatRoom(roomId);
   }
 
   async disconnectRoom(userId: number, roomId: string): Promise<void> {
