@@ -28,7 +28,6 @@ export class SocketSessionAdapter extends IoAdapter {
     },
   ): Server {
     const server = super.create(port, options) as Server;
-    console.log("hold");
     const wrap =
       (middleware: NestMiddleware) =>
       (socket: Socket, next: (error?: ExtendedError) => void) => {
