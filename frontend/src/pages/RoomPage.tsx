@@ -9,7 +9,7 @@ import { StyledButton } from "src/components/StyledButton";
 import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
 import { EditorProvider } from "src/contexts/EditorContext";
-import { useSocket } from "src/contexts/WsContext";
+import { useSocket } from "src/contexts/SocketContext";
 import { useGetUserName } from "src/hooks/useUsers";
 import { nameToInitials } from "src/utils/string";
 

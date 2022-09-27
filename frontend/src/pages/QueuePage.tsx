@@ -5,7 +5,7 @@ import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
 
 import { Timer } from "src/components/Timer";
-import { useSocket } from "src/contexts/WsContext";
+import { useSocket } from "src/contexts/SocketContext";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
 import { MatchRes } from "~shared/types/api";
