@@ -1,4 +1,5 @@
 export { LoginReq, LoginRes } from "./auth.dto";
+export { CreateTokenRes } from "./chat.dto";
 export { MatchRes } from "./match.dto";
 export {
   JoinedPayload,
