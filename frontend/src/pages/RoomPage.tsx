@@ -3,11 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Avatar, Divider, Grid, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 
+import { Chat } from "src/components/Chat";
 import { Editor } from "src/components/Editor";
 import { Question } from "src/components/Question";
 import { StyledButton } from "src/components/StyledButton";
 import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
+import { ChatProvider } from "src/contexts/ChatContext";
 import { EditorProvider } from "src/contexts/EditorContext";
 import { useSocket } from "src/contexts/SocketContext";
 import { useGetUserName } from "src/hooks/useUsers";
@@ -254,7 +256,12 @@ export const RoomPage = () => {
         <Divider />
         <Stack direction="row" spacing={2} sx={{ p: 3 }}>
           <Grid item xs={4}>
-            <Question />
+            <Stack spacing={2}>
+              <Question />
+              <ChatProvider roomId={roomId || ""}>
+                <Chat />
+              </ChatProvider>
+            </Stack>
           </Grid>
           <Grid item xs={8}>
             <EditorProvider roomId={roomId || ""}>
