@@ -32,8 +32,8 @@ class JavaMiddleware extends JudgeMiddleware {
 
       // Check if input type is array
       if (codeDetail.argTypes[i].includes("[]")) {
-        input = input.replace("[", "{");
-        input = input.replace("]", "}");
+        input = input.replace(/\[/g, "{");
+        input = input.replace(/\]/g, "}");
       }
       variables += `${codeDetail.argTypes[i]} ${codeDetail.variableNames[i]} = ${input};`;
     }
