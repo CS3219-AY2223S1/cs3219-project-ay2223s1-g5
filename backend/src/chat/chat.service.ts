@@ -5,6 +5,8 @@ import { RedisService } from "src/redis/redis.service";
 import { TwilioService } from "src/twilio/twilio.service";
 import { UserService } from "src/user/user.service";
 
+const SYSTEM_WELCOME_MESSAGE = "Welcome! Chat with your partner here!";
+
 @Injectable()
 export class ChatService {
   private static readonly NAMESPACE = "CHAT";
@@ -34,6 +36,10 @@ export class ChatService {
     const chatRoomSid = await this.twilioService.createChatRoom(roomId);
     this.logger.info(`Creating chat room [${roomId}]: ${chatRoomSid}`);
     await this.saveChatRoomSid(roomId, chatRoomSid);
+    await this.twilioService.sendSystemMessage(
+      chatRoomSid,
+      SYSTEM_WELCOME_MESSAGE,
+    );
   }
 
   async joinChatRoom(roomId: string, userId: number) {

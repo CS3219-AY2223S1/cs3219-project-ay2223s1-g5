@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Avatar, Divider, Grid, Stack } from "@mui/material";
+import { Avatar, Box, Divider, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 
-import { Chat } from "src/components/Chat";
+import { Chat } from "src/components/chat/Chat";
 import { Editor } from "src/components/Editor";
 import { Question } from "src/components/Question";
 import { StyledButton } from "src/components/StyledButton";
@@ -201,75 +201,83 @@ export const RoomPage = () => {
   }, [partnerInfo]);
 
   return (
-    <Grid
-      container
-      sx={{ borderTop: "10px solid", borderColor: "primary.500" }}
+    <Stack
+      sx={{
+        borderTop: "10px solid",
+        borderColor: "primary.500",
+        height: "100vh",
+        maxWidth: "100vw",
+        display: "flex",
+      }}
     >
-      <Grid item xs={12}>
-        <Grid
-          container
-          item
-          xs={12}
-          sx={{ py: 2, px: 3, justifyContent: "space-between" }}
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        sx={{ py: 2, px: 3 }}
+      >
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ display: "flex", alignItems: "center" }}
         >
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ display: "flex", alignItems: "center" }}
+          <Avatar
+            sx={{
+              width: "36px",
+              height: "36px",
+              bgcolor: self.isConnected ? "secondary.A700" : "grey.500",
+              fontSize: "14px",
+            }}
           >
+            {nameToInitials(self.name)}
+          </Avatar>
+          {partner && (
             <Avatar
               sx={{
                 width: "36px",
                 height: "36px",
-                bgcolor: self.isConnected ? "secondary.A700" : "grey.500",
+                bgcolor: partner?.isConnected ? "primary.A700" : "grey.500",
                 fontSize: "14px",
               }}
             >
-              {nameToInitials(self.name)}
+              {nameToInitials(partner?.name)}
             </Avatar>
-            {partner && (
-              <Avatar
-                sx={{
-                  width: "36px",
-                  height: "36px",
-                  bgcolor: partner?.isConnected ? "primary.A700" : "grey.500",
-                  fontSize: "14px",
-                }}
-              >
-                {nameToInitials(partner?.name)}
-              </Avatar>
-            )}
-          </Stack>
-          <StyledButton
-            label={"Leave Room"}
-            disabled={!socket}
-            sx={{
-              bgcolor: "red.500",
-              "&:hover": {
-                bgcolor: "red.700",
-                boxShadow: "1",
-              },
-            }}
-            onClick={leaveRoom}
-          />
-        </Grid>
-        <Divider />
-        <Stack direction="row" spacing={2} sx={{ p: 3 }}>
-          <Grid item xs={4}>
-            <Stack spacing={2}>
-              <Question />
-              <ChatProvider roomId={roomId || ""}>
-                <Chat />
-              </ChatProvider>
-            </Stack>
-          </Grid>
-          <Grid item xs={8}>
-            <EditorProvider roomId={roomId || ""}>
-              <Editor language={"javascript"} />
-            </EditorProvider>
-          </Grid>
+          )}
         </Stack>
-      </Grid>
-    </Grid>
+        <StyledButton
+          label={"Leave Room"}
+          disabled={!socket}
+          sx={{
+            bgcolor: "red.500",
+            "&:hover": {
+              bgcolor: "red.700",
+              boxShadow: "1",
+            },
+          }}
+          onClick={leaveRoom}
+        />
+      </Stack>
+      <Divider />
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
+      >
+        <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
+          <Box sx={{ flex: 1, minHeight: 0 }}>
+            <Question />
+          </Box>
+          <ChatProvider roomId={roomId || ""}>
+            <Box sx={{ height: "40%" }}>
+              <Chat />
+            </Box>
+          </ChatProvider>
+        </Stack>
+        <Box sx={{ height: "100%", flex: 1, minWidth: 0 }}>
+          <EditorProvider roomId={roomId || ""}>
+            <Editor language={"javascript"} />
+          </EditorProvider>
+        </Box>
+      </Stack>
+    </Stack>
   );
 };

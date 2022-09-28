@@ -18,6 +18,7 @@ import { useCreateChatToken } from "src/hooks/useChat";
 import { useAuth } from "./AuthContext";
 
 type ChatContextProps = {
+  identity: string;
   connected: boolean;
   messages: Message[] | undefined;
   send: (content: string, callback: () => void) => Promise<void>;
@@ -68,7 +69,7 @@ export const ChatProvider = ({
 
       // Update display name in participant object.
       const self = await activeConversation.getParticipantByIdentity(identity);
-      self?.updateAttributes({ name: user?.name || "" });
+      await self?.updateAttributes({ name: user?.name || "" });
 
       // Retrieve existing messages and load them.
       const existingMessages = await activeConversation.getMessages();
@@ -140,7 +141,7 @@ export const ChatProvider = ({
 
   return (
     <ChatContext.Provider
-      value={{ connected, messages, send, typing, isTyping }}
+      value={{ connected, messages, send, typing, isTyping, identity }}
     >
       {children}
     </ChatContext.Provider>

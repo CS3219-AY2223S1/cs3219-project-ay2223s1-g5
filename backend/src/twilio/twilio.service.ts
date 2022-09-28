@@ -62,6 +62,15 @@ export class TwilioService {
     return participant.sid;
   }
 
+  async sendSystemMessage(chatRoomSid: string, message: string): Promise<void> {
+    await this.twilioClient.conversations
+      .services(this.conversationSid)
+      .conversations(chatRoomSid)
+      .messages.create({
+        body: message,
+      });
+  }
+
   async leaveChatRoom(
     chatRoomSid: string,
     participantSid: string,

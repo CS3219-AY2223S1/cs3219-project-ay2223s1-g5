@@ -11,8 +11,19 @@ import {
 
 export const Question = () => {
   return (
-    <Paper elevation={1} sx={{ p: 3 }}>
-      <Stack direction="column" spacing={3}>
+    <Paper elevation={1} sx={{ py: 3, px: 2, height: "100%" }}>
+      <Stack
+        direction="column"
+        spacing={3}
+        sx={{
+          px: 1, // Padding between scrollbar and content.
+          flex: 1,
+          height: "100%",
+          minHeight: 0,
+          overflowX: "hidden",
+          overflowY: "auto",
+        }}
+      >
         <Typography variant="h5" sx={{ textAlign: "center" }}>
           Problem Title
         </Typography>
