@@ -14,13 +14,12 @@ jobs:
     name: Deploy
     uses: ./.github/workflows/gcp-deploy.yml
     secrets:
-      project: ${{ secrets.GCP_PROJECT }}
-      credentials: ${{ secrets.GCP_SA_KEY }}
+      project: ${{ secrets.GCP_PROJECT_STAGING }}
+      provider: ${{ secrets.GCP_PROVIDER_STAGING }}
+      service-account: ${{ secrets.GCP_SERVICE_ACCOUNT_STAGING }}
     with:
-      region: "asia-southeast1"
-      service: "code-collab-staging"
-      repository: "code-collab-staging-repository"
+      environment: "staging"
+      service: "application"
+      service-region: "asia-southeast1"
+      repository: "application-registry"
       repository-region: "asia-southeast1"
-      # Environment values are case sensitive
-      environment: "STAGING"
-      node-environment: "staging"

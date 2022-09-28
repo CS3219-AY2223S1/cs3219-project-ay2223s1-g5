@@ -6,34 +6,37 @@ on:
       project:
         description: "Project ID"
         required: true
-      credentials:
-        description: "Service Account Credentials"
+      provider:
+        description: "GCP WIF Provider"
+        required: true
+      service-account:
+        description: "Service Account Email"
         required: true
     inputs:
-      region:
-        description: "Cloud Run Instance Region"
+      environment:
+        description: "Application Environment"
         required: true
         type: string
       service:
         description: "Cloud Run Service ID"
         required: true
         type: string
+      service-region:
+        description: "Cloud Run Service Region"
+        required: true
+        type: string
       repository:
-        description: "GCP Artifact Registry"
+        description: "Artifact Registry"
         required: true
         type: string
       repository-region:
-        description: "GCP Artifact Registry Region"
+        description: "Artifact Registry Region"
         required: true
         type: string
-      environment:
-        description: "Secrets Environment"
-        required: true
-        type: string
-      node-environment:
-        description: "Node Environment"
-        required: true
-        type: string
+
+permissions:
+  contents: "read"
+  id-token: "write"
 
 jobs:
   deploy:
@@ -43,21 +46,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: GCP Authentication
-        id: "auth"
-        uses: "google-github-actions/auth@v0"
+      - name: GCP authentication
+        id: auth
+        uses: google-github-actions/auth@v0
         with:
-          credentials_json: "${{ secrets.credentials }}"
+          token_format: "access_token"
+          workload_identity_provider: ${{ secrets.provider }}
+          service_account: ${{ secrets.service-account }}
 
-      - name: Docker Authentication
+      - name: Docker authentication
         id: docker-auth
         uses: "docker/login-action@v1"
         with:
-          registry: ${{ inputs.repository-region }}-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.credentials }}
+          registry: "${{ inputs.repository-region }}-docker.pkg.dev"
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
 
-      - name: Build and Push Container
+      - name: Build and push container
         run: |-
           docker build -t "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}" ./
           docker push "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}"
@@ -67,19 +72,23 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v0
         with:
           service: ${{ inputs.service }}
-          region: ${{ inputs.region }}
+          region: ${{ inputs.service-region }}
           image: ${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}
-          env_vars: NODE_ENV=${{ inputs.node-environment }}
+          env_vars: NODE_ENV=${{ inputs.environment }}
           secrets: |
-            DOMAIN=DOMAIN_${{ inputs.environment }}:latest
-            DATABASE_NAME=DATABASE_NAME_${{ inputs.environment }}:latest
-            DATABASE_USERNAME=DATABASE_USERNAME_${{ inputs.environment }}:latest
-            DATABASE_PASSWORD=DATABASE_PASSWORD_${{ inputs.environment }}:latest
-            DATABASE_HOST=DATABASE_HOST_${{ inputs.environment }}:latest
-            DATABASE_PORT=DATABASE_PORT_${{ inputs.environment }}:latest
-            REDIS_URL=REDIS_URL_${{ inputs.environment }}:latest
-            SESSION_SECRET=SESSION_SECRET_${{ inputs.environment }}:latest
+            DOMAIN=DOMAIN:latest
+            DATABASE_NAME=DATABASE_NAME:latest
+            DATABASE_USERNAME=DATABASE_USERNAME:latest
+            DATABASE_PASSWORD=DATABASE_PASSWORD:latest
+            DATABASE_HOST=DATABASE_HOST:latest
+            DATABASE_PORT=DATABASE_PORT:latest
+            REDIS_URL=REDIS_URL:latest
+            SESSION_SECRET=SESSION_SECRET:latest
             TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest
             TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest
             TWILIO_VERIFICATION_SID=TWILIO_VERIFICATION_SID:latest
             TWILIO_RESET_PASSWORD_SID=TWILIO_RESET_PASSWORD_SID:latest
+            TWILIO_CONVERSATIONS_SID=TWILIO_CONVERSATIONS_SID:latest
+            TWILIO_API_KEY=TWILIO_API_KEY:latest
+            TWILIO_API_SECRET=TWILIO_API_SECRET:latest
+            JUDGE0_API_KEY=JUDGE0_API_KEY:latest
