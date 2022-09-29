@@ -5,6 +5,7 @@ import { LandingLayout } from "src/layouts/LandingLayout";
 import { SidebarLayout } from "src/layouts/SidebarLayout";
 import { LoginPage } from "src/pages/LoginPage";
 import { QueuePage } from "src/pages/QueuePage";
+import { RequestVerificationEmailPage } from "src/pages/RequestVerificationEmailPage";
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
 import { RoomPage } from "src/pages/RoomPage";
 import { VerificationPage } from "src/pages/VerificationPage";
@@ -31,6 +32,10 @@ export const AppRoutes: RouteObject[] = [
           {
             path: "reset-password",
             element: <ResetPasswordPage />,
+          },
+          {
+            path: "request-verify",
+            element: <RequestVerificationEmailPage />,
           },
         ],
       },

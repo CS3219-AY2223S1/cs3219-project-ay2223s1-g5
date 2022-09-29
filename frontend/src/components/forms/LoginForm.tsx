@@ -10,7 +10,7 @@ import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useAuth } from "src/contexts/AuthContext";
 import { useLogin } from "src/hooks/useAuth";
-import { useRequestVerifyEmail } from "src/hooks/useUsers";
+import { useRequestVerificationEmail } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
 
 import { TextButton } from "../TextButton";
@@ -28,7 +28,7 @@ type LoginFormState = {
 export const LoginForm = (props: LoginFormProps) => {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const { loginMutation, isLoginLoading } = useLogin();
-  const { requestVerifyEmailMutation } = useRequestVerifyEmail();
+  const { requestVerificationEmailMutation } = useRequestVerificationEmail();
   const { getUser } = useAuth();
 
   const formMethods = useForm<LoginFormState>();
@@ -42,7 +42,6 @@ export const LoginForm = (props: LoginFormProps) => {
     } catch (e: unknown) {
       const error = e as ApiResponseError;
       if (error.status === 403) {
-        // TODO: Abstract this callback.
         enqueueSnackbar(
           <span>
             Account not activated.{" "}
@@ -55,7 +54,8 @@ export const LoginForm = (props: LoginFormProps) => {
               }}
               onClick={async () => {
                 try {
-                  await requestVerifyEmailMutation({ email: data.email });
+                  await requestVerificationEmailMutation({ email: data.email });
+                  // We don't need to close the snackbar since we have a limit of one snackbar.
                   enqueueSnackbar("Verification email sent!", {
                     variant: "success",
                   });

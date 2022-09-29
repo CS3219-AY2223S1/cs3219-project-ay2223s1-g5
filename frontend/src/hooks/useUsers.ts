@@ -70,16 +70,16 @@ export const useResetPassword = () => {
   };
 };
 
-export const useRequestVerifyEmail = () => {
-  const requestVerifyEmail = async (input: RequestVerifyEmailReq) => {
+export const useRequestVerificationEmail = () => {
+  const requestVerificationEmail = async (input: RequestVerifyEmailReq) => {
     await ApiService.post<void>(`/users/verifications`, input);
   };
   const {
-    isLoading: isRequestVerifyEmailLoading,
-    mutateAsync: requestVerifyEmailMutation,
-  } = useMutation(requestVerifyEmail);
+    isLoading: isRequestVerificationEmailLoading,
+    mutateAsync: requestVerificationEmailMutation,
+  } = useMutation(requestVerificationEmail);
   return {
-    isRequestVerifyEmailLoading,
-    requestVerifyEmailMutation,
+    isRequestVerificationEmailLoading,
+    requestVerificationEmailMutation,
   };
 };
