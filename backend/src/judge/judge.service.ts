@@ -5,6 +5,8 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
 
+import { JavaMiddleware } from "./middleware/java";
+
 import { Language } from "~shared/types/base/index";
 
 @Injectable()
@@ -39,11 +41,12 @@ export class JudgeService {
     try {
       const entryPoint = this.getEntryPoint(language, template, inputs);
       code += entryPoint;
+      const encodedCode = this.convertToBase64(code);
       const response = await this.axiosInstance.post(
         "submissions",
         JSON.stringify({
           language_id: language,
-          source_code: code,
+          source_code: encodedCode,
         }),
       );
 
@@ -68,5 +71,9 @@ export class JudgeService {
       default:
         return "";
     }
+  }
+
+  private convertToBase64(code: string): string {
+    return Buffer.from(code, "binary").toString("base64");
   }
 }

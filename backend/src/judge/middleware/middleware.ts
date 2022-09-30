@@ -1,11 +1,11 @@
-interface CodeDetail {
+export interface CodeDetail {
   functionName: string;
   argTypes: string[];
   variableNames: string[];
   returnType: string;
 }
 
-abstract class JudgeMiddleware {
+export abstract class JudgeMiddleware {
   template: string;
   inputs: string[];
 

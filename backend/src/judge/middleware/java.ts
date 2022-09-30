@@ -1,4 +1,10 @@
-class JavaMiddleware extends JudgeMiddleware {
+import { CodeDetail, JudgeMiddleware } from "./middleware";
+
+export class JavaMiddleware extends JudgeMiddleware {
+  constructor(template: string, inputs: string[]) {
+    super(template, inputs);
+  }
+
   getCodeDetail(): CodeDetail {
     const returnType = this.template.match(/public\s(\S*)/);
     const functionName = this.template.match(/public.*\s(\S*)\(/);
