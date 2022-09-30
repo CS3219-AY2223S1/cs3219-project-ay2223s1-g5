@@ -31,17 +31,19 @@ export class JudgeService {
   async sendRequest(
     language: Language,
     code: string,
-    stdin: string,
+    template: string,
+    inputs: string[],
     expectedOutput: string,
   ): Promise<boolean> {
     this.logger.info("Sending code to Judge0...");
     try {
+      const entryPoint = this.getEntryPoint(language, template, inputs);
+      code += entryPoint;
       const response = await this.axiosInstance.post(
         "submissions",
         JSON.stringify({
           language_id: language,
           source_code: code,
-          stdin: stdin,
         }),
       );
 
@@ -50,6 +52,21 @@ export class JudgeService {
     } catch (e: unknown) {
       this.logger.error(e);
       return false;
+    }
+  }
+
+  private getEntryPoint(
+    language: Language,
+    template: string,
+    inputs: string[],
+  ): string {
+    switch (language) {
+      case Language.JAVA: {
+        const middleware = new JavaMiddleware(template, inputs);
+        return middleware.getEntryPoint();
+      }
+      default:
+        return "";
     }
   }
 }

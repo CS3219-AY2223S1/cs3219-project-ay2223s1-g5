@@ -1,11 +1,11 @@
 class JavaMiddleware extends JudgeMiddleware {
-  getCodeDetail(): CodeDetail | null {
-    const returnType = this.template.match(/.*public\s(\S*).*/);
-    const functionName = this.template.match(/.*public.*\s(\S*)\(.*/);
-    const argTypeWithVariableName = this.template.match(/.*public.*\((.*)\)/);
+  getCodeDetail(): CodeDetail {
+    const returnType = this.template.match(/public\s(\S*)/);
+    const functionName = this.template.match(/public.*\s(\S*)\(/);
+    const argTypeWithVariableName = this.template.match(/public.*\((.*)\)/);
 
     if (!returnType || !functionName || !argTypeWithVariableName) {
-      return null;
+      throw Error("Error parsing Java template code");
     }
 
     const arr = argTypeWithVariableName[1].split(",").map((e) => e.trim());

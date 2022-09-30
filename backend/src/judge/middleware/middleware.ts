@@ -8,14 +8,17 @@ interface CodeDetail {
 abstract class JudgeMiddleware {
   template: string;
   inputs: string[];
-  output: string;
 
-  constructor(template: string, inputs: string[], output: string) {
+  constructor(template: string, inputs: string[]) {
     this.template = template;
     this.inputs = inputs;
-    this.output = output;
   }
 
-  abstract getCodeDetail(): CodeDetail | null;
+  getEntryPoint() {
+    const codeDetail = this.getCodeDetail();
+    return this.createEntryPoint(codeDetail);
+  }
+
+  abstract getCodeDetail(): CodeDetail;
   abstract createEntryPoint(codeDetail: CodeDetail): string;
 }
