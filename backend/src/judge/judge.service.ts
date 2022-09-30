@@ -6,6 +6,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { ConfigService } from "src/core/config/config.service";
 
 import { JavaMiddleware } from "./middleware/java";
+import { JavascriptMiddleware } from "./middleware/javascript";
 import { JudgeMiddleware } from "./middleware/middleware";
 
 import { Language } from "~shared/types/base/index";
@@ -72,6 +73,8 @@ export class JudgeService {
     switch (language) {
       case Language.JAVA:
         return new JavaMiddleware(template, inputs);
+      case Language.JAVASCRIPT:
+        return new JavascriptMiddleware(template, inputs);
       default:
         throw Error("Language not supported yet");
     }

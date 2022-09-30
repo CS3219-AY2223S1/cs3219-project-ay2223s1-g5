@@ -1,10 +1,16 @@
-class JavascriptMiddleware extends JudgeMiddleware {
-  getCodeDetail(): CodeDetail | null {
-    const returnType = this.template.match(/var\s(\S*)/);
-    const functionName = this.template.match(/@return\s{(.*)}/);
+import { CodeDetail, JudgeMiddleware } from "./middleware";
+
+export class JavascriptMiddleware extends JudgeMiddleware {
+  constructor(template: string, inputs: string[]) {
+    super(template, inputs);
+  }
+
+  getCodeDetail(): CodeDetail {
+    const functionName = this.template.match(/var\s(\S*)/);
+    const returnType = this.template.match(/@return\s{(.*)}/);
 
     if (!returnType || !functionName) {
-      return null;
+      throw Error("Error parsing Javascript template code");
     }
 
     const argTypeRegex = /@param\s{(\S*)}/g;
@@ -32,15 +38,15 @@ class JavascriptMiddleware extends JudgeMiddleware {
   createEntryPoint(codeDetail: CodeDetail): string {
     let variables = "";
     for (let i = 0; i < codeDetail.argTypes.length; i++) {
-      variables += `const ${codeDetail.variableNames} = ${this.inputs[i]}`;
+      variables += `const ${codeDetail.variableNames[i]} = ${this.inputs[i]};\n`;
     }
 
     const joinedVariableNames = codeDetail.variableNames.join(",");
 
     return `
-${variables};
+${variables}
 const result = ${codeDetail.functionName}(${joinedVariableNames});
 console.log(result);
-		`;
+`;
   }
 }
