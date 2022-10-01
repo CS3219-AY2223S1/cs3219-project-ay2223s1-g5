@@ -1,11 +1,17 @@
-import { CodeDetail, JudgeMiddleware } from "./middleware";
+import dedent from "dedent";
+
+import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class JavascriptMiddleware extends JudgeMiddleware {
   constructor(template: string, inputs: string[]) {
     super(template, inputs);
   }
 
-  getCodeDetail(): CodeDetail {
+  getImports(): string {
+    return `var _ = require('lodash');`;
+  }
+
+  protected getCodePrototype(): CodePrototype {
     const functionName = this.template.match(/var\s(\S*)/);
     const returnType = this.template.match(/@return\s{(.*)}/);
 
@@ -13,40 +19,34 @@ export class JavascriptMiddleware extends JudgeMiddleware {
       throw Error("Error parsing Javascript template code");
     }
 
-    const argTypeRegex = /@param\s{(\S*)}/g;
-    let argTypeMatches = null;
-    const argTypes = [];
-    while ((argTypeMatches = argTypeRegex.exec(this.template))) {
-      argTypes.push(argTypeMatches[1]);
-    }
-
-    const varNameRegex = /@param.*}\s(\S+)/g;
-    let varNameMatches = null;
-    const variableNames = [];
-    while ((varNameMatches = varNameRegex.exec(this.template))) {
-      variableNames.push(varNameMatches[1]);
+    const argumentRegex = /@param\s{(\S*)}\s(\S*)/g;
+    let argumentMatches = null;
+    const argumentArr = [];
+    while ((argumentMatches = argumentRegex.exec(this.template))) {
+      argumentArr.push({ type: argumentMatches[1], name: argumentMatches[2] });
     }
 
     return {
-      argTypes,
-      variableNames,
+      arguments: argumentArr,
       functionName: functionName[1],
       returnType: returnType[1],
     };
   }
 
-  createEntryPoint(codeDetail: CodeDetail): string {
+  protected createEntryPoint(codePrototype: CodePrototype): string {
     let variables = "";
-    for (let i = 0; i < codeDetail.argTypes.length; i++) {
-      variables += `const ${codeDetail.variableNames[i]} = ${this.inputs[i]};\n`;
+    for (let i = 0; i < codePrototype.arguments.length; i++) {
+      variables += `const ${codePrototype.arguments[i].name} = ${this.inputs[i]};\n`;
     }
 
-    const joinedVariableNames = codeDetail.variableNames.join(",");
+    const joinedVariableNames = codePrototype.arguments
+      .map((arg) => arg.name)
+      .join(", ");
 
-    return `
-${variables}
-const result = ${codeDetail.functionName}(${joinedVariableNames});
-console.log(result);
-`;
+    return dedent`
+      ${variables}
+      const result = ${codePrototype.functionName}(${joinedVariableNames});
+      console.log(result);
+    `;
   }
 }

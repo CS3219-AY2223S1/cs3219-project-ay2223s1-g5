@@ -1,85 +1,97 @@
-import { CodeDetail, JudgeMiddleware } from "./middleware";
+import dedent from "dedent";
+
+import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class CppMiddleware extends JudgeMiddleware {
   constructor(template: string, inputs: string[]) {
     super(template, inputs);
   }
 
-  getCodeDetail(): CodeDetail {
+  getImports(): string {
+    return dedent`
+      #include <algorithm>
+      #include <cstdint>
+      #include <limits>
+      #include <set>
+      #include <utility>
+      #include <vector>
+      #include <iostream>
+      #include <sstream>
+      #include <string>
+      #include <iterator>
+      #include <map>
+      using namespace std;
+    `;
+  }
+
+  protected getCodePrototype(): CodePrototype {
     const returnType = this.template.match(/public:\s*(\S*)/);
     const functionName = this.template.match(/\s(\S*)\(/);
     const argTypeWithVariableName = this.template.match(/\((.*)\)/);
-    if (!returnType) {
-      throw Error("No return type");
-    }
-    if (!functionName) {
-      throw Error("No func name");
-    }
-    if (!argTypeWithVariableName) {
-      throw Error("No arg var");
-    }
 
     if (!returnType || !functionName || !argTypeWithVariableName) {
       throw Error("Error parsing CPP template code");
     }
 
     const arr = argTypeWithVariableName[1].split(",").map((e) => e.trim());
-    const argTypes = [];
-    const variableNames = [];
+    const argumentArr = [];
     for (const element of arr) {
       const [argType, varName] = element.split(" ").map((e) => e.trim());
-      argTypes.push(argType);
-      variableNames.push(varName);
+      argumentArr.push({ type: argType, name: varName });
     }
 
     return {
-      argTypes,
-      variableNames,
+      arguments: argumentArr,
       functionName: functionName[1],
       returnType: returnType[1],
     };
   }
 
-  createEntryPoint(codeDetail: CodeDetail): string {
+  protected createEntryPoint(codePrototype: CodePrototype): string {
     let variables = "";
-    for (let i = 0; i < codeDetail.argTypes.length; i++) {
+    for (let i = 0; i < codePrototype.arguments.length; i++) {
       let input = this.inputs[i];
 
       // Check if input type is vector
-      if (codeDetail.argTypes[i].includes("vector")) {
-        const argType = codeDetail.argTypes[i].replace("&", "");
-        input = input.replace(/\[/g, "{");
-        input = input.replace(/\]/g, "}");
-        variables += `${argType} ${codeDetail.variableNames[i]}${input};\n`;
+      if (codePrototype.arguments[i].type.includes("vector")) {
+        const argType = codePrototype.arguments[i].type.replace("&", "");
+        // TODO: Handle nested vector case
+        input = input.replace(/^\[/, "{");
+        input = input.replace(/\]$/, "}");
+        variables += `${argType} ${codePrototype.arguments[i].name}${input};\n`;
       } else {
-        variables += `${codeDetail.argTypes[i]} ${codeDetail.variableNames[i]} = ${input};\n`;
+        variables += `${codePrototype.arguments[i].type} ${codePrototype.arguments[i].name} = ${input};\n`;
       }
     }
 
-    const joinedVariableNames = codeDetail.variableNames.join(",");
+    const joinedVariableNames = codePrototype.arguments
+      .map((arg) => arg.name)
+      .join(",");
+
     let printOutput;
-    if (codeDetail.returnType.includes("vector")) {
-      printOutput = `
-std::stringstream ss;
-ss << "[";
-for (size_t i = 0; i < res.size(); i++) {
-  if (i != 0) {
-    ss << ", ";
-  }
-  ss << res[i];
-}
-ss << "]";
-std::cout << ss.str() << std::endl;
-`;
+    if (codePrototype.returnType.includes("vector")) {
+      printOutput = dedent`
+        std::stringstream ss;
+        ss << "[";
+        for (size_t i = 0; i < res.size(); i++) {
+          if (i != 0) {
+            ss << ", ";
+          }
+          ss << res[i];
+        }
+        ss << "]";
+        std::cout << ss.str() << std::endl;
+      `;
     } else {
       printOutput = `std::cout << res << std::endl;`;
     }
 
-    return `
-int main() {
-  ${variables}
-  ${codeDetail.returnType} res = Solution().${codeDetail.functionName}(${joinedVariableNames});
-  ${printOutput}
-}`;
+    return dedent`
+      int main() {
+        ${variables}
+        ${codePrototype.returnType} res = Solution().${codePrototype.functionName}(${joinedVariableNames});
+        ${printOutput}
+      }
+    `;
   }
 }
