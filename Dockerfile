@@ -18,4 +18,4 @@ COPY --from=build /opt/codecollab/node_modules ./node_modules
 COPY --from=build /opt/codecollab/package.json ./
 
 EXPOSE 8080
-CMD ["npm", "run", "on-backend", "start"]
+CMD ["npm", "run", "on-backend", "start:prod"]

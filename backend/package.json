@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "pre-commit": "lint-staged",
-    "prebuild": "rimraf dist",
+    "prebuild": "rimraf build",
     "build": "nest build",
     "dev": "concurrently \"npm run --prefix ../shared dev\" \"nest start --watch | npm run pino-pretty\"",
     "dev:debug": "concurrently \"npm run --prefix ../shared dev\" \"nest start --watch --debug | npm run pino-pretty\"",

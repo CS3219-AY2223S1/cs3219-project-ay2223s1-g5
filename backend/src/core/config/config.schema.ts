@@ -128,11 +128,12 @@ export const schema: Schema<ConfigSchema> = {
       env: "JUDGE0_API_KEY",
       format: "required-string",
       default: "",
+      sensitive: true,
     },
     apiHost: {
       env: "JUDGE0_API_HOST",
       format: "required-string",
-      default: "",
+      default: "judge0-ce.p.rapidapi.com",
     },
   },
 };
