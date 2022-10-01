@@ -59,17 +59,19 @@ export class RoomService {
       throw new Error(`User ${userId} should not be in room`);
     }
 
-    // We add before deleting to ensure that the room will not be accidentally terminated.
-    await this.redisService.addKeySet(
-      [RoomService.NAMESPACE],
-      roomId,
-      `${userId.toString()}:${Status.CONNECTED}`,
-    );
-    await this.redisService.deleteFromSet(
-      [RoomService.NAMESPACE],
-      roomId,
-      `${userId.toString()}:${Status.DISCONNECTED}`,
-    );
+    await this.redisService
+      .transaction()
+      .deleteFromSet(
+        [RoomService.NAMESPACE],
+        roomId,
+        `${userId.toString()}:${Status.DISCONNECTED}`,
+      )
+      .addKeySet(
+        [RoomService.NAMESPACE],
+        roomId,
+        `${userId.toString()}:${Status.CONNECTED}`,
+      )
+      .execute();
 
     const members = await this.getMembers(roomId);
     if (!members) {
@@ -114,16 +116,19 @@ export class RoomService {
   }
 
   async disconnectRoom(userId: number, roomId: string): Promise<void> {
-    await this.redisService.addKeySet(
-      [RoomService.NAMESPACE],
-      roomId,
-      `${userId.toString()}:${Status.DISCONNECTED}`,
-    );
-    await this.redisService.deleteFromSet(
-      [RoomService.NAMESPACE],
-      roomId,
-      `${userId.toString()}:${Status.CONNECTED}`,
-    );
+    await this.redisService
+      .transaction()
+      .addKeySet(
+        [RoomService.NAMESPACE],
+        roomId,
+        `${userId.toString()}:${Status.DISCONNECTED}`,
+      )
+      .deleteFromSet(
+        [RoomService.NAMESPACE],
+        roomId,
+        `${userId.toString()}:${Status.CONNECTED}`,
+      )
+      .execute();
   }
 
   async getRoom(userId: number): Promise<string | null> {

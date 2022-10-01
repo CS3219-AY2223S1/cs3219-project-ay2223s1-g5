@@ -1,8 +1,47 @@
 import { Injectable, OnApplicationShutdown } from "@nestjs/common";
+import { RedisClientMultiCommandType } from "@redis/client/dist/lib/client/multi-command";
 import { PinoLogger } from "nestjs-pino";
-import { createClient, RedisClientType } from "redis";
+import {
+  createClient,
+  RedisClientType,
+  RedisFunctions,
+  RedisModules,
+  RedisScripts,
+} from "redis";
 
 import { ConfigService } from "src/core/config/config.service";
+
+export class RedisTransactionBuilder<
+  M extends RedisModules,
+  F extends RedisFunctions,
+  S extends RedisScripts,
+> {
+  constructor(private multiCommand: RedisClientMultiCommandType<M, F, S>) {}
+
+  addKeySet(
+    namespaces: string[],
+    key: string,
+    value: string,
+  ): RedisTransactionBuilder<M, F, S> {
+    const namespace = RedisService.createNamespace(namespaces);
+    this.multiCommand = this.multiCommand.v4.sAdd(`${namespace}${key}`, value);
+    return this;
+  }
+
+  deleteFromSet(
+    namespaces: string[],
+    key: string,
+    value: string,
+  ): RedisTransactionBuilder<M, F, S> {
+    const namespace = RedisService.createNamespace(namespaces);
+    this.multiCommand = this.multiCommand.v4.sRem(`${namespace}${key}`, value);
+    return this;
+  }
+
+  async execute(): Promise<void> {
+    await this.multiCommand.exec();
+  }
+}
 
 @Injectable()
 export class RedisService implements OnApplicationShutdown {
@@ -97,7 +136,7 @@ export class RedisService implements OnApplicationShutdown {
     value: string,
   ): Promise<number> {
     const namespace = RedisService.createNamespace(namespaces);
-    return this.redisClient.sAdd(`${namespace}${key}`, value);
+    return this.redisClient.v4.sAdd(`${namespace}${key}`, value);
   }
 
   async deleteFromSet(
@@ -112,5 +151,9 @@ export class RedisService implements OnApplicationShutdown {
   async getSetSize(namespaces: string[], key: string): Promise<number> {
     const namespace = RedisService.createNamespace(namespaces);
     return this.redisClient.v4.sCard(`${namespace}${key}`);
+  }
+
+  transaction() {
+    return new RedisTransactionBuilder(this.redisClient.multi());
   }
 }
