@@ -17,7 +17,9 @@ export const QueuePage = () => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const difficulty = params.get("difficulty");
-  const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(
+    undefined,
+  );
   const [timer, setTimer] = useState<number>(TIMEOUT);
   const [timerVariant, setTimerVariant] = useState<
     "determinate" | "indeterminate"

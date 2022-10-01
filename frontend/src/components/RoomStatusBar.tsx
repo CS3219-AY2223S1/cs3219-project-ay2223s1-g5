@@ -1,5 +1,8 @@
-import { Avatar, Stack, useTheme } from "@mui/material";
+import { Circle } from "@mui/icons-material";
+import { Avatar, Stack, Typography, useTheme } from "@mui/material";
 
+import { useChat } from "src/contexts/ChatContext";
+import { useEditor } from "src/contexts/EditorContext";
 import { nameToInitials } from "src/utils/string";
 
 import { StyledButton } from "./StyledButton";
@@ -11,6 +14,8 @@ type RoomStatusBarProps = {
 };
 
 export const RoomStatusBar = (props: RoomStatusBarProps) => {
+  const { isConnected: isEditorConnected } = useEditor();
+  const { isConnected: isChatConnected } = useChat();
   const theme = useTheme();
 
   return (
@@ -54,17 +59,63 @@ export const RoomStatusBar = (props: RoomStatusBarProps) => {
           </Avatar>
         ))}
       </Stack>
-      <StyledButton
-        label={"Leave Room"}
-        sx={{
-          bgcolor: "red.500",
-          "&:hover": {
-            bgcolor: "red.700",
-            boxShadow: "1",
-          },
-        }}
-        onClick={props.onLeaveRoom}
-      />
+      <Stack
+        direction="row"
+        spacing={3}
+        sx={{ display: "flex", alignItems: "center" }}
+      >
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          <Typography
+            fontWeight={100}
+            fontSize="1.2rem"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            <Circle
+              sx={{
+                height: "12px",
+                width: "12px",
+                color: isEditorConnected
+                  ? theme.palette.green[500]
+                  : theme.palette.red[500],
+                mr: 1,
+              }}
+            />
+            Editor
+          </Typography>
+          <Typography
+            fontWeight={100}
+            fontSize="1.2rem"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            <Circle
+              sx={{
+                height: "12px",
+                width: "12px",
+                color: isChatConnected
+                  ? theme.palette.green[500]
+                  : theme.palette.red[500],
+                mr: 1,
+              }}
+            />
+            Chat
+          </Typography>
+        </Stack>
+        <StyledButton
+          label={"Leave Room"}
+          sx={{
+            bgcolor: "red.500",
+            "&:hover": {
+              bgcolor: "red.700",
+              boxShadow: "1",
+            },
+          }}
+          onClick={props.onLeaveRoom}
+        />
+      </Stack>
     </Stack>
   );
 };

@@ -75,8 +75,8 @@ export const RoomPage = () => {
       // Joining a room is idempotent so this should be fine.
       socket.emit(ROOM_EVENTS.JOIN, { roomId });
 
-      // To handle reconnections.
-      socket.on(ROOM_EVENTS.CONNECT, () => {
+      // FIXME: socket.on(ROOM_EVENTS.CONNECT) should work.
+      socket.io.on("reconnect", () => {
         socket.emit(ROOM_EVENTS.JOIN, { roomId });
       });
     }

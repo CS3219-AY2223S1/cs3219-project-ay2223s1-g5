@@ -19,7 +19,7 @@ import { useAuth } from "./AuthContext";
 
 type ChatContextProps = {
   identity: string;
-  connected: boolean;
+  isConnected: boolean;
   messages: Message[] | undefined;
   send: (content: string, callback: () => void) => Promise<void>;
   typing: () => void;
@@ -39,7 +39,7 @@ export const ChatProvider = ({
   const [token, setToken] = useState<string>("");
   const [identity, setIdentity] = useState<string>("");
   const [isTyping, setIsTyping] = useState<Set<string>>(new Set());
-  const [connected, setConnected] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
   const [activeConversation, setActiveConversation] = useState<
     Conversation | undefined
   >();
@@ -110,10 +110,10 @@ export const ChatProvider = ({
     // Check connection state.
     twilioClient.on("connectionStateChanged", (state: ConnectionState) => {
       if (state === "connected") {
-        setConnected(true);
+        setIsConnected(true);
       }
       if (state === "disconnected") {
-        setConnected(false);
+        setIsConnected(false);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -141,7 +141,7 @@ export const ChatProvider = ({
 
   return (
     <ChatContext.Provider
-      value={{ connected, messages, send, typing, isTyping, identity }}
+      value={{ isConnected, messages, send, typing, isTyping, identity }}
     >
       {children}
     </ChatContext.Provider>
