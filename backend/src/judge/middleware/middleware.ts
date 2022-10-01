@@ -1,7 +1,6 @@
-export interface CodeDetail {
+export interface CodePrototype {
   functionName: string;
-  argTypes: string[];
-  variableNames: string[];
+  arguments: { type: string; name: string }[];
   returnType: string;
 }
 
@@ -15,10 +14,12 @@ export abstract class JudgeMiddleware {
   }
 
   getEntryPoint() {
-    const codeDetail = this.getCodeDetail();
-    return this.createEntryPoint(codeDetail);
+    const codePrototype = this.getCodePrototype();
+    return this.createEntryPoint(codePrototype);
   }
 
-  abstract getCodeDetail(): CodeDetail;
-  abstract createEntryPoint(codeDetail: CodeDetail): string;
+  abstract getImports(): string;
+
+  protected abstract getCodePrototype(): CodePrototype;
+  protected abstract createEntryPoint(codePrototype: CodePrototype): string;
 }

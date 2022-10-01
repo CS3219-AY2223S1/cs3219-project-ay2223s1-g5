@@ -6,6 +6,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { ConfigService } from "src/core/config/config.service";
 
 import { JavaMiddleware } from "./middleware/java";
+import { JudgeMiddleware } from "./middleware/middleware";
 
 import { Language } from "~shared/types/base/index";
 
@@ -39,8 +40,9 @@ export class JudgeService {
   ): Promise<boolean> {
     this.logger.info("Sending code to Judge0...");
     try {
-      const entryPoint = this.getEntryPoint(language, template, inputs);
-      code += entryPoint;
+      const middleware = this.getMiddleware(language, template, inputs);
+      code = middleware.getImports() + code;
+      code += middleware.getEntryPoint();
       const encodedCode = this.convertToBase64(code);
       const response = await this.axiosInstance.post(
         "submissions",
@@ -58,18 +60,16 @@ export class JudgeService {
     }
   }
 
-  private getEntryPoint(
+  private getMiddleware(
     language: Language,
     template: string,
     inputs: string[],
-  ): string {
+  ): JudgeMiddleware {
     switch (language) {
-      case Language.JAVA: {
-        const middleware = new JavaMiddleware(template, inputs);
-        return middleware.getEntryPoint();
-      }
+      case Language.JAVA:
+        return new JavaMiddleware(template, inputs);
       default:
-        return "";
+        throw Error("Language not supported yet");
     }
   }
 
