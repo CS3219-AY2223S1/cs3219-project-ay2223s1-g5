@@ -53,6 +53,10 @@ export class MockTwilioService {
     this.logger.info(`Creating chat room: ${chatRoomSid}`);
   }
 
+  async sendSystemMessage(chatRoomSid: string, message: string): Promise<void> {
+    this.logger.info(`Sending system message [${chatRoomSid}] ${message}`);
+  }
+
   async sendVerificationEmail(email: string, userId: number): Promise<void> {
     const code = nanoid(10);
     // Code expires in 10 minutes
