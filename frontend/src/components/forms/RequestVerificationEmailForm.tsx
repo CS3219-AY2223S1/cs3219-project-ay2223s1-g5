@@ -1,0 +1,93 @@
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import { MailOutline } from "@mui/icons-material";
+import { Stack } from "@mui/material";
+import { validate } from "email-validator";
+import { useSnackbar } from "notistack";
+
+import { InputWithIcon } from "src/components/InputWithIcon";
+import { StyledButton } from "src/components/StyledButton";
+import { useRequestVerificationEmail } from "src/hooks/useUsers";
+import { ApiResponseError } from "src/services/ApiService";
+
+import { TextButton } from "../TextButton";
+
+export interface RequestVerificationEmailFormProps {
+  onSubmit: () => void;
+  loginRedirect: () => void;
+}
+
+type RequestVerificationEmailFormState = {
+  email: string;
+};
+
+export const RequestVerificationEmailForm = (
+  props: RequestVerificationEmailFormProps,
+) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const {
+    requestVerificationEmailMutation,
+    isRequestVerificationEmailLoading,
+  } = useRequestVerificationEmail();
+
+  const formMethods = useForm<RequestVerificationEmailFormState>();
+  const { handleSubmit } = formMethods;
+
+  const onSubmit = handleSubmit(
+    async (data: RequestVerificationEmailFormState) => {
+      try {
+        await requestVerificationEmailMutation(data);
+        enqueueSnackbar(
+          "An email with account activation instructions will be sent if there is an account associated with this email.",
+          {
+            variant: "success",
+          },
+        );
+        props.onSubmit();
+      } catch (e: unknown) {
+        enqueueSnackbar((e as ApiResponseError).message, {
+          variant: "error",
+        });
+      }
+    },
+  );
+
+  return (
+    <FormProvider {...formMethods}>
+      <Stack spacing={6} component="form" onSubmit={onSubmit} width="100%">
+        <Controller
+          name="email"
+          defaultValue={""}
+          rules={{
+            required: "Email is required.",
+            validate: (value: string) =>
+              validate(value) || "Please enter a valid email",
+          }}
+          render={({
+            field: { value, onBlur, onChange: formOnChange },
+            fieldState: { error },
+          }) => (
+            <InputWithIcon
+              Icon={MailOutline}
+              label="Email"
+              autoComplete="email"
+              value={value ?? ""}
+              onBlur={onBlur}
+              onChange={formOnChange}
+              error={!!error}
+              helperText={error?.message}
+              type="email"
+            />
+          )}
+        />
+        <Stack direction="row" justifyContent="space-between">
+          <TextButton onClick={props.loginRedirect}>Back to login</TextButton>
+          <StyledButton
+            label="Resend Email"
+            type="submit"
+            loading={isRequestVerificationEmailLoading}
+          />
+        </Stack>
+      </Stack>
+    </FormProvider>
+  );
+};

@@ -26,3 +26,12 @@ export class ResetPasswordReq {
   code: string;
   password: string;
 }
+
+export class RequestVerifyEmailReq {
+  email: string;
+}
+
+export class VerifyEmailReq {
+  userId: number;
+  code: string;
+}

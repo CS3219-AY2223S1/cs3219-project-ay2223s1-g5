@@ -6,6 +6,7 @@ import {
   CreateUserReq,
   GetUserNameRes,
   RequestResetPasswordReq,
+  RequestVerifyEmailReq,
   ResetPasswordReq,
 } from "~shared/types/api";
 
@@ -66,5 +67,19 @@ export const useResetPassword = () => {
   return {
     resetPasswordMutation,
     isResetPasswordLoading,
+  };
+};
+
+export const useRequestVerificationEmail = () => {
+  const requestVerificationEmail = async (input: RequestVerifyEmailReq) => {
+    await ApiService.post<void>(`/users/verifications`, input);
+  };
+  const {
+    isLoading: isRequestVerificationEmailLoading,
+    mutateAsync: requestVerificationEmailMutation,
+  } = useMutation(requestVerificationEmail);
+  return {
+    isRequestVerificationEmailLoading,
+    requestVerificationEmailMutation,
   };
 };

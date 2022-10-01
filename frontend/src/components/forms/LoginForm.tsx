@@ -1,6 +1,8 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { Lock, MailOutline } from "@mui/icons-material";
-import { Stack } from "@mui/material";
+import { CloseOutlined, Lock, MailOutline } from "@mui/icons-material";
+import { IconButton, Link, Stack } from "@mui/material";
+import { blueGrey } from "@mui/material/colors";
+import { Box } from "@mui/system";
 import { validate } from "email-validator";
 import { useSnackbar } from "notistack";
 
@@ -8,6 +10,7 @@ import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useAuth } from "src/contexts/AuthContext";
 import { useLogin } from "src/hooks/useAuth";
+import { useRequestVerificationEmail } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
 
 import { TextButton } from "../TextButton";
@@ -23,8 +26,9 @@ type LoginFormState = {
 };
 
 export const LoginForm = (props: LoginFormProps) => {
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const { loginMutation, isLoginLoading } = useLogin();
+  const { requestVerificationEmailMutation } = useRequestVerificationEmail();
   const { getUser } = useAuth();
 
   const formMethods = useForm<LoginFormState>();
@@ -36,6 +40,49 @@ export const LoginForm = (props: LoginFormProps) => {
       await getUser();
       props.onSubmit();
     } catch (e: unknown) {
+      const error = e as ApiResponseError;
+      if (error.status === 403) {
+        enqueueSnackbar(
+          <span>
+            Account not activated.{" "}
+            <Link
+              component="button"
+              variant="body2"
+              sx={{
+                color: "blueGrey.900",
+                textDecorationColor: blueGrey[900],
+              }}
+              onClick={async () => {
+                try {
+                  await requestVerificationEmailMutation({ email: data.email });
+                  // We don't need to close the snackbar since we have a limit of one snackbar.
+                  enqueueSnackbar("Verification email sent!", {
+                    variant: "success",
+                  });
+                } catch (e: unknown) {
+                  enqueueSnackbar((e as ApiResponseError).message, {
+                    variant: "error",
+                  });
+                }
+              }}
+            >
+              Click here to resend email.
+            </Link>
+          </span>,
+          {
+            action: (id) => (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <IconButton sx={{ p: "4px" }} onClick={() => closeSnackbar(id)}>
+                  <CloseOutlined fontSize="small" />
+                </IconButton>
+              </Box>
+            ),
+            variant: "warning",
+            persist: true,
+          },
+        );
+        return;
+      }
       enqueueSnackbar((e as ApiResponseError).message, {
         variant: "error",
       });

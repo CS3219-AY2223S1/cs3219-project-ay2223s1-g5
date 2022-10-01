@@ -8,8 +8,3 @@ export class LoginRes {
   email: string;
   name: string;
 }
-
-export class VerifyEmailReq {
-  userId: number;
-  code: string;
-}
