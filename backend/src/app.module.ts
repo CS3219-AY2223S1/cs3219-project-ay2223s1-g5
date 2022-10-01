@@ -6,6 +6,7 @@ import passport from "passport";
 import { join } from "path";
 
 import { AuthModule } from "src/auth/auth.module";
+import { ChatModule } from "src/chat/chat.module";
 import { ExceptionFilter } from "src/common/filters/exception.filter";
 import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
 import { CoreModule } from "src/core/core.module";
@@ -50,6 +51,7 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     UserModule,
     QueueModule,
     RoomModule,
+    ChatModule,
     EditorModule,
   ],
   providers: [

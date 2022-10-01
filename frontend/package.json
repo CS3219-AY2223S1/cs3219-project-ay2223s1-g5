@@ -9,6 +9,7 @@
     "@mui/icons-material": "^5.10.3",
     "@mui/lab": "^5.0.0-alpha.97",
     "@mui/material": "^5.10.3",
+    "@twilio/conversations": "^2.2.0",
     "axios": "^0.27.2",
     "check-password-strength": "^2.0.7",
     "echarts": "^5.3.3",

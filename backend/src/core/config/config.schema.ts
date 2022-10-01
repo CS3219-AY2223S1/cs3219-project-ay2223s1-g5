@@ -14,6 +14,9 @@ export interface ConfigSchema {
     authToken: string;
     verificationSid: string;
     resetPasswordSid: string;
+    conversationsSid: string;
+    apiKey: string;
+    apiSecret: string;
   };
   redis: {
     url: string;
@@ -90,6 +93,24 @@ export const schema: Schema<ConfigSchema> = {
     },
     resetPasswordSid: {
       env: "TWILIO_RESET_PASSWORD_SID",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    conversationsSid: {
+      env: "TWILIO_CONVERSATIONS_SID",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    apiKey: {
+      env: "TWILIO_API_KEY",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    apiSecret: {
+      env: "TWILIO_API_SECRET",
       format: "required-string",
       default: "",
       sensitive: true,

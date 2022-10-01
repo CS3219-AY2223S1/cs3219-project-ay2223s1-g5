@@ -7,8 +7,12 @@ import { ConfigService } from "src/core/config/config.service";
 export class TwilioService {
   private twilioClient: twilio.Twilio;
   private domain: string;
+  private accountSid: string;
   private verificationSid: string;
   private resetPasswordSid: string;
+  private conversationSid: string;
+  private apiKey: string;
+  private apiSecret: string;
 
   constructor(private readonly configService: ConfigService) {
     this.twilioClient = twilio(
@@ -16,8 +20,73 @@ export class TwilioService {
       this.configService.get("twilio.authToken"),
     );
     this.domain = this.configService.get("domain");
+    this.accountSid = this.configService.get("twilio.accountSid");
     this.verificationSid = this.configService.get("twilio.verificationSid");
     this.resetPasswordSid = this.configService.get("twilio.resetPasswordSid");
+    this.conversationSid = this.configService.get("twilio.conversationsSid");
+    this.apiKey = this.configService.get("twilio.apiKey");
+    this.apiSecret = this.configService.get("twilio.apiSecret");
+  }
+
+  createConversationsToken(userIdentity: string): string {
+    const chatGrant = new twilio.jwt.AccessToken.ChatGrant({
+      serviceSid: this.conversationSid,
+    });
+    const token = new twilio.jwt.AccessToken(
+      this.accountSid,
+      this.apiKey,
+      this.apiSecret,
+      { identity: userIdentity },
+    );
+    token.addGrant(chatGrant);
+    return token.toJwt();
+  }
+
+  async createChatRoom(roomId: string): Promise<string> {
+    const conversation = await this.twilioClient.conversations
+      .services(this.conversationSid)
+      .conversations.create({ uniqueName: roomId });
+    return conversation.sid;
+  }
+
+  async joinChatRoom(
+    chatRoomSid: string,
+    userIdentity: string,
+  ): Promise<string> {
+    const participant = await this.twilioClient.conversations
+      .services(this.conversationSid)
+      .conversations(chatRoomSid)
+      .participants.create({
+        identity: userIdentity,
+      });
+    return participant.sid;
+  }
+
+  async sendSystemMessage(chatRoomSid: string, message: string): Promise<void> {
+    await this.twilioClient.conversations
+      .services(this.conversationSid)
+      .conversations(chatRoomSid)
+      .messages.create({
+        body: message,
+      });
+  }
+
+  async leaveChatRoom(
+    chatRoomSid: string,
+    participantSid: string,
+  ): Promise<void> {
+    await this.twilioClient.conversations
+      .services(this.conversationSid)
+      .conversations(chatRoomSid)
+      .participants(participantSid)
+      .remove();
+  }
+
+  async closeChatRoom(chatRoomSid: string): Promise<void> {
+    await this.twilioClient.conversations
+      .services(this.conversationSid)
+      .conversations(chatRoomSid)
+      .remove();
   }
 
   async sendVerificationEmail(email: string, userId: number): Promise<void> {

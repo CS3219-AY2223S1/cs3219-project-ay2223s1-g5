@@ -41,7 +41,6 @@ export class RoomGateway implements OnGatewayDisconnect {
       };
 
       await client.join(roomId);
-      console.log(payload);
       this.server.to(roomId).emit(ROOM_EVENTS.JOINED, payload);
     } catch (e: unknown) {
       client.disconnect();

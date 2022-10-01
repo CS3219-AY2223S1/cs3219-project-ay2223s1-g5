@@ -21,6 +21,38 @@ export class MockTwilioService {
     this.domain = this.configService.get("domain");
   }
 
+  createConversationsToken(_: string): string {
+    return "MOCK_CONVERSATION_TOKEN";
+  }
+
+  async createChatRoom(roomId: string): Promise<string> {
+    const chatRoomSid = nanoid(10);
+    this.logger.info(`Creating chat room: ${roomId} (${chatRoomSid})`);
+    return chatRoomSid;
+  }
+
+  async joinChatRoom(
+    chatRoomSid: string,
+    userIdentity: string,
+  ): Promise<string> {
+    const participantSid = nanoid(10);
+    this.logger.info(
+      `Joining chat room [${chatRoomSid}]: ${userIdentity} (${participantSid})`,
+    );
+    return participantSid;
+  }
+
+  async leaveChatRoom(
+    chatRoomSid: string,
+    participantSid: string,
+  ): Promise<void> {
+    this.logger.info(`Leaving chat room [${chatRoomSid}]: ${participantSid}`);
+  }
+
+  async closeChatRoom(chatRoomSid: string): Promise<void> {
+    this.logger.info(`Creating chat room: ${chatRoomSid}`);
+  }
+
   async sendVerificationEmail(email: string, userId: number): Promise<void> {
     const code = nanoid(10);
     // Code expires in 10 minutes
