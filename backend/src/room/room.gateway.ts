@@ -54,7 +54,7 @@ export class RoomGateway implements OnGatewayDisconnect {
   ) {
     const userId = Number(session(client).passport?.user.userId);
     await this.roomService.leaveRoom(userId, roomId);
-    this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_LEAVE, userId);
+    this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_LEAVE, { userId });
     client.disconnect();
   }
 
@@ -65,7 +65,7 @@ export class RoomGateway implements OnGatewayDisconnect {
     const roomId = await this.roomService.getRoom(userId);
     if (roomId) {
       await this.roomService.disconnectRoom(userId, roomId);
-      this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_DISCONNECT, userId);
+      this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_DISCONNECT, { userId });
     }
   }
 }
