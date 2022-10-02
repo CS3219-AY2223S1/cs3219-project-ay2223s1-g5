@@ -46,7 +46,10 @@ export class JudgeService {
       const middleware = this.getMiddleware(language, template, inputs);
 
       // Replace leading tabs with whitespaces
-      code = code.replace(/\t/gy, "  ");
+      code = code
+        .split("\n")
+        .map((line) => line.replace(/\t/gy, "  "))
+        .join("\n");
       code = middleware.getImports() + code;
       code += middleware.getEntryPoint();
       const encodedCode = this.encodeBase64(code);
