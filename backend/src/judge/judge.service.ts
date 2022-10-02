@@ -43,7 +43,8 @@ export class JudgeService {
       const middleware = this.getMiddleware(language, template, inputs);
       code = middleware.getImports() + code;
       code += middleware.getEntryPoint();
-      const encodedCode = this.convertToBase64(code);
+      const encodedCode = this.encodeBase64(code);
+      this.logger.info(code);
       const response = await this.axiosInstance.post(
         "submissions",
         JSON.stringify({
@@ -53,7 +54,10 @@ export class JudgeService {
       );
 
       this.logger.info(JSON.stringify(response.data));
-      return response.data.stdout === expectedOutput;
+
+      const decodedOutput = this.decodeBase64(response.data.stdout);
+      this.logger.info(`Judge0 output: ${decodedOutput}`);
+      return decodedOutput === expectedOutput;
     } catch (e: unknown) {
       this.logger.error(e);
       return false;
@@ -73,7 +77,11 @@ export class JudgeService {
     }
   }
 
-  private convertToBase64(code: string): string {
+  private encodeBase64(code: string): string {
     return Buffer.from(code, "binary").toString("base64");
+  }
+
+  private decodeBase64(code: string): string {
+    return Buffer.from(code, "base64").toString("binary");
   }
 }

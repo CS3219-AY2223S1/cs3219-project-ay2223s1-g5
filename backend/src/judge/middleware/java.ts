@@ -1,5 +1,3 @@
-import dedent from "dedent";
-
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class JavaMiddleware extends JudgeMiddleware {
@@ -8,12 +6,11 @@ export class JavaMiddleware extends JudgeMiddleware {
   }
 
   getImports(): string {
-    return dedent`
-      import java.util.*;
-      import java.lang.*
-      import java.util.stream.*;
-      import javafx.util.Pair;
-    `;
+    return (
+      "import java.util.*;\n" +
+      "import java.lang.*;\n" +
+      "import java.util.stream.*;\n"
+    );
   }
 
   protected getCodePrototype(): CodePrototype {
@@ -40,7 +37,7 @@ export class JavaMiddleware extends JudgeMiddleware {
   }
 
   protected createEntryPoint(codePrototype: CodePrototype): string {
-    let variables = "";
+    const variables = [];
     for (let i = 0; i < codePrototype.arguments.length; i++) {
       let input = this.inputs[i];
 
@@ -54,7 +51,9 @@ export class JavaMiddleware extends JudgeMiddleware {
           .replace(/\]$/g, "}")
           .replace(/\],/g, "},");
       }
-      variables += `${codePrototype.arguments[i].type} ${codePrototype.arguments[i].name} = ${input};\n`;
+      variables.push(
+        `${codePrototype.arguments[i].type} ${codePrototype.arguments[i].name} = ${input};`,
+      );
     }
 
     const joinedVariableNames = codePrototype.arguments
@@ -65,15 +64,16 @@ export class JavaMiddleware extends JudgeMiddleware {
       ? "Arrays.toString(res)"
       : "res";
 
-    return dedent`
-      public class Main {
-        public static void main(String[] args) {
-          ${variables}
-          Solution solution = new Solution();
-          ${codePrototype.returnType} res = solution.${codePrototype.functionName}(${joinedVariableNames});
-          System.out.println(${printOutput});
-        }
-      }
-    `;
+    return (
+      `public class Main {\n` +
+      `  public static void main(String[] args) {\n` +
+      variables.map((line) => `  ${line}`).join("\n") +
+      `\n` +
+      `    Solution solution = new Solution();\n` +
+      `    ${codePrototype.returnType} res = solution.${codePrototype.functionName}(${joinedVariableNames});\n` +
+      `    System.out.print(${printOutput});\n` +
+      `  }\n` +
+      `}\n`
+    );
   }
 }
