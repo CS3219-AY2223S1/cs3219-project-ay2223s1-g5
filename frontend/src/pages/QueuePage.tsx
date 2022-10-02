@@ -66,6 +66,7 @@ export const QueuePage = () => {
       return;
     }
     socket.on(QUEUE_EVENTS.CONNECT, () => {
+      setMessage("Finding a match...");
       setConnected(true);
     });
     return () => {
@@ -98,10 +99,13 @@ export const QueuePage = () => {
       return;
     }
 
-    setMessage("Finding a match...");
+    socket.on(QUEUE_EVENTS.MATCH_FOUND, () => {
+      setMessage("Match found. Preparing room...");
+      clearTimeout(timeoutId);
+    });
 
-    socket.on(QUEUE_EVENTS.MATCH_FOUND, (match: MatchRes) => {
-      setMessage("Match found. Joining...");
+    socket.on(QUEUE_EVENTS.ROOM_READY, (match: MatchRes) => {
+      setMessage("Room ready. Joining...");
       clearTimeout(timeoutId);
       setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
     });
@@ -113,6 +117,7 @@ export const QueuePage = () => {
     });
 
     return () => {
+      socket.off(QUEUE_EVENTS.ROOM_READY);
       socket.off(QUEUE_EVENTS.MATCH_FOUND);
       socket.off(QUEUE_EVENTS.EXISTING_MATCH);
     };
