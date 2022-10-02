@@ -44,6 +44,7 @@ export class JavascriptMiddleware extends JudgeMiddleware {
       .join(", ");
 
     return (
+      `\n` +
       variables.join("\n") +
       `\n` +
       `const result = ${codePrototype.functionName}(${joinedVariableNames});\n` +

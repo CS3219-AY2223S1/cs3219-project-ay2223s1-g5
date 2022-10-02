@@ -48,6 +48,7 @@ export class PythonMiddleware extends JudgeMiddleware {
       .join(", ");
 
     return (
+      `\n` +
       variables.join("\n") +
       `\n` +
       `print(Solution().${codePrototype.functionName}(${joinedVariableNames}))\n`

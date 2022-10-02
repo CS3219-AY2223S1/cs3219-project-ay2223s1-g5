@@ -44,6 +44,9 @@ export class JudgeService {
     this.logger.info("Sending code to Judge0...");
     try {
       const middleware = this.getMiddleware(language, template, inputs);
+
+      // Replace leading tabs with whitespaces
+      code = code.replace(/\t/gy, "  ");
       code = middleware.getImports() + code;
       code += middleware.getEntryPoint();
       const encodedCode = this.encodeBase64(code);
