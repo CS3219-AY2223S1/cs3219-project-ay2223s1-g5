@@ -9,7 +9,6 @@ import {
 } from "react";
 import { useMonaco } from "@monaco-editor/react";
 import * as monacoType from "monaco-editor";
-import { useSnackbar } from "notistack";
 import { MonacoBinding } from "y-monaco";
 import { SocketIOProvider } from "y-socket.io";
 import { Doc, Text } from "yjs";
@@ -19,6 +18,7 @@ import { useAuth } from "src/contexts/AuthContext";
 import { EDITOR_DOCUMENT_NAME } from "~shared/constants";
 type EditorContextProps = {
   onMount: (editor: monacoType.editor.IStandaloneCodeEditor) => void;
+  isConnected: boolean;
 };
 
 const EditorContext = createContext<EditorContextProps | undefined>(undefined);
@@ -27,7 +27,6 @@ export const EditorProvider = ({
   roomId,
   children,
 }: PropsWithChildren & { roomId: string }): JSX.Element => {
-  const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuth();
   const monaco = useMonaco();
   const editor = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
@@ -38,7 +37,8 @@ export const EditorProvider = ({
   const [provider, setProvider] = useState<SocketIOProvider | undefined>(
     undefined,
   );
-  const [_, setBinding] = useState<MonacoBinding | undefined>(undefined);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [binding, setBinding] = useState<MonacoBinding | undefined>(undefined);
 
   const onMount = useCallback(
     (monacoEditor: monacoType.editor.IStandaloneCodeEditor) => {
@@ -71,26 +71,32 @@ export const EditorProvider = ({
       document,
       { autoConnect: true },
     );
-    socketIOProvider.awareness.setLocalState({
+    setProvider(socketIOProvider);
+  }, [document, provider, roomId]);
+
+  useEffect(() => {
+    if (!provider) {
+      return;
+    }
+    provider.awareness.setLocalState({
       id: user?.userId,
       name: user?.name,
     });
-    socketIOProvider.on("status", ({ status }: { status: string }) => {
+    provider.on("status", ({ status }: { status: string }) => {
       if (status === "connected") {
-        enqueueSnackbar("Editor connected.", {
-          variant: "info",
-          key: "editor",
-        });
+        setIsConnected(true);
       } else {
-        enqueueSnackbar("Editor disconnected. Please wait...", {
-          variant: "error",
-          key: "editor",
-          persist: true,
-        });
+        setIsConnected(false);
       }
     });
-    setProvider(socketIOProvider);
-  }, [document, provider, user, roomId, enqueueSnackbar]);
+  }, [provider, user, setIsConnected]);
+
+  useEffect(() => {
+    if (!provider) {
+      return;
+    }
+    return () => provider.destroy();
+  }, [provider]);
 
   // Bind the editor to the provider.
   useEffect(() => {
@@ -108,10 +114,18 @@ export const EditorProvider = ({
     setBinding(binding);
   }, [monaco, provider, type, isEditorMounted]);
 
+  useEffect(() => {
+    if (!binding) {
+      return;
+    }
+    return () => binding.destroy();
+  }, [binding]);
+
   return (
     <EditorContext.Provider
       value={{
         onMount,
+        isConnected,
       }}
     >
       {children}
