@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
+import {
+  Cancel,
+  CheckCircle,
+  DriveFolderUpload,
+  Wysiwyg,
+} from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import {
   Avatar,
@@ -18,6 +23,7 @@ import {
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 
+import { Center } from "src/components/Center";
 import { Chat } from "src/components/chat/Chat";
 import { Editor } from "src/components/Editor";
 import { Question } from "src/components/Question";
@@ -226,22 +232,14 @@ export const RoomPage = () => {
   }, [partnerInfo]);
 
   /* Tabular Data */
-  const tableHeaders = [
-    "DATE",
-    "PROBLEM",
-    "RUNTIME",
-    "LANGUAGE",
-    "TEST CASE",
-    "JUDGEMENT",
-  ];
-  const tableCells = [
-    "2020-04-26 00:26:55",
-    "Two Sum",
-    "0.13s",
-    "Java",
-    "[2,7,11,15], 9",
-    "Pass",
-  ];
+  const tableHeaders = ["DATE", "RUNTIME", "TEST CASE", "STATUS"];
+  const tableCells = ["2020-04-26 00:26:55", "0.13s", "[2,7,11,15], 9", "Fail"];
+  enum Status {
+    PASS = "Pass",
+    COMPILATION_ERROR = "Compilation Error",
+    FAIL = "Fail",
+    TIME_LIMIT_EXCEED = "Time Limit Exceed",
+  }
 
   return (
     <Stack
@@ -393,8 +391,37 @@ export const RoomPage = () => {
                 <TableBody>
                   <TableRow>
                     {tableCells.map((tableCell) => (
-                      <TableCell key={tableCell} align="center">
-                        {tableCell}
+                      <TableCell
+                        key={tableCell}
+                        align="center"
+                        sx={{
+                          color:
+                            Object.values<string>(Status).includes(tableCell) &&
+                            tableCell === "Pass"
+                              ? "green.500"
+                              : Object.values<string>(Status).includes(
+                                  tableCell,
+                                )
+                              ? "red.500"
+                              : "black",
+                          fontWeight: Object.values<string>(Status).includes(
+                            tableCell,
+                          )
+                            ? "bold"
+                            : "normal",
+                        }}
+                      >
+                        <Center>
+                          {Object.values<string>(Status).includes(tableCell) &&
+                          tableCell === "Pass" ? (
+                            <CheckCircle sx={{ mr: 0.5 }} />
+                          ) : Object.values<string>(Status).includes(
+                              tableCell,
+                            ) ? (
+                            <Cancel sx={{ mr: 0.5 }} />
+                          ) : null}
+                          {tableCell}
+                        </Center>
                       </TableCell>
                     ))}
                   </TableRow>
