@@ -1,5 +1,3 @@
-import dedent from "dedent";
-
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class JavascriptMiddleware extends JudgeMiddleware {
@@ -8,7 +6,7 @@ export class JavascriptMiddleware extends JudgeMiddleware {
   }
 
   getImports(): string {
-    return `var _ = require('lodash');`;
+    return "";
   }
 
   protected getCodePrototype(): CodePrototype {
@@ -34,19 +32,22 @@ export class JavascriptMiddleware extends JudgeMiddleware {
   }
 
   protected createEntryPoint(codePrototype: CodePrototype): string {
-    let variables = "";
+    const variables = [];
     for (let i = 0; i < codePrototype.arguments.length; i++) {
-      variables += `const ${codePrototype.arguments[i].name} = ${this.inputs[i]};\n`;
+      variables.push(
+        `const ${codePrototype.arguments[i].name} = ${this.inputs[i]};`,
+      );
     }
 
     const joinedVariableNames = codePrototype.arguments
       .map((arg) => arg.name)
       .join(", ");
 
-    return dedent`
-      ${variables}
-      const result = ${codePrototype.functionName}(${joinedVariableNames});
-      console.log(result);
-    `;
+    return (
+      variables.join("\n") +
+      `\n` +
+      `const result = ${codePrototype.functionName}(${joinedVariableNames});\n` +
+      `console.log(result);\n`
+    );
   }
 }

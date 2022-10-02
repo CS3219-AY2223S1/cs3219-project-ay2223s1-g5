@@ -1,5 +1,3 @@
-import dedent from "dedent";
-
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class PythonMiddleware extends JudgeMiddleware {
@@ -8,12 +6,12 @@ export class PythonMiddleware extends JudgeMiddleware {
   }
 
   getImports(): string {
-    return dedent`
-      from typing import List
-      import collections
-      import math
-      import random
-    `;
+    return (
+      "from typing import List\n" +
+      "import collections\n" +
+      "import math\n" +
+      "import random\n"
+    );
   }
 
   protected getCodePrototype(): CodePrototype {
@@ -40,18 +38,19 @@ export class PythonMiddleware extends JudgeMiddleware {
   }
 
   protected createEntryPoint(codePrototype: CodePrototype): string {
-    let variables = "";
+    const variables = [];
     for (let i = 0; i < codePrototype.arguments.length; i++) {
-      variables += `${codePrototype.arguments[i].name} = ${this.inputs[i]}\n`;
+      variables.push(`${codePrototype.arguments[i].name} = ${this.inputs[i]}`);
     }
 
     const joinedVariableNames = codePrototype.arguments
       .map((arg) => arg.name)
       .join(", ");
 
-    return `
-${variables}
-print(Solution().${codePrototype.functionName}(${joinedVariableNames}))
-`;
+    return (
+      variables.join("\n") +
+      `\n` +
+      `print(Solution().${codePrototype.functionName}(${joinedVariableNames}))\n`
+    );
   }
 }

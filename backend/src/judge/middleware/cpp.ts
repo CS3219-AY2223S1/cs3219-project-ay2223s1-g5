@@ -1,5 +1,3 @@
-import dedent from "dedent";
-
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class CppMiddleware extends JudgeMiddleware {
@@ -8,20 +6,20 @@ export class CppMiddleware extends JudgeMiddleware {
   }
 
   getImports(): string {
-    return dedent`
-      #include <algorithm>
-      #include <cstdint>
-      #include <limits>
-      #include <set>
-      #include <utility>
-      #include <vector>
-      #include <iostream>
-      #include <sstream>
-      #include <string>
-      #include <iterator>
-      #include <map>
-      using namespace std;
-    `;
+    return (
+      "#include <algorithm>\n" +
+      "#include <cstdint>\n" +
+      "#include <limits>\n" +
+      "#include <set>\n" +
+      "#include <utility>\n" +
+      "#include <vector>\n" +
+      "#include <iostream>\n" +
+      "#include <sstream>\n" +
+      "#include <string>\n" +
+      "#include <iterator>\n" +
+      "#include <map>\n" +
+      "using namespace std;\n"
+    );
   }
 
   protected getCodePrototype(): CodePrototype {
@@ -48,7 +46,7 @@ export class CppMiddleware extends JudgeMiddleware {
   }
 
   protected createEntryPoint(codePrototype: CodePrototype): string {
-    let variables = "";
+    const variables = [];
     for (let i = 0; i < codePrototype.arguments.length; i++) {
       let input = this.inputs[i];
 
@@ -58,9 +56,13 @@ export class CppMiddleware extends JudgeMiddleware {
         // TODO: Handle nested vector case
         input = input.replace(/^\[/, "{");
         input = input.replace(/\]$/, "}");
-        variables += `${argType} ${codePrototype.arguments[i].name}${input};\n`;
+        variables.push(
+          `${argType} ${codePrototype.arguments[i].name}${input};`,
+        );
       } else {
-        variables += `${codePrototype.arguments[i].type} ${codePrototype.arguments[i].name} = ${input};\n`;
+        variables.push(
+          `${codePrototype.arguments[i].type} ${codePrototype.arguments[i].name} = ${input};`,
+        );
       }
     }
 
@@ -70,28 +72,28 @@ export class CppMiddleware extends JudgeMiddleware {
 
     let printOutput;
     if (codePrototype.returnType.includes("vector")) {
-      printOutput = dedent`
-        std::stringstream ss;
-        ss << "[";
-        for (size_t i = 0; i < res.size(); i++) {
-          if (i != 0) {
-            ss << ", ";
-          }
-          ss << res[i];
-        }
-        ss << "]";
-        std::cout << ss.str() << std::endl;
-      `;
+      printOutput =
+        `  std::stringstream ss;\n` +
+        `  ss << "[";\n` +
+        `  for (size_t i = 0; i < res.size(); i++) {\n` +
+        `    if (i != 0) {\n` +
+        `      ss << ", ";\n` +
+        `    }\n` +
+        `    ss << res[i];\n` +
+        `  }\n` +
+        `  ss << "]";\n` +
+        `  std::cout << ss.str() << std::endl;\n`;
     } else {
-      printOutput = `std::cout << res << std::endl;`;
+      printOutput = "std::cout << res << std::endl;";
     }
 
-    return dedent`
-      int main() {
-        ${variables}
-        ${codePrototype.returnType} res = Solution().${codePrototype.functionName}(${joinedVariableNames});
-        ${printOutput}
-      }
-    `;
+    return (
+      `int main() {\n` +
+      variables.map((line) => `  ${line}`).join("\n") +
+      `\n` +
+      `  ${codePrototype.returnType} res = Solution().${codePrototype.functionName}(${joinedVariableNames});\n` +
+      `${printOutput}\n` +
+      `}\n`
+    );
   }
 }
