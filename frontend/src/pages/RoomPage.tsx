@@ -1,6 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Avatar, Box, Divider, Stack } from "@mui/material";
+import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import {
+  Avatar,
+  Box,
+  Divider,
+  Paper,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import { useSnackbar } from "notistack";
 
 import { Chat } from "src/components/chat/Chat";
@@ -40,6 +55,16 @@ export const RoomPage = () => {
   });
   const [partner, setPartner] = useState<participant | undefined>(undefined);
   const { user: partnerInfo } = useGetUserName(partner?.userId);
+  const [formType, setFormType] = useState<"description" | "submission">(
+    "description",
+  );
+
+  const handleChange = (
+    _: React.SyntheticEvent | undefined,
+    formType: "description" | "submission",
+  ) => {
+    setFormType(formType);
+  };
 
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -200,6 +225,24 @@ export const RoomPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partnerInfo]);
 
+  /* Tabular Data */
+  const tableHeaders = [
+    "DATE",
+    "PROBLEM",
+    "RUNTIME",
+    "LANGUAGE",
+    "TEST CASE",
+    "JUDGEMENT",
+  ];
+  const tableCells = [
+    "2020-04-26 00:26:55",
+    "Two Sum",
+    "0.13s",
+    "Java",
+    "[2,7,11,15], 9",
+    "Pass",
+  ];
+
   return (
     <Stack
       sx={{
@@ -257,27 +300,110 @@ export const RoomPage = () => {
         />
       </Stack>
       <Divider />
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
-      >
-        <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
-          <Box sx={{ flex: 1, minHeight: 0 }}>
-            <Question />
-          </Box>
-          <ChatProvider roomId={roomId || ""}>
-            <Box sx={{ height: "40%" }}>
-              <Chat />
+      <TabContext value={formType}>
+        <TabList
+          centered
+          onChange={handleChange}
+          sx={{
+            "& .MuiTabs-indicator": {
+              height: "0px",
+            },
+          }}
+        >
+          <Tab
+            label="Description"
+            value="description"
+            sx={{
+              fontWeight: "bold",
+              fontSize: "1.2rem",
+              textTransform: "none",
+            }}
+            icon={<Wysiwyg />}
+            iconPosition="start"
+          />
+          <Tab
+            label="Submission"
+            value="submission"
+            sx={{
+              fontWeight: "bold",
+              fontSize: "1.2rem",
+              textTransform: "none",
+            }}
+            icon={<DriveFolderUpload />}
+            iconPosition="start"
+          />
+        </TabList>
+        <TabPanel sx={{ p: 0 }} value="description">
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
+          >
+            <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                <Question />
+              </Box>
+              <ChatProvider roomId={roomId || ""}>
+                <Box sx={{ height: "40%" }}>
+                  <Chat />
+                </Box>
+              </ChatProvider>
+            </Stack>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <EditorProvider roomId={roomId || ""}>
+                <Editor language={"javascript"} />
+              </EditorProvider>
             </Box>
-          </ChatProvider>
-        </Stack>
-        <Box sx={{ height: "100%", flex: 1, minWidth: 0 }}>
-          <EditorProvider roomId={roomId || ""}>
-            <Editor language={"javascript"} />
-          </EditorProvider>
-        </Box>
-      </Stack>
+          </Stack>
+          <Stack
+            direction="row"
+            justifyContent="flex-end"
+            sx={{ py: 2, px: 3 }}
+          >
+            <StyledButton
+              label={"Submit Code"}
+              sx={{ "&:hover": { boxShadow: "1" } }}
+            />
+          </Stack>
+        </TabPanel>
+        <TabPanel sx={{ p: 0 }} value="submission">
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
+          >
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: "100%" }}>
+                <TableHead sx={{ bgcolor: "primary.500" }}>
+                  <TableRow>
+                    {tableHeaders.map((tableHeader) => (
+                      <TableCell
+                        key={tableHeader}
+                        align="center"
+                        sx={{
+                          fontWeight: "bold",
+                          color: "white",
+                        }}
+                      >
+                        {tableHeader}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    {tableCells.map((tableCell) => (
+                      <TableCell key={tableCell} align="center">
+                        {tableCell}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Stack>
+        </TabPanel>
+      </TabContext>
     </Stack>
   );
 };
