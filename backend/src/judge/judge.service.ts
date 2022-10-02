@@ -5,8 +5,11 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
 
+import { CppMiddleware } from "./middleware/cpp";
 import { JavaMiddleware } from "./middleware/java";
+import { JavascriptMiddleware } from "./middleware/javascript";
 import { JudgeMiddleware } from "./middleware/middleware";
+import { PythonMiddleware } from "./middleware/python";
 
 import { Language } from "~shared/types/base/index";
 
@@ -41,6 +44,12 @@ export class JudgeService {
     this.logger.info("Sending code to Judge0...");
     try {
       const middleware = this.getMiddleware(language, template, inputs);
+
+      // Replace leading tabs with whitespaces
+      code = code
+        .split("\n")
+        .map((line) => line.replace(/\t/gy, "  "))
+        .join("\n");
       code = middleware.getImports() + code;
       code += middleware.getEntryPoint();
       const encodedCode = this.encodeBase64(code);
@@ -72,6 +81,12 @@ export class JudgeService {
     switch (language) {
       case Language.JAVA:
         return new JavaMiddleware(template, inputs);
+      case Language.JAVASCRIPT:
+        return new JavascriptMiddleware(template, inputs);
+      case Language.PYTHON:
+        return new PythonMiddleware(template, inputs);
+      case Language.CPP:
+        return new CppMiddleware(template, inputs);
       default:
         throw Error("Language not supported yet");
     }
