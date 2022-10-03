@@ -1,8 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RedisService } from "src/redis/redis.service";
-import { RoomService } from "src/room/room.service";
+import {
+  RoomCreationService,
+  RoomServiceInterfaces,
+} from "src/room/room.interface";
 
 type Match = {
   roomId: string;
@@ -18,7 +21,8 @@ export class QueueService {
     @InjectPinoLogger(QueueService.name)
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
-    private readonly roomService: RoomService,
+    @Inject(RoomServiceInterfaces.RoomCreationService)
+    private readonly roomService: RoomCreationService,
   ) {}
 
   async getExistingRoom(userId: number): Promise<string | null> {
