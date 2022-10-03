@@ -1,7 +1,16 @@
-import { Injectable } from "@nestjs/common";
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RedisService } from "src/redis/redis.service";
+import {
+  RoomAuthorizationService,
+  RoomServiceInterfaces,
+} from "src/room/room.interface";
 import { TwilioService } from "src/twilio/twilio.service";
 import { UserService } from "src/user/user.service";
 
@@ -16,6 +25,8 @@ export class ChatService {
   constructor(
     @InjectPinoLogger(ChatService.name)
     private readonly logger: PinoLogger,
+    @Inject(forwardRef(() => RoomServiceInterfaces.RoomAuthorizationService))
+    private readonly roomService: RoomAuthorizationService,
     private readonly userService: UserService,
     private readonly redisService: RedisService,
     private readonly twilioService: TwilioService,
@@ -45,7 +56,10 @@ export class ChatService {
   async joinChatRoom(roomId: string, userId: number) {
     const chatRoomSid = await this.getChatRoomSid(roomId);
     const identity = await this.getIdentity(userId);
-    // TODO: Verify that user is participant of room.
+    if (!(await this.roomService.isAuthorized(roomId, userId))) {
+      // TODO: Provide better handling for WebSocket errors
+      throw new Error();
+    }
     if (await this.getParticipantSid(identity)) {
       const participantSid = await this.getParticipantSid(identity);
       this.logger.warn(
