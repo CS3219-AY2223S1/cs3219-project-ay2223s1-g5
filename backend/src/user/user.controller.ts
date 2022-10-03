@@ -82,7 +82,7 @@ export class UserController {
   }
 
   @UseGuards(SessionGuard)
-  @Post(":userId(\\d+)")
+  @Post(":userId(\\d+)/password")
   async updatePassword(
     @Session() session: Request["session"],
     @Param("userId", ParseIntPipe) userId: number,

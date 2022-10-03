@@ -8,6 +8,8 @@ import {
   RequestResetPasswordReq,
   RequestVerifyEmailReq,
   ResetPasswordReq,
+  UpdatePasswordReq,
+  VerifyEmailReq,
 } from "~shared/types/api";
 
 export const useCreateUser = () => {
@@ -71,6 +73,20 @@ export const useGetUsersName = (
   })[];
 };
 
+export const useUpdatePassword = (userId: number) => {
+  const updatePassword = async (input: UpdatePasswordReq) => {
+    await ApiService.post<void>(`/users/${userId}/password`, input);
+  };
+  const {
+    isLoading: isUpdatePasswordLoading,
+    mutateAsync: updatePasswordMutation,
+  } = useMutation(updatePassword);
+  return {
+    updatePasswordMutation,
+    isUpdatePasswordLoading,
+  };
+};
+
 export const useRequestResetPassword = () => {
   const requestResetPassword = async (input: RequestResetPasswordReq) => {
     await ApiService.post<void>(`/users/reset-password`, input);
@@ -86,13 +102,13 @@ export const useRequestResetPassword = () => {
 };
 
 export const useResetPassword = () => {
-  const requestResetPassword = async (input: ResetPasswordReq) => {
+  const resetPassword = async (input: ResetPasswordReq) => {
     await ApiService.patch<void>(`/users/reset-password`, input);
   };
   const {
     isLoading: isResetPasswordLoading,
     mutateAsync: resetPasswordMutation,
-  } = useMutation(requestResetPassword);
+  } = useMutation(resetPassword);
   return {
     resetPasswordMutation,
     isResetPasswordLoading,
@@ -110,5 +126,17 @@ export const useRequestVerificationEmail = () => {
   return {
     isRequestVerificationEmailLoading,
     requestVerificationEmailMutation,
+  };
+};
+
+export const useVerifyEmail = () => {
+  const verifyEmail = async (input: VerifyEmailReq) => {
+    await ApiService.patch<void>(`/users/verifications`, input);
+  };
+  const { isLoading: isVerifyEmailLoading, mutateAsync: verifyEmailMutation } =
+    useMutation(verifyEmail);
+  return {
+    isVerifyEmailLoading,
+    verifyEmailMutation,
   };
 };
