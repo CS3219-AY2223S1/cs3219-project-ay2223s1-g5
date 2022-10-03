@@ -1,4 +1,4 @@
-export enum DifficultyLevel {
+export enum Difficulty {
   EASY = "EASY",
   MEDIUM = "MEDIUM",
   HARD = "HARD",

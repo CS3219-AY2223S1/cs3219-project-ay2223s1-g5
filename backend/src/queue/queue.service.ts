@@ -12,6 +12,8 @@ type User = {
   socketId: string;
 };
 
+import { Difficulty, Language } from "~shared/types/base";
+
 type Match = {
   roomId: string;
   result: User[];
@@ -36,13 +38,17 @@ export class QueueService {
 
   async searchMatch(
     userId: number,
-    difficultyLevel: string,
+    difficulty: Difficulty,
+    language: Language,
     socketId: string,
   ): Promise<User[] | null> {
     this.logger.info(
-      `[${socketId}] Searching for match for ${userId}: ${difficultyLevel}`,
+      `[${socketId}] Searching for match for ${userId}: ${difficulty} | ${language}`,
     );
-    const namespaces = [QueueService.NAMESPACE, difficultyLevel];
+    const namespaces = [
+      QueueService.NAMESPACE,
+      this.constructQueueKey(difficulty, language),
+    ];
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
     if (this.isUserInQueue(matchedUsers, userId)) {
@@ -50,7 +56,7 @@ export class QueueService {
     }
 
     if (matchedUsers.length === 0) {
-      await this.addUserToQueue(difficultyLevel, userId, socketId);
+      await this.addUserToQueue(difficulty, language, userId, socketId);
       return null;
     }
 
@@ -61,7 +67,7 @@ export class QueueService {
     );
 
     if (!matchedUserSocketId) {
-      await this.addUserToQueue(difficultyLevel, userId, socketId);
+      await this.addUserToQueue(difficulty, language, userId, socketId);
       return null;
     }
 
@@ -75,9 +81,9 @@ export class QueueService {
     ];
   }
 
-  async createRoom(users: User[]): Promise<Match> {
+  async createRoom(language: Language, users: User[]): Promise<Match> {
     const userIds = users.map((user) => user.userId);
-    const roomId = await this.roomService.createRoom(userIds);
+    const roomId = await this.roomService.createRoom(language, userIds);
     return {
       roomId,
       result: users,
@@ -96,7 +102,8 @@ export class QueueService {
   }
 
   async addUserToQueue(
-    difficultyLevel: string,
+    difficulty: Difficulty,
+    language: Language,
     userId: number,
     socketId: string,
   ): Promise<string | null> {
@@ -104,10 +111,10 @@ export class QueueService {
     await this.redisService.setKey(
       [QueueService.NAMESPACE],
       userId.toString(),
-      difficultyLevel,
+      this.constructQueueKey(difficulty, language),
     );
     return this.redisService.setKey(
-      [QueueService.NAMESPACE, difficultyLevel],
+      [QueueService.NAMESPACE, this.constructQueueKey(difficulty, language)],
       userId.toString(),
       socketId,
       QueueService.EXPIRATION_TIME,
@@ -115,7 +122,7 @@ export class QueueService {
   }
 
   async removeFromQueue(userId: number): Promise<void> {
-    const difficultyLevel = await this.redisService.getValue(
+    const queueKey = await this.redisService.getValue(
       [QueueService.NAMESPACE],
       userId.toString(),
     );
@@ -125,12 +132,12 @@ export class QueueService {
       userId.toString(),
     );
 
-    if (!difficultyLevel) {
+    if (!queueKey) {
       return;
     }
 
     const result = await this.redisService.deleteKey(
-      [QueueService.NAMESPACE, difficultyLevel],
+      [QueueService.NAMESPACE, queueKey],
       userId.toString(),
     );
     if (result === 0) {
@@ -139,5 +146,12 @@ export class QueueService {
       this.logger.info(`${userId} removed from queue`);
     }
     return;
+  }
+
+  private constructQueueKey(
+    difficulty: Difficulty,
+    language: Language,
+  ): string {
+    return `${difficulty} | ${language}`;
   }
 }

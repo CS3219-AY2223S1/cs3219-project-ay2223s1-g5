@@ -1,6 +1,11 @@
+import { Language } from "../base";
+
 export type JoinedPayload = {
   userId: number;
-  members: { userId: number; isConnected: boolean }[];
+  metadata: {
+    language: Language;
+    members: { userId: number; isConnected: boolean }[];
+  };
 };
 
 export type LeavePayload = {

@@ -9,7 +9,7 @@ import { useSocket } from "src/contexts/SocketContext";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
 import { MatchRes } from "~shared/types/api";
-import { DifficultyLevel } from "~shared/types/base";
+import { Difficulty, Language } from "~shared/types/base";
 
 const TIMEOUT = 30;
 
@@ -17,6 +17,7 @@ export const QueuePage = () => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const difficulty = params.get("difficulty");
+  const language = params.get("language");
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(
     undefined,
   );
@@ -29,25 +30,38 @@ export const QueuePage = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (!difficulty) {
-      enqueueSnackbar("No difficulty level specified", {
+    if (!difficulty || !language) {
+      enqueueSnackbar("No difficulty level or language specified", {
         variant: "error",
       });
       navigate("/select-difficulty");
       return;
     }
 
-    const normalized = difficulty.toUpperCase();
+    const normalizedDifficulty = difficulty.toUpperCase();
     if (
-      Object.values(DifficultyLevel).filter((value) => normalized === value)
-        .length === 0
+      Object.values(Difficulty).filter(
+        (value) => normalizedDifficulty === value,
+      ).length === 0
     ) {
       enqueueSnackbar("Invalid difficulty level", {
         variant: "error",
       });
       navigate("/select-difficulty");
     }
-  }, [difficulty, navigate, enqueueSnackbar]);
+
+    const normalizedLanguage = language.toUpperCase();
+    if (
+      Object.values(Language).filter(
+        (value) => normalizedLanguage === value.toUpperCase(),
+      ).length === 0
+    ) {
+      enqueueSnackbar("Invalid language", {
+        variant: "error",
+      });
+      navigate("/select-difficulty");
+    }
+  }, [difficulty, language, navigate, enqueueSnackbar]);
 
   const { socket, connect } = useSocket();
 
@@ -78,8 +92,8 @@ export const QueuePage = () => {
     if (!socket || !connected) {
       return;
     }
-    socket.emit(QUEUE_EVENTS.ENTER_QUEUE, difficulty?.toUpperCase());
-  }, [socket, connected, difficulty]);
+    socket.emit(QUEUE_EVENTS.ENTER_QUEUE, { difficulty, language });
+  }, [socket, connected, difficulty, language]);
 
   useEffect(() => {
     if (timer === 0) {

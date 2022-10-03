@@ -14,6 +14,8 @@ import { session } from "src/common/adapters/websocket.adapter";
 import { QueueService } from "./queue.service";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
+import { EnterQueuePayload } from "~shared/types/api";
+import { Difficulty, Language } from "~shared/types/base";
 
 @WebSocketGateway({ namespace: QUEUE_NAMESPACE })
 export class QueueGateway implements OnGatewayDisconnect {
@@ -29,7 +31,7 @@ export class QueueGateway implements OnGatewayDisconnect {
   @SubscribeMessage(QUEUE_EVENTS.ENTER_QUEUE)
   async handleFind(
     @ConnectedSocket() client: Socket,
-    @MessageBody() difficultyLevel: string,
+    @MessageBody() { difficulty, language }: EnterQueuePayload,
   ): Promise<void> {
     this.logger.info(`Handling find match request: ${client.id}`);
     const userId = Number(session(client).passport?.user.userId);
@@ -40,16 +42,21 @@ export class QueueGateway implements OnGatewayDisconnect {
       return;
     }
 
-    await this.handleQueue(client, difficultyLevel);
+    await this.handleQueue(client, difficulty, language);
   }
 
-  async handleQueue(client: Socket, difficultyLevel: string): Promise<void> {
+  async handleQueue(
+    client: Socket,
+    difficulty: Difficulty,
+    language: Language,
+  ): Promise<void> {
     this.logger.info(`Joining queue: ${client.id}`);
     const userId = Number(session(client).passport?.user.userId);
 
     const users = await this.queueService.searchMatch(
       userId,
-      difficultyLevel,
+      difficulty,
+      language,
       client.id,
     );
 
@@ -61,7 +68,7 @@ export class QueueGateway implements OnGatewayDisconnect {
       this.server.to(user.socketId).emit(QUEUE_EVENTS.MATCH_FOUND);
     }
 
-    const match = await this.queueService.createRoom(users);
+    const match = await this.queueService.createRoom(language, users);
     for (const user of users) {
       this.server.to(user.socketId).emit(QUEUE_EVENTS.ROOM_READY, match);
     }

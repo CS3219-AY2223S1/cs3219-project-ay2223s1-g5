@@ -13,6 +13,23 @@ import { PythonMiddleware } from "./middleware/python";
 
 import { Language } from "~shared/types/base/index";
 
+const languageToLanguageId = (language: Language) => {
+  switch (language) {
+    case Language.CPP: {
+      return 54;
+    }
+    case Language.JAVA: {
+      return 62;
+    }
+    case Language.JAVASCRIPT: {
+      return 63;
+    }
+    case Language.PYTHON: {
+      return 71;
+    }
+  }
+};
+
 @Injectable()
 export class JudgeService {
   private axiosInstance: AxiosInstance;
@@ -62,7 +79,7 @@ export class JudgeService {
       const response = await this.axiosInstance.post(
         "submissions",
         JSON.stringify({
-          language_id: language,
+          language_id: languageToLanguageId(language),
           source_code: encodedCode,
         }),
       );

@@ -1,3 +1,3 @@
-export { DifficultyLevel } from "./difficulty-level";
+export { Difficulty } from "./difficulty";
 export { Language } from "./language";
 export { Status } from "./status";
