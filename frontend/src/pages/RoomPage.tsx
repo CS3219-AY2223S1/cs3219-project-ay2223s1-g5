@@ -41,6 +41,7 @@ import {
   PartnerDisconnectPayload,
   PartnerLeavePayload,
 } from "~shared/types/api";
+import { Status } from "~shared/types/base";
 
 type Participant = {
   userId: number;
@@ -249,12 +250,6 @@ export const RoomPage = () => {
   /* Tabular Data */
   const tableHeaders = ["DATE", "RUNTIME", "TEST CASE", "STATUS"];
   const tableCells = ["2020-04-26 00:26:55", "0.13s", "[2,7,11,15], 9", "Pass"];
-  enum Status {
-    PASS = "Pass",
-    COMPILATION_ERROR = "Compilation Error",
-    FAIL = "Fail",
-    TIME_LIMIT_EXCEED = "Time Limit Exceed",
-  }
 
   return (
     <EditorProvider roomId={roomId || ""}>
