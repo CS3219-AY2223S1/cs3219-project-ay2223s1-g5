@@ -6,7 +6,6 @@ import {
   ParseIntPipe,
   UseGuards,
 } from "@nestjs/common";
-import { Category, Topic } from "@prisma/client";
 
 import { SessionGuard } from "src/auth/session.guard";
 
