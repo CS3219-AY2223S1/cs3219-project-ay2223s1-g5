@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Question } from "@prisma/client";
+import { Category, Question, Topic } from "@prisma/client";
 
 import { PrismaService } from "src/core/prisma.service";
 
@@ -12,6 +12,30 @@ export class QuestionService {
   async getQuestionById(id: number): Promise<Question | null> {
     return this.prisma.question.findFirst({
       where: { id: id },
+    });
+  }
+
+  async getTopicsByQuestionId(id: number): Promise<Topic[] | null> {
+    return this.prisma.topic.findMany({
+      include: {
+        questions: {
+          where: {
+            id: id,
+          },
+        },
+      },
+    });
+  }
+
+  async getCategoryByQuestionId(id: number): Promise<Category | null> {
+    return this.prisma.category.findFirst({
+      include: {
+        questions: {
+          where: {
+            id: id,
+          },
+        },
+      },
     });
   }
 
