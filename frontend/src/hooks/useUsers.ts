@@ -1,6 +1,6 @@
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQueries, useQuery } from "react-query";
 
-import { ApiService } from "src/services/ApiService";
+import { ApiResponseError, ApiService } from "src/services/ApiService";
 
 import {
   CreateUserReq,
@@ -40,6 +40,35 @@ export const useGetUserName = (userId?: number) => {
     user,
     isGetUserNameLoading,
   };
+};
+
+export const useGetUsersName = (
+  userIds: number[],
+): (GetUserNameRes & { userId: number })[] => {
+  const getUserName = async (userId: number) => {
+    const { data } = await ApiService.get<GetUserNameRes>(`/users/${userId}`);
+    return data;
+  };
+  const results = useQueries(
+    userIds.map((userId) => {
+      return {
+        queryKey: ["USER", userId.toString()],
+        queryFn: () =>
+          getUserName(userId).then((value) => ({ ...value, userId })),
+        onError: (e: ApiResponseError) => {
+          // eslint-disable-next-line no-console
+          console.log(e.message);
+        },
+      };
+    }),
+  );
+
+  // Manual typecast because TS can't detect that filter removes undefined.
+  return results
+    .filter((result) => !!result.data)
+    .map((result) => result.data) as unknown as (GetUserNameRes & {
+    userId: number;
+  })[];
 };
 
 export const useRequestResetPassword = () => {
