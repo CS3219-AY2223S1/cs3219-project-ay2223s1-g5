@@ -71,7 +71,7 @@ export class JudgeService {
         return false;
       }
       const decodedOutput = this.decodeBase64(response.data.stdout);
-      return decodedOutput.trim() === "True";
+      return decodedOutput.trim().toLowerCase() === "true";
     } catch (e: unknown) {
       this.logger.error(e);
       return false;

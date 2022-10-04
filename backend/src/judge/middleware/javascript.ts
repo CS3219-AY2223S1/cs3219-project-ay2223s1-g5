@@ -39,13 +39,8 @@ export class JavascriptMiddleware extends JudgeMiddleware {
       );
     }
 
-    let isEqual = "";
-    if (codePrototype.returnType.includes("[]")) {
-      isEqual =
-        "const isEqual = JSON.stringify(result) == JSON.stringify(expectedOutput);";
-    } else {
-      isEqual = "const isEqual = result == expectedOutput;";
-    }
+    const isEqual =
+      "const isEqual = JSON.stringify(result) == JSON.stringify(expectedOutput);";
 
     const joinedVariableNames = codePrototype.arguments
       .map((arg) => arg.name)
@@ -58,7 +53,7 @@ export class JavascriptMiddleware extends JudgeMiddleware {
       `const expectedOutput = ${this.output};\n` +
       `const result = ${codePrototype.functionName}(${joinedVariableNames});\n` +
       `${isEqual}\n` +
-      `console.log(isEqual ? "True" : "False");\n`
+      `console.log(isEqual);\n`
     );
   }
 }

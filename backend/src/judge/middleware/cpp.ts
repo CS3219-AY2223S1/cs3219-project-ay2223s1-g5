@@ -75,7 +75,9 @@ export class CppMiddleware extends JudgeMiddleware {
     if (codePrototype.returnType.includes("vector")) {
       const output = this.output.replace(/^\[/, "{").replace(/\]$/, "}");
       expectedOutput = `${codePrototype.returnType} expectedOutput${output};`;
-      isEqual = `bool isEqual = std::equal(res.begin(), res.end(), expectedOutput.begin());`;
+      isEqual =
+        `bool isEqual = res.size() == expectedOutput.size() && ` +
+        `std::equal(res.begin(), res.end(), expectedOutput.begin());`;
     } else {
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
       isEqual = "bool isEqual = res == expectedOuput;";
@@ -92,7 +94,7 @@ export class CppMiddleware extends JudgeMiddleware {
       `  ${expectedOutput}\n` +
       `  ${codePrototype.returnType} res = Solution().${codePrototype.functionName}(${joinedVariableNames});\n` +
       `  ${isEqual}\n` +
-      `  printf("%s", isEqual ? "True" : "False");\n` +
+      `  printf("%s", isEqual ? "true" : "false");\n` +
       `}\n`
     );
   }
