@@ -12,6 +12,7 @@ import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
 import { CoreModule } from "src/core/core.module";
 import { PrismaServiceModule } from "src/core/prisma.service.module";
 import { EditorModule } from "src/editor/editor.module";
+import { QuestionModule } from "src/question/question.module";
 import { QueueModule } from "src/queue/queue.module";
 import { RedisServiceModule } from "src/redis/redis.service.module";
 import { RoomModule } from "src/room/room.module";
@@ -53,6 +54,7 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     RoomModule,
     ChatModule,
     EditorModule,
+    QuestionModule,
   ],
   providers: [
     {
