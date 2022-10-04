@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Difficulty, Question } from "@prisma/client";
+import { Question } from "@prisma/client";
 
 import { PrismaService } from "src/core/prisma.service";
 
@@ -9,19 +9,18 @@ import { DifficultyLevel } from "../../../shared/src/types/base";
 export class QuestionService {
   constructor(private prisma: PrismaService) {}
 
-  // gets a random question of diffiulty difficultyLevel
-  async getByDifficulty(
-    difficultyLevel: DifficultyLevel,
-  ): Promise<Question | null> {
-    const difficulty: Difficulty = difficultyLevel;
-    const questionsCount = await this.prisma.question.count({
-      where: { difficulty: difficulty },
-    });
-    const randomNum = Math.floor(Math.random() * questionsCount);
+  async getQuestionById(id: number): Promise<Question | null> {
     return this.prisma.question.findFirst({
-      take: 1,
-      skip: randomNum,
-      where: { difficulty: difficulty },
+      where: { id: id },
     });
+  }
+
+  // gets a random question number of diffiulty difficultyLevel
+  async getIdByDifficulty(difficultyLevel: DifficultyLevel): Promise<number> {
+    const questionsCount = await this.prisma.question.count({
+      where: { difficulty: difficultyLevel },
+    });
+    const randomQuestionId = Math.floor(Math.random() * questionsCount); // 0 if no questions
+    return randomQuestionId;
   }
 }
