@@ -43,7 +43,12 @@ export class JudgeService {
   ): Promise<boolean> {
     this.logger.info("Sending code to Judge0...");
     try {
-      const middleware = this.getMiddleware(language, template, inputs);
+      const middleware = this.getMiddleware(
+        language,
+        template,
+        inputs,
+        expectedOutput,
+      );
 
       // Replace leading tabs with whitespaces
       code = code
@@ -62,11 +67,11 @@ export class JudgeService {
         }),
       );
 
-      this.logger.info(JSON.stringify(response.data));
-
+      if (!response.data.stdout) {
+        return false;
+      }
       const decodedOutput = this.decodeBase64(response.data.stdout);
-      this.logger.info(`Judge0 output: ${decodedOutput}`);
-      return decodedOutput === expectedOutput;
+      return decodedOutput.trim() === "True";
     } catch (e: unknown) {
       this.logger.error(e);
       return false;
@@ -77,16 +82,17 @@ export class JudgeService {
     language: Language,
     template: string,
     inputs: string[],
+    output: string,
   ): JudgeMiddleware {
     switch (language) {
       case Language.JAVA:
-        return new JavaMiddleware(template, inputs);
+        return new JavaMiddleware(template, inputs, output);
       case Language.JAVASCRIPT:
-        return new JavascriptMiddleware(template, inputs);
+        return new JavascriptMiddleware(template, inputs, output);
       case Language.PYTHON:
-        return new PythonMiddleware(template, inputs);
+        return new PythonMiddleware(template, inputs, output);
       case Language.CPP:
-        return new CppMiddleware(template, inputs);
+        return new CppMiddleware(template, inputs, output);
       default:
         throw Error("Language not supported yet");
     }
