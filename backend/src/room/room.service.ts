@@ -6,13 +6,20 @@ import { ChatService } from "src/chat/chat.service";
 import { EditorService } from "src/editor/editor.service";
 import { RedisService } from "src/redis/redis.service";
 
+import {
+  RoomAuthorizationService,
+  RoomManagementService,
+} from "./room.interface";
+
 enum Status {
   CONNECTED = 1,
   DISCONNECTED = 0,
 }
 
 @Injectable()
-export class RoomService {
+export class RoomService
+  implements RoomManagementService, RoomAuthorizationService
+{
   private static readonly NAMESPACE = "Room";
   private static readonly DELIMITER = ":";
 
@@ -107,14 +114,6 @@ export class RoomService {
     }
   }
 
-  async terminateRoom(roomId: string): Promise<void> {
-    this.logger.info(`Closing room: ${roomId}`);
-    await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
-    // Document ID and room ID are the same.
-    await this.editorService.removeDocument(roomId);
-    await this.chatService.closeChatRoom(roomId);
-  }
-
   async disconnectRoom(userId: number, roomId: string): Promise<void> {
     await this.redisService
       .transaction()
@@ -138,7 +137,23 @@ export class RoomService {
     );
   }
 
-  async getMembers(
+  async isAuthorized(roomId: string, userId: number): Promise<boolean> {
+    const members = await this.getMembers(roomId);
+    if (!members) {
+      return false;
+    }
+    return !!members.filter((member) => member.userId === userId).length;
+  }
+
+  private async terminateRoom(roomId: string): Promise<void> {
+    this.logger.info(`Closing room: ${roomId}`);
+    await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
+    // Document ID and room ID are the same.
+    await this.editorService.removeDocument(roomId);
+    await this.chatService.closeChatRoom(roomId);
+  }
+
+  private async getMembers(
     roomId: string,
   ): Promise<{ userId: number; isConnected: boolean }[] | null> {
     const members = await this.redisService.getSet(
