@@ -101,6 +101,7 @@ export const QueuePage = () => {
 
     socket.on(QUEUE_EVENTS.MATCH_FOUND, () => {
       setMessage("Match found. Preparing room...");
+      setTimerVariant("indeterminate");
       clearTimeout(timeoutId);
     });
 
