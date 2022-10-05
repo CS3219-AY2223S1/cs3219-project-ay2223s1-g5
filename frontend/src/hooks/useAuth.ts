@@ -2,7 +2,7 @@ import { useMutation } from "react-query";
 
 import { ApiService } from "src/services/ApiService";
 
-import { LoginReq, LoginRes, VerifyEmailReq } from "~shared/types/api";
+import { LoginReq, LoginRes } from "~shared/types/api";
 
 export const useLogin = () => {
   const login = async (input: LoginReq) => {
@@ -31,18 +31,6 @@ export const useLogout = () => {
   return {
     logoutMutation,
     isLogoutLoading,
-  };
-};
-
-export const useVerifyEmail = () => {
-  const verifyEmail = async (input: VerifyEmailReq) => {
-    await ApiService.patch<void>(`/users/verifications`, input);
-  };
-  const { isLoading: isVerifyEmailLoading, mutateAsync: verifyEmailMutation } =
-    useMutation(verifyEmail);
-  return {
-    isVerifyEmailLoading,
-    verifyEmailMutation,
   };
 };
 
