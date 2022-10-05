@@ -11,6 +11,8 @@ import {
   RoomManagementService,
 } from "./room.interface";
 
+import { Language } from "~shared/types/base";
+
 enum Status {
   CONNECTED = 1,
   DISCONNECTED = 0,
@@ -21,6 +23,9 @@ export class RoomService
   implements RoomManagementService, RoomAuthorizationService
 {
   private static readonly NAMESPACE = "Room";
+  private static readonly LANGUAGE_NAMESPACE = "LANGUAGE";
+  private static readonly MEMBERS_NAMESPACE = "MEMBERS";
+  private static readonly REVERSE_MAPPING_NAMESPACE = "REVERSE";
   private static readonly DELIMITER = ":";
 
   constructor(
@@ -32,20 +37,26 @@ export class RoomService
     private readonly editorService: EditorService,
   ) {}
 
-  async createRoom(userIds: number[]): Promise<string> {
+  async createRoom(language: Language, userIds: number[]): Promise<string> {
     const roomId = nanoid();
+
+    await this.redisService.setKey(
+      [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
+      roomId,
+      language.toString(),
+    );
 
     await this.chatService.createChatRoom(roomId);
 
     for (const userId of userIds) {
       await this.redisService.addKeySet(
-        [RoomService.NAMESPACE],
+        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
         `${userId.toString()}${RoomService.DELIMITER}${Status.DISCONNECTED}`,
       );
 
       await this.redisService.setKey(
-        [RoomService.NAMESPACE],
+        [RoomService.NAMESPACE, RoomService.REVERSE_MAPPING_NAMESPACE],
         userId.toString(),
         roomId,
       );
@@ -59,7 +70,10 @@ export class RoomService
   async joinRoom(
     userId: number,
     roomId: string,
-  ): Promise<{ userId: number; isConnected: boolean }[]> {
+  ): Promise<{
+    members: { userId: number; isConnected: boolean }[];
+    language: Language;
+  }> {
     this.logger.info(`Joining room [${roomId}]: ${userId}`);
     if ((await this.getRoom(userId)) !== roomId) {
       this.logger.error(`Room mismatch [${roomId}]: ${userId}`);
@@ -70,38 +84,50 @@ export class RoomService
     await this.redisService
       .transaction()
       .deleteFromSet(
-        [RoomService.NAMESPACE],
+        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
         `${userId.toString()}:${Status.DISCONNECTED}`,
       )
       .addKeySet(
-        [RoomService.NAMESPACE],
+        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
         `${userId.toString()}:${Status.CONNECTED}`,
       )
       .execute();
 
     const members = await this.getMembers(roomId);
-    if (!members) {
+    const languageString = await this.redisService.getValue(
+      [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
+      roomId,
+    );
+
+    const language = Object.entries(Language).find(
+      (value) => value[0] === languageString,
+    )?.[1] as Language;
+    if (!members || !language) {
       throw new Error("Internal server error");
     }
-    return members;
+
+    return {
+      members,
+      language,
+    };
   }
 
   async leaveRoom(userId: number, roomId: string): Promise<void> {
     this.logger.info(`Leaving room [${roomId}]: ${userId}`);
     await this.redisService.deleteKey(
-      [RoomService.NAMESPACE],
+      [RoomService.NAMESPACE, RoomService.REVERSE_MAPPING_NAMESPACE],
       userId.toString(),
     );
     await this.redisService.deleteFromSet(
-      [RoomService.NAMESPACE],
+      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
       roomId,
       `${userId.toString()}:${Status.CONNECTED}`,
     );
     // The user should be connected, but just in case we delete both entries.
     await this.redisService.deleteFromSet(
-      [RoomService.NAMESPACE],
+      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
       roomId,
       `${userId.toString()}:${Status.DISCONNECTED}`,
     );
@@ -109,7 +135,10 @@ export class RoomService
     await this.chatService.leaveChatRoom(roomId, userId);
 
     if (
-      !(await this.redisService.getSetSize([RoomService.NAMESPACE], roomId))
+      !(await this.redisService.getSetSize(
+        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        roomId,
+      ))
     ) {
       await this.terminateRoom(roomId);
     }
@@ -119,12 +148,12 @@ export class RoomService
     await this.redisService
       .transaction()
       .addKeySet(
-        [RoomService.NAMESPACE],
+        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
         `${userId.toString()}:${Status.DISCONNECTED}`,
       )
       .deleteFromSet(
-        [RoomService.NAMESPACE],
+        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
         `${userId.toString()}:${Status.CONNECTED}`,
       )
@@ -133,7 +162,7 @@ export class RoomService
 
   async getRoom(userId: number): Promise<string | null> {
     return await this.redisService.getValue(
-      [RoomService.NAMESPACE],
+      [RoomService.NAMESPACE, RoomService.REVERSE_MAPPING_NAMESPACE],
       userId.toString(),
     );
   }
@@ -146,9 +175,16 @@ export class RoomService
     return !!members.filter((member) => member.userId === userId).length;
   }
 
-  private async terminateRoom(roomId: string): Promise<void> {
+  async terminateRoom(roomId: string): Promise<void> {
     this.logger.info(`Closing room: ${roomId}`);
-    await this.redisService.deleteKey([RoomService.NAMESPACE], roomId);
+    await this.redisService.deleteKey(
+      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+      roomId,
+    );
+    await this.redisService.deleteKey(
+      [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
+      roomId,
+    );
     // Document ID and room ID are the same.
     await this.editorService.removeDocument(roomId);
     await this.chatService.closeChatRoom(roomId);
@@ -158,7 +194,7 @@ export class RoomService
     roomId: string,
   ): Promise<{ userId: number; isConnected: boolean }[] | null> {
     const members = await this.redisService.getSet(
-      [RoomService.NAMESPACE],
+      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
       roomId,
     );
     if (members.length === 0) {

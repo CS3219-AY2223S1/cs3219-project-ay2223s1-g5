@@ -41,7 +41,7 @@ import {
   PartnerDisconnectPayload,
   PartnerLeavePayload,
 } from "~shared/types/api";
-import { Status } from "~shared/types/base";
+import { Language, Status } from "~shared/types/base";
 
 type Participant = {
   userId: number;
@@ -54,6 +54,7 @@ export const RoomPage = () => {
   const { user } = useAuth();
   const { socket, connect } = useSocket();
   const { enqueueSnackbar } = useSnackbar();
+  const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [self, setSelf] = useState<Participant>({
     // We know that if the page renders, user is not null.
     userId: user?.userId || NaN,
@@ -175,47 +176,52 @@ export const RoomPage = () => {
       },
     );
 
-    socket.on(ROOM_EVENTS.JOINED, ({ userId, members }: JoinedPayload) => {
-      if (userId === user?.userId) {
-        setSelf((self) => ({ ...self, isConnected: true }));
-        enqueueSnackbar(`You are connected.`, {
-          variant: "success",
-        });
-      } else {
-        const participant = participants.find(
-          (participant) => participant.userId === userId,
-        );
-        if (participant?.name) {
-          enqueueSnackbar(`${participant.name} has connected.`, {
-            variant: "info",
+    socket.on(
+      ROOM_EVENTS.JOINED,
+      ({ userId, metadata: { members, language } }: JoinedPayload) => {
+        setLanguage(language);
+
+        if (userId === user?.userId) {
+          setSelf((self) => ({ ...self, isConnected: true }));
+          enqueueSnackbar(`You are connected.`, {
+            variant: "success",
           });
-        }
-      }
-
-      members = members.filter((member) => member.userId !== user?.userId);
-
-      // Update the state of all participants in case we were disconnected when one of them updated.
-      setParticipants((participants) => {
-        // In the bootstrap case or the rare case that a partner leaves while we were disconnected,
-        // just reinitalize the entire state of the group.
-        if (members.length !== participants.length) {
-          return [...members];
-        }
-        for (const member of members) {
+        } else {
           const participant = participants.find(
-            (participant) => participant.userId === member.userId,
+            (participant) => participant.userId === userId,
           );
-          if (participant) {
-            participant.isConnected = member.isConnected;
-          } else {
-            participants.push(member);
+          if (participant?.name) {
+            enqueueSnackbar(`${participant.name} has connected.`, {
+              variant: "info",
+            });
           }
         }
-        return [...participants];
-      });
 
-      return;
-    });
+        members = members.filter((member) => member.userId !== user?.userId);
+
+        // Update the state of all participants in case we were disconnected when one of them updated.
+        setParticipants((participants) => {
+          // In the bootstrap case or the rare case that a partner leaves while we were disconnected,
+          // just reinitalize the entire state of the group.
+          if (members.length !== participants.length) {
+            return [...members];
+          }
+          for (const member of members) {
+            const participant = participants.find(
+              (participant) => participant.userId === member.userId,
+            );
+            if (participant) {
+              participant.isConnected = member.isConnected;
+            } else {
+              participants.push(member);
+            }
+          }
+          return [...participants];
+        });
+
+        return;
+      },
+    );
 
     return () => {
       socket.off(ROOM_EVENTS.CONNECT);
@@ -317,7 +323,7 @@ export const RoomPage = () => {
                   </Box>
                 </Stack>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Editor language={"javascript"} />
+                  <Editor language={language} />
                 </Box>
               </Stack>
               <Stack
