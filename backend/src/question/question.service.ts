@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { Category, Question, Topic } from "@prisma/client";
 
 import { PrismaService } from "src/core/prisma.service";
 
@@ -9,32 +8,12 @@ import { DifficultyLevel } from "~shared/types/base";
 export class QuestionService {
   constructor(private prisma: PrismaService) {}
 
-  async getQuestionById(id: number): Promise<Question | null> {
+  async getQuestionById(id: number) {
     return this.prisma.question.findUnique({
       where: { id: id },
-    });
-  }
-
-  async getTopicsByQuestionId(id: number): Promise<Topic[] | null> {
-    return this.prisma.topic.findMany({
       include: {
-        questions: {
-          where: {
-            id: id,
-          },
-        },
-      },
-    });
-  }
-
-  async getCategoryByQuestionId(id: number): Promise<Category | null> {
-    return this.prisma.category.findFirst({
-      include: {
-        questions: {
-          where: {
-            id: id,
-          },
-        },
+        topics: true,
+        category: true,
       },
     });
   }

@@ -26,20 +26,10 @@ export class QuestionController {
     if (!question) {
       throw new NotFoundException("Question not found.");
     }
-    const category = await this.questionService.getCategoryByQuestionId(
-      questionId,
-    );
-    if (!category) {
-      throw new NotFoundException("Category not found.");
-    }
-    const topics = await this.questionService.getTopicsByQuestionId(questionId);
-    if (!topics) {
-      throw new NotFoundException("Topics not found.");
-    }
     const questionReturnType: GetQuestionRes = {
       title: question.title,
-      category: category.title,
-      topics: topics.flatMap((x) => x.name),
+      category: question.category.title,
+      topics: question.topics.flatMap((topic) => topic.name),
       description: question.description,
       hints: question.hints,
     };
