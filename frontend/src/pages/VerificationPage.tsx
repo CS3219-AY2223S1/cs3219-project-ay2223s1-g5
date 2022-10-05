@@ -6,7 +6,7 @@ import { blueGrey } from "@mui/material/colors";
 import { useSnackbar } from "notistack";
 
 import { Center } from "src/components/Center";
-import { useVerifyEmail } from "src/hooks/useAuth";
+import { useVerifyEmail } from "src/hooks/useUsers";
 
 export const VerificationPage = () => {
   const { search } = useLocation();

@@ -1,3 +1,4 @@
+import { Inject } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -11,7 +12,7 @@ import { Namespace, Socket } from "socket.io";
 
 import { session } from "src/common/adapters/websocket.adapter";
 
-import { RoomService } from "./room.service";
+import { RoomManagementService, RoomServiceInterfaces } from "./room.interface";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
 import { JoinedPayload, JoinPayload, LeavePayload } from "~shared/types/api";
@@ -24,7 +25,8 @@ export class RoomGateway implements OnGatewayDisconnect {
   constructor(
     @InjectPinoLogger(RoomGateway.name)
     private readonly logger: PinoLogger,
-    private readonly roomService: RoomService,
+    @Inject(RoomServiceInterfaces.RoomManagementService)
+    private readonly roomService: RoomManagementService,
   ) {}
 
   @SubscribeMessage(ROOM_EVENTS.JOIN)

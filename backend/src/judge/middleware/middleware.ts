@@ -7,10 +7,12 @@ export interface CodePrototype {
 export abstract class JudgeMiddleware {
   template: string;
   inputs: string[];
+  output: string;
 
-  constructor(template: string, inputs: string[]) {
+  constructor(template: string, inputs: string[], output: string) {
     this.template = template;
     this.inputs = inputs;
+    this.output = output;
   }
 
   getEntryPoint() {

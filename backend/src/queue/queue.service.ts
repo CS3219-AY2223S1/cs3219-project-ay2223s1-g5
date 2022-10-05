@@ -1,12 +1,20 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RedisService } from "src/redis/redis.service";
-import { RoomService } from "src/room/room.service";
+import {
+  RoomCreationService,
+  RoomServiceInterfaces,
+} from "src/room/room.interface";
+
+type User = {
+  userId: number;
+  socketId: string;
+};
 
 type Match = {
   roomId: string;
-  result: { userId: number; socketId: string }[];
+  result: User[];
 };
 
 @Injectable()
@@ -18,7 +26,8 @@ export class QueueService {
     @InjectPinoLogger(QueueService.name)
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
-    private readonly roomService: RoomService,
+    @Inject(RoomServiceInterfaces.RoomCreationService)
+    private readonly roomService: RoomCreationService,
   ) {}
 
   async getExistingRoom(userId: number): Promise<string | null> {
@@ -29,7 +38,7 @@ export class QueueService {
     userId: number,
     difficultyLevel: string,
     socketId: string,
-  ): Promise<Match | null> {
+  ): Promise<User[] | null> {
     this.logger.info(
       `[${socketId}] Searching for match for ${userId}: ${difficultyLevel}`,
     );
@@ -59,14 +68,19 @@ export class QueueService {
     await this.removeFromQueue(matchedUserId);
 
     this.logger.info(`${userId} and ${matchedUserId} matched`);
-    const roomId = await this.roomService.createRoom([userId, matchedUserId]);
-    const matchResult = [
+
+    return [
       { userId, socketId },
       { userId: matchedUserId, socketId: matchedUserSocketId },
     ];
+  }
+
+  async createRoom(users: User[]): Promise<Match> {
+    const userIds = users.map((user) => user.userId);
+    const roomId = await this.roomService.createRoom(userIds);
     return {
       roomId,
-      result: matchResult,
+      result: users,
     } as Match;
   }
 

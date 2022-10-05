@@ -47,18 +47,23 @@ export class QueueGateway implements OnGatewayDisconnect {
     this.logger.info(`Joining queue: ${client.id}`);
     const userId = Number(session(client).passport?.user.userId);
 
-    const match = await this.queueService.searchMatch(
+    const users = await this.queueService.searchMatch(
       userId,
       difficultyLevel,
       client.id,
     );
 
-    if (!match) {
+    if (!users) {
       return;
     }
 
-    for (const user of match.result) {
-      this.server.to(user.socketId).emit(QUEUE_EVENTS.MATCH_FOUND, match);
+    for (const user of users) {
+      this.server.to(user.socketId).emit(QUEUE_EVENTS.MATCH_FOUND);
+    }
+
+    const match = await this.queueService.createRoom(users);
+    for (const user of users) {
+      this.server.to(user.socketId).emit(QUEUE_EVENTS.ROOM_READY, match);
     }
   }
 

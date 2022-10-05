@@ -1,8 +1,8 @@
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class JavaMiddleware extends JudgeMiddleware {
-  constructor(template: string, inputs: string[]) {
-    super(template, inputs);
+  constructor(template: string, inputs: string[], output: string) {
+    super(template, inputs, output);
   }
 
   getImports(): string {
@@ -46,7 +46,7 @@ export class JavaMiddleware extends JudgeMiddleware {
         input = input
           .replace(/^\[\[/g, "{{")
           .replace(/^\[/g, "{")
-          .replace(/\s\[/g, " {")
+          .replace(/,\[/g, ",{")
           .replace(/\]\]$/g, "}}")
           .replace(/\]$/g, "}")
           .replace(/\],/g, "},");
@@ -56,22 +56,32 @@ export class JavaMiddleware extends JudgeMiddleware {
       );
     }
 
+    let expectedOutput = "";
+    let isEqual = "";
+    if (codePrototype.returnType.includes("[]")) {
+      const output = this.output.replace(/^\[/, "{").replace(/\]$/, "}");
+      expectedOutput = `${codePrototype.returnType} expectedOutput = ${output};`;
+      isEqual = `boolean isEqual = Arrays.equals(res, expectedOutput);`;
+    } else {
+      expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
+      isEqual =
+        "boolean isEqual = res.toString().equals(expectedOuput.toString());";
+    }
+
     const joinedVariableNames = codePrototype.arguments
       .map((arg) => arg.name)
       .join(",");
 
-    const printOutput = codePrototype.returnType.includes("[]")
-      ? "Arrays.toString(res)"
-      : "res";
-
     return (
       `public class Main {\n` +
       `  public static void main(String[] args) {\n` +
-      variables.map((line) => `  ${line}`).join("\n") +
+      variables.map((line) => `    ${line}`).join("\n") +
       `\n` +
       `    Solution solution = new Solution();\n` +
+      `    ${expectedOutput}\n` +
       `    ${codePrototype.returnType} res = solution.${codePrototype.functionName}(${joinedVariableNames});\n` +
-      `    System.out.print(${printOutput});\n` +
+      `    ${isEqual}\n` +
+      `    System.out.print(isEqual ? "True" : "False");\n` +
       `  }\n` +
       `}\n`
     );
