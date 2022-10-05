@@ -1,8 +1,8 @@
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class JavascriptMiddleware extends JudgeMiddleware {
-  constructor(template: string, inputs: string[]) {
-    super(template, inputs);
+  constructor(template: string, inputs: string[], output: string) {
+    super(template, inputs, output);
   }
 
   getImports(): string {
@@ -39,6 +39,9 @@ export class JavascriptMiddleware extends JudgeMiddleware {
       );
     }
 
+    const isEqual =
+      "const isEqual = JSON.stringify(result) == JSON.stringify(expectedOutput);";
+
     const joinedVariableNames = codePrototype.arguments
       .map((arg) => arg.name)
       .join(", ");
@@ -47,8 +50,10 @@ export class JavascriptMiddleware extends JudgeMiddleware {
       `\n` +
       variables.join("\n") +
       `\n` +
+      `const expectedOutput = ${this.output};\n` +
       `const result = ${codePrototype.functionName}(${joinedVariableNames});\n` +
-      `console.log(result);\n`
+      `${isEqual}\n` +
+      `console.log(isEqual);\n`
     );
   }
 }

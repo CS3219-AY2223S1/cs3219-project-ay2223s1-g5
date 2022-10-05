@@ -1,8 +1,8 @@
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class PythonMiddleware extends JudgeMiddleware {
-  constructor(template: string, inputs: string[]) {
-    super(template, inputs);
+  constructor(template: string, inputs: string[], output: string) {
+    super(template, inputs, output);
   }
 
   getImports(): string {
@@ -51,7 +51,7 @@ export class PythonMiddleware extends JudgeMiddleware {
       `\n` +
       variables.join("\n") +
       `\n` +
-      `print(Solution().${codePrototype.functionName}(${joinedVariableNames}))\n`
+      `print(Solution().${codePrototype.functionName}(${joinedVariableNames}) == ${this.output})\n`
     );
   }
 }
