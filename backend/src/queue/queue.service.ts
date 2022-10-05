@@ -7,9 +7,14 @@ import {
   RoomServiceInterfaces,
 } from "src/room/room.interface";
 
+type User = {
+  userId: number;
+  socketId: string;
+};
+
 type Match = {
   roomId: string;
-  result: { userId: number; socketId: string }[];
+  result: User[];
 };
 
 @Injectable()
@@ -33,7 +38,7 @@ export class QueueService {
     userId: number,
     difficultyLevel: string,
     socketId: string,
-  ): Promise<Match | null> {
+  ): Promise<User[] | null> {
     this.logger.info(
       `[${socketId}] Searching for match for ${userId}: ${difficultyLevel}`,
     );
@@ -63,14 +68,19 @@ export class QueueService {
     await this.removeFromQueue(matchedUserId);
 
     this.logger.info(`${userId} and ${matchedUserId} matched`);
-    const roomId = await this.roomService.createRoom([userId, matchedUserId]);
-    const matchResult = [
+
+    return [
       { userId, socketId },
       { userId: matchedUserId, socketId: matchedUserSocketId },
     ];
+  }
+
+  async createRoom(users: User[]): Promise<Match> {
+    const userIds = users.map((user) => user.userId);
+    const roomId = await this.roomService.createRoom(userIds);
     return {
       roomId,
-      result: matchResult,
+      result: users,
     } as Match;
   }
 
