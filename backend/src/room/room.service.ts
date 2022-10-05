@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
@@ -27,6 +27,7 @@ export class RoomService
     @InjectPinoLogger(RoomService.name)
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
+    @Inject(forwardRef(() => ChatService))
     private readonly chatService: ChatService,
     private readonly editorService: EditorService,
   ) {}
