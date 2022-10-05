@@ -52,7 +52,7 @@ model SolutionTemplate {
   questionId Int
 }
 
-model TestCases {
+model TestCase {
   id         Int      @id @default(autoincrement())
   inputs     String[]
   output     String
@@ -70,5 +70,5 @@ model Question {
   description String
   hints       String[]
   templates   SolutionTemplate[]
-  testcases   TestCases[]
+  testcases   TestCase[]
 }

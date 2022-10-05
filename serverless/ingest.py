@@ -136,7 +136,7 @@ def process_questions(questions: List[Question], cursor: Cursor, categories, top
             topic_id = topics[topic]
             cursor.execute("INSERT INTO \"_QuestionToTopic\" (\"A\", \"B\") VALUES (%s, %s)",
                            [question_id, topic_id])
-        cursor.execute("INSERT INTO \"TestCases\" (inputs, output, \"questionId\") VALUES (%s, %s, %s)",
+        cursor.execute("INSERT INTO \"TestCase\" (inputs, output, \"questionId\") VALUES (%s, %s, %s)",
                        [question.testcase.inputs, question.testcase.output, question_id])
         for language in question.templates:
             cursor.execute("INSERT INTO \"SolutionTemplate\" (language, code, \"questionId\") VALUES (%s, %s, %s)",
