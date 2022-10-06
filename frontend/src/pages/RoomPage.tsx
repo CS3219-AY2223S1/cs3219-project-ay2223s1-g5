@@ -302,103 +302,101 @@ export const RoomPage = () => {
                 iconPosition="start"
               />
             </TabList>
-            <TabPanel sx={{ p: 0 }} value="description">
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
-              >
-                <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
-                  <Box sx={{ flex: 1, minHeight: 0 }}>
-                    <Question />
-                  </Box>
-                  <Box sx={{ height: "40%" }}>
-                    <Chat />
-                  </Box>
-                </Stack>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Editor language={"javascript"} />
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
+            >
+              <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
+                <TabPanel
+                  sx={{ p: 0, minHeight: 0, flex: 1 }}
+                  value="description"
+                >
+                  <Question />
+                </TabPanel>
+                <TabPanel
+                  sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}
+                  value="submission"
+                >
+                  <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: "100%" }}>
+                      <TableHead sx={{ bgcolor: "primary.500" }}>
+                        <TableRow>
+                          {tableHeaders.map((tableHeader) => (
+                            <TableCell
+                              key={tableHeader}
+                              align="center"
+                              sx={{
+                                fontWeight: "bold",
+                                color: "white",
+                              }}
+                            >
+                              {tableHeader}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          {tableCells.map((tableCell) => (
+                            <TableCell
+                              key={tableCell}
+                              align="center"
+                              sx={{
+                                color:
+                                  Object.values<string>(Status).includes(
+                                    tableCell,
+                                  ) && tableCell === "Pass"
+                                    ? "green.500"
+                                    : Object.values<string>(Status).includes(
+                                        tableCell,
+                                      )
+                                    ? "red.500"
+                                    : "black",
+                                fontWeight: Object.values<string>(
+                                  Status,
+                                ).includes(tableCell)
+                                  ? "bold"
+                                  : "normal",
+                              }}
+                            >
+                              <Center>
+                                {Object.values<string>(Status).includes(
+                                  tableCell,
+                                ) && tableCell === "Pass" ? (
+                                  <CheckCircle sx={{ mr: 0.5 }} />
+                                ) : Object.values<string>(Status).includes(
+                                    tableCell,
+                                  ) ? (
+                                  <Cancel sx={{ mr: 0.5 }} />
+                                ) : null}
+                                {tableCell}
+                              </Center>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </TabPanel>
+                <Box sx={{ height: "40%" }}>
+                  <Chat />
                 </Box>
               </Stack>
-              <Stack
-                direction="row"
-                justifyContent="flex-end"
-                sx={{ py: 2, px: 3 }}
-              >
-                <StyledButton
-                  label={"Submit Code"}
-                  sx={{ "&:hover": { boxShadow: "1" } }}
-                />
-              </Stack>
-            </TabPanel>
-            <TabPanel sx={{ p: 0 }} value="submission">
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
-              >
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: "100%" }}>
-                    <TableHead sx={{ bgcolor: "primary.500" }}>
-                      <TableRow>
-                        {tableHeaders.map((tableHeader) => (
-                          <TableCell
-                            key={tableHeader}
-                            align="center"
-                            sx={{
-                              fontWeight: "bold",
-                              color: "white",
-                            }}
-                          >
-                            {tableHeader}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        {tableCells.map((tableCell) => (
-                          <TableCell
-                            key={tableCell}
-                            align="center"
-                            sx={{
-                              color:
-                                Object.values<string>(Status).includes(
-                                  tableCell,
-                                ) && tableCell === "Pass"
-                                  ? "green.500"
-                                  : Object.values<string>(Status).includes(
-                                      tableCell,
-                                    )
-                                  ? "red.500"
-                                  : "black",
-                              fontWeight: Object.values<string>(
-                                Status,
-                              ).includes(tableCell)
-                                ? "bold"
-                                : "normal",
-                            }}
-                          >
-                            <Center>
-                              {Object.values<string>(Status).includes(
-                                tableCell,
-                              ) && tableCell === "Pass" ? (
-                                <CheckCircle sx={{ mr: 0.5 }} />
-                              ) : Object.values<string>(Status).includes(
-                                  tableCell,
-                                ) ? (
-                                <Cancel sx={{ mr: 0.5 }} />
-                              ) : null}
-                              {tableCell}
-                            </Center>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Stack>
-            </TabPanel>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Editor language={"javascript"} />
+              </Box>
+            </Stack>
+            <Stack
+              direction="row"
+              justifyContent="flex-end"
+              sx={{ py: 2, px: 3 }}
+            >
+              <StyledButton
+                label={"Submit Code"}
+                sx={{ "&:hover": { boxShadow: "1" } }}
+              />
+            </Stack>
           </TabContext>
         </Stack>
       </ChatProvider>
