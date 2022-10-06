@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 
 import { PrismaService } from "src/core/prisma.service";
 
-import { DifficultyLevel } from "~shared/types/base";
+import { Difficulty } from "~shared/types/base";
 
 @Injectable()
 export class QuestionService {
@@ -18,18 +18,16 @@ export class QuestionService {
     });
   }
 
-  // gets a random question number of diffiulty difficultyLevel
-  async getIdByDifficulty(
-    difficultyLevel: DifficultyLevel,
-  ): Promise<number | null> {
+  // gets a random question number of difficulty
+  async getIdByDifficulty(difficulty: Difficulty): Promise<number | null> {
     const questionsCount = await this.prisma.question.count({
-      where: { difficulty: difficultyLevel },
+      where: { difficulty },
     });
     const randomNum = Math.floor(Math.random() * questionsCount);
     const question = await this.prisma.question.findFirst({
       take: 1,
       skip: randomNum,
-      where: { difficulty: difficultyLevel },
+      where: { difficulty },
       select: { id: true },
     });
     if (question === null) {

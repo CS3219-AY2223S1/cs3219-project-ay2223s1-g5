@@ -36,15 +36,22 @@ export class RoomGateway implements OnGatewayDisconnect {
   ) {
     const userId = Number(session(client).passport?.user.userId);
     try {
-      const members = await this.roomService.joinRoom(userId, roomId);
+      const { language, members } = await this.roomService.joinRoom(
+        userId,
+        roomId,
+      );
       const payload: JoinedPayload = {
         userId,
-        members,
+        metadata: {
+          language,
+          members,
+        },
       };
 
       await client.join(roomId);
       this.server.to(roomId).emit(ROOM_EVENTS.JOINED, payload);
     } catch (e: unknown) {
+      this.logger.warn(e);
       client.disconnect();
     }
   }

@@ -1,3 +1,5 @@
+import { Language } from "~shared/types/base";
+
 export const RoomServiceInterfaces = {
   RoomBasicService: "RoomBasicService",
   RoomCreationService: "RoomCreationService",
@@ -14,14 +16,17 @@ export interface RoomAuthorizationService {
 }
 
 export interface RoomCreationService extends RoomBasicService {
-  createRoom(userIds: number[]): Promise<string>;
+  createRoom(language: Language, userIds: number[]): Promise<string>;
 }
 
 export interface RoomManagementService extends RoomCreationService {
   joinRoom(
     userId: number,
     roomId: string,
-  ): Promise<{ userId: number; isConnected: boolean }[]>;
+  ): Promise<{
+    members: { userId: number; isConnected: boolean }[];
+    language: Language;
+  }>;
   disconnectRoom(userId: number, roomId: string): Promise<void>;
   leaveRoom(userId: number, roomId: string): Promise<void>;
 }
