@@ -308,11 +308,7 @@ export const RoomPage = () => {
                 iconPosition="start"
               />
             </TabList>
-            <Stack
-              direction="row"
-              spacing={2}
-              sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
-            >
+            <Stack direction="row" spacing={2} sx={{ minHeight: 1000, p: 3 }}>
               <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
                 <TabPanel
                   sx={{ p: 0, minHeight: 0, flex: 1 }}
