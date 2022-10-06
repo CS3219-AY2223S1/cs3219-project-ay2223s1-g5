@@ -3,9 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { CircularProgress, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
+import { Socket } from "socket.io-client";
 
 import { Timer } from "src/components/Timer";
-import { useSocket } from "src/contexts/SocketContext";
+import { useSockets } from "src/contexts/SocketsContext";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
 import { MatchRes } from "~shared/types/api";
@@ -63,7 +64,8 @@ export const QueuePage = () => {
     }
   }, [difficulty, language, navigate, enqueueSnackbar]);
 
-  const { socket, connect } = useSocket();
+  const { sockets, connect } = useSockets();
+  const [queueSocket, setQueueSocket] = useState<Socket | undefined>(undefined);
 
   // We use a callback on the "connect" event to set a state here
   // so that we can be sure that we will have the socket ID.
@@ -76,24 +78,32 @@ export const QueuePage = () => {
   }, []);
 
   useEffect(() => {
+    const socket = sockets.get(QUEUE_NAMESPACE);
     if (!socket) {
       return;
     }
-    socket.on(QUEUE_EVENTS.CONNECT, () => {
+    setQueueSocket(socket);
+  }, [sockets]);
+
+  useEffect(() => {
+    if (!queueSocket) {
+      return;
+    }
+    queueSocket.on(QUEUE_EVENTS.CONNECT, () => {
       setMessage("Finding a match...");
       setConnected(true);
     });
     return () => {
-      socket.disconnect();
+      queueSocket.disconnect();
     };
-  }, [socket]);
+  }, [queueSocket]);
 
   useEffect(() => {
-    if (!socket || !connected) {
+    if (!queueSocket || !connected) {
       return;
     }
-    socket.emit(QUEUE_EVENTS.ENTER_QUEUE, { difficulty, language });
-  }, [socket, connected, difficulty, language]);
+    queueSocket.emit(QUEUE_EVENTS.ENTER_QUEUE, { difficulty, language });
+  }, [queueSocket, connected, difficulty, language]);
 
   useEffect(() => {
     if (timer === 0) {
@@ -109,34 +119,34 @@ export const QueuePage = () => {
   }, [timer]);
 
   useEffect(() => {
-    if (!socket || !connected) {
+    if (!queueSocket || !connected) {
       return;
     }
 
-    socket.on(QUEUE_EVENTS.MATCH_FOUND, () => {
+    queueSocket.on(QUEUE_EVENTS.MATCH_FOUND, () => {
       setMessage("Match found. Preparing room...");
       setTimerVariant("indeterminate");
       clearTimeout(timeoutId);
     });
 
-    socket.on(QUEUE_EVENTS.ROOM_READY, (match: MatchRes) => {
+    queueSocket.on(QUEUE_EVENTS.ROOM_READY, (match: MatchRes) => {
       setMessage("Room ready. Joining...");
       clearTimeout(timeoutId);
       setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
     });
 
-    socket.on(QUEUE_EVENTS.EXISTING_MATCH, (roomId: string) => {
+    queueSocket.on(QUEUE_EVENTS.EXISTING_MATCH, (roomId: string) => {
       setMessage("Existing match found. Rejoining...");
       clearTimeout(timeoutId);
       setTimeout(() => navigate(`/room/${roomId}`), 1000);
     });
 
     return () => {
-      socket.off(QUEUE_EVENTS.ROOM_READY);
-      socket.off(QUEUE_EVENTS.MATCH_FOUND);
-      socket.off(QUEUE_EVENTS.EXISTING_MATCH);
+      queueSocket.off(QUEUE_EVENTS.ROOM_READY);
+      queueSocket.off(QUEUE_EVENTS.MATCH_FOUND);
+      queueSocket.off(QUEUE_EVENTS.EXISTING_MATCH);
     };
-  }, [socket, navigate, difficulty, connected, timeoutId]);
+  }, [queueSocket, navigate, difficulty, connected, timeoutId]);
 
   return (
     <Stack
