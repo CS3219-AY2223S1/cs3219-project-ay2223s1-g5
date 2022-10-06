@@ -1,33 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Cancel,
-  CheckCircle,
-  DriveFolderUpload,
-  Wysiwyg,
-} from "@mui/icons-material";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import {
-  Box,
-  Divider,
-  Paper,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import { Box, Divider, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
-import { Center } from "src/components/Center";
-import { Chat } from "src/components/chat/Chat";
-import { Editor } from "src/components/Editor";
-import { Question } from "src/components/Question";
-import { RoomStatusBar } from "src/components/RoomStatusBar";
+import { Chat } from "src/components/room/chat/Chat";
+import { Editor } from "src/components/room/Editor";
+import { QuestionSubmissionPanel } from "src/components/room/QuestionSubmissionPanel";
+import { RoomStatusBar } from "src/components/room/RoomStatusBar";
 import { StyledButton } from "src/components/StyledButton";
 import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
@@ -42,7 +22,7 @@ import {
   PartnerDisconnectPayload,
   PartnerLeavePayload,
 } from "~shared/types/api";
-import { Language, Status } from "~shared/types/base";
+import { Language } from "~shared/types/base";
 
 type Participant = {
   userId: number;
@@ -67,16 +47,6 @@ export const RoomPage = () => {
   const userInfos = useGetUsersName(
     participants.map((participant) => participant.userId),
   );
-  const [formType, setFormType] = useState<"description" | "submission">(
-    "description",
-  );
-
-  const handleChange = (
-    _: React.SyntheticEvent | undefined,
-    formType: "description" | "submission",
-  ) => {
-    setFormType(formType);
-  };
 
   const navigate = useNavigate();
 
@@ -274,10 +244,6 @@ export const RoomPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfos]);
 
-  /* Tabular Data */
-  const tableHeaders = ["DATE", "RUNTIME", "TEST CASE", "STATUS"];
-  const tableCells = ["2020-04-26 00:26:55", "0.13s", "[2,7,11,15], 9", "Pass"];
-
   return (
     <EditorProvider roomId={roomId || ""}>
       <ChatProvider roomId={roomId || ""}>
@@ -296,137 +262,33 @@ export const RoomPage = () => {
             onLeaveRoom={onLeaveRoom}
           />
           <Divider />
-          <TabContext value={formType}>
-            <TabList
-              centered
-              onChange={handleChange}
-              sx={{
-                "& .MuiTabs-indicator": {
-                  height: "0px",
-                },
-              }}
-            >
-              <Tab
-                label="Description"
-                value="description"
-                sx={{
-                  fontWeight: "bold",
-                  fontSize: "1.2rem",
-                  textTransform: "none",
-                }}
-                icon={<Wysiwyg />}
-                iconPosition="start"
-              />
-              <Tab
-                label="Submission"
-                value="submission"
-                sx={{
-                  fontWeight: "bold",
-                  fontSize: "1.2rem",
-                  textTransform: "none",
-                }}
-                icon={<DriveFolderUpload />}
-                iconPosition="start"
-              />
-            </TabList>
-            <TabPanel sx={{ p: 0 }} value="description">
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
-              >
-                <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
-                  <Box sx={{ flex: 1, minHeight: 0 }}>
-                    <Question />
-                  </Box>
-                  <Box sx={{ height: "40%" }}>
-                    <Chat />
-                  </Box>
-                </Stack>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Editor language={language} />
-                </Box>
-              </Stack>
-              <Stack
-                direction="row"
-                justifyContent="flex-end"
-                sx={{ py: 2, px: 3 }}
-              >
-                <StyledButton
-                  label={"Submit Code"}
-                  sx={{ "&:hover": { boxShadow: "1" } }}
-                />
-              </Stack>
-            </TabPanel>
-            <TabPanel sx={{ p: 0 }} value="submission">
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{ width: "100%", flex: 1, minHeight: 0, p: 3 }}
-              >
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: "100%" }}>
-                    <TableHead sx={{ bgcolor: "primary.500" }}>
-                      <TableRow>
-                        {tableHeaders.map((tableHeader) => (
-                          <TableCell
-                            key={tableHeader}
-                            align="center"
-                            sx={{
-                              fontWeight: "bold",
-                              color: "white",
-                            }}
-                          >
-                            {tableHeader}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        {tableCells.map((tableCell) => (
-                          <TableCell
-                            key={tableCell}
-                            align="center"
-                            sx={{
-                              color:
-                                Object.values<string>(Status).includes(
-                                  tableCell,
-                                ) && tableCell === "Pass"
-                                  ? "green.500"
-                                  : Object.values<string>(Status).includes(
-                                      tableCell,
-                                    )
-                                  ? "red.500"
-                                  : "black",
-                              fontWeight: Object.values<string>(
-                                Status,
-                              ).includes(tableCell)
-                                ? "bold"
-                                : "normal",
-                            }}
-                          >
-                            <Center>
-                              {Object.values<string>(Status).includes(
-                                tableCell,
-                              ) && tableCell === "Pass" ? (
-                                <CheckCircle sx={{ mr: 0.5 }} />
-                              ) : Object.values<string>(Status).includes(
-                                  tableCell,
-                                ) ? (
-                                <Cancel sx={{ mr: 0.5 }} />
-                              ) : null}
-                              {tableCell}
-                            </Center>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Stack>
-            </TabPanel>
-          </TabContext>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ minHeight: 900, p: 3, pb: 2 }}
+          >
+            <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
+              <Box sx={{ height: "60%" }}>
+                <QuestionSubmissionPanel />
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Chat />
+              </Box>
+            </Stack>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Editor language={language} />
+            </Box>
+          </Stack>
+          <Stack
+            direction="row"
+            justifyContent="flex-end"
+            sx={{ pb: 2, px: 3 }}
+          >
+            <StyledButton
+              label={"Submit Code"}
+              sx={{ "&:hover": { boxShadow: "1" } }}
+            />
+          </Stack>
         </Stack>
       </ChatProvider>
     </EditorProvider>
