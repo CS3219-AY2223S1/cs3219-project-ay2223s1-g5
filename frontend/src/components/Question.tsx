@@ -4,7 +4,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Divider,
-  Paper,
   Stack,
   Typography,
 } from "@mui/material";
@@ -23,51 +22,49 @@ export const Question = () => {
   ];
 
   return (
-    <Paper elevation={1} sx={{ py: 3, px: 2, height: "100%" }}>
-      <Stack
-        direction="column"
-        spacing={3}
-        sx={{
-          px: 1, // Padding between scrollbar and content.
-          flex: 1,
-          height: "100%",
-          minHeight: 0,
-          overflowX: "hidden",
-          overflowY: "auto",
-        }}
+    <Stack
+      direction="column"
+      spacing={3}
+      sx={{
+        px: 1, // Padding between scrollbar and content.
+        flex: 1,
+        height: "100%",
+        minHeight: 0,
+        overflowX: "hidden",
+        overflowY: "auto",
+      }}
+    >
+      <Typography variant="h5" sx={{ textAlign: "center" }}>
+        {title}
+      </Typography>
+      <Divider />
+      <Typography
+        component={"span"}
+        variant="body2"
+        sx={{ textAlign: "justify" }}
       >
-        <Typography variant="h5" sx={{ textAlign: "center" }}>
-          {title}
-        </Typography>
-        <Divider />
-        <Typography
-          component={"span"}
-          variant="body2"
-          sx={{ textAlign: "justify" }}
-        >
-          {parse(DOMPurify.sanitize(content))}
-        </Typography>
-        <Stack direction="column">
-          {hints.map((hint, number) => (
-            <Accordion
-              key={number}
-              sx={{
-                boxShadow: "none",
-                "& .MuiAccordionSummary-root": { p: 0 },
-              }}
-            >
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography>Hint {number + 1}</Typography>
-              </AccordionSummary>
-              <AccordionDetails sx={{ p: 0 }}>
-                <Typography component={"span"} variant="body2">
-                  {parse(DOMPurify.sanitize(hint))}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Stack>
+        {parse(DOMPurify.sanitize(content))}
+      </Typography>
+      <Stack direction="column">
+        {hints.map((hint, number) => (
+          <Accordion
+            key={number}
+            sx={{
+              boxShadow: "none",
+              "& .MuiAccordionSummary-root": { p: 0 },
+            }}
+          >
+            <AccordionSummary expandIcon={<ExpandMore />}>
+              <Typography>Hint {number + 1}</Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <Typography component={"span"} variant="body2">
+                {parse(DOMPurify.sanitize(hint))}
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
+        ))}
       </Stack>
-    </Paper>
+    </Stack>
   );
 };
