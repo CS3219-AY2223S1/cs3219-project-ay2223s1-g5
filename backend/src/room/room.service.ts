@@ -1,9 +1,10 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
-import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ChatService } from "src/chat/chat.service";
+import { PrismaService } from "src/core/prisma.service";
 import { EditorService } from "src/editor/editor.service";
+import { QuestionService } from "src/question/question.service";
 import { RedisService } from "src/redis/redis.service";
 
 import {
@@ -11,7 +12,7 @@ import {
   RoomManagementService,
 } from "./room.interface";
 
-import { Language } from "~shared/types/base";
+import { Difficulty, Language } from "~shared/types/base";
 
 enum Status {
   CONNECTED = 1,
@@ -24,6 +25,7 @@ export class RoomService
 {
   private static readonly NAMESPACE = "Room";
   private static readonly LANGUAGE_NAMESPACE = "LANGUAGE";
+  private static readonly QUESTION_NAMESPACE = "QUESTION";
   private static readonly MEMBERS_NAMESPACE = "MEMBERS";
   private static readonly REVERSE_MAPPING_NAMESPACE = "REVERSE";
   private static readonly DELIMITER = ":";
@@ -32,19 +34,50 @@ export class RoomService
     @InjectPinoLogger(RoomService.name)
     private readonly logger: PinoLogger,
     private readonly redisService: RedisService,
+    private readonly prismaService: PrismaService,
+    private readonly questionService: QuestionService,
     @Inject(forwardRef(() => ChatService))
     private readonly chatService: ChatService,
     @Inject(forwardRef(() => EditorService))
     private readonly editorService: EditorService,
   ) {}
 
-  async createRoom(language: Language, userIds: number[]): Promise<string> {
-    const roomId = nanoid();
+  async createRoom(
+    language: Language,
+    difficulty: Difficulty,
+    userIds: number[],
+  ): Promise<string> {
+    const questionId = await this.questionService.getIdByDifficulty(difficulty);
+    const template = await this.questionService.getSolutionTemplateByLanguage(
+      questionId,
+      language,
+    );
+
+    if (!template) {
+      throw new Error("Unable to load template.");
+    }
+
+    const room = await this.prismaService.roomSession.create({
+      data: {
+        startTime: new Date(),
+        questionId,
+        users: {
+          connect: userIds.map((userId) => ({ id: userId })),
+        },
+      },
+    });
+
+    const roomId = room.id;
 
     await this.redisService.setKey(
       [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
       roomId,
       language.toString(),
+    );
+    await this.redisService.setKey(
+      [RoomService.NAMESPACE, RoomService.QUESTION_NAMESPACE],
+      roomId,
+      questionId.toString(),
     );
 
     await this.chatService.createChatRoom(roomId);
@@ -65,6 +98,8 @@ export class RoomService
       await this.chatService.joinChatRoom(roomId, userId);
     }
 
+    await this.editorService.createDocument(roomId, template.code);
+
     return roomId;
   }
 
@@ -74,6 +109,7 @@ export class RoomService
   ): Promise<{
     members: { userId: number; isConnected: boolean }[];
     language: Language;
+    questionId: number;
   }> {
     this.logger.info(`Joining room [${roomId}]: ${userId}`);
     if ((await this.getRoom(userId)) !== roomId) {
@@ -105,13 +141,23 @@ export class RoomService
     const language = Object.entries(Language).find(
       (value) => value[0] === languageString,
     )?.[1] as Language;
-    if (!members || !language) {
+
+    const questionId = Number(
+      await this.redisService.getValue(
+        [RoomService.NAMESPACE, RoomService.QUESTION_NAMESPACE],
+        roomId,
+      ),
+    );
+
+    if (!members || !language || isNaN(questionId)) {
+      this.logger.warn(members);
       throw new Error("Internal server error");
     }
 
     return {
       members,
       language,
+      questionId,
     };
   }
 
@@ -186,6 +232,14 @@ export class RoomService
       [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
       roomId,
     );
+    await this.redisService.deleteKey(
+      [RoomService.NAMESPACE, RoomService.QUESTION_NAMESPACE],
+      roomId,
+    );
+    await this.prismaService.roomSession.update({
+      where: { id: roomId },
+      data: { endTime: new Date() },
+    });
     // Document ID and room ID are the same.
     await this.editorService.removeDocument(roomId);
     await this.chatService.closeChatRoom(roomId);
@@ -201,8 +255,6 @@ export class RoomService
     if (members.length === 0) {
       return null;
     }
-    // FIXME: In the rare case that we have a race condition the room
-    // can have a member with a duplicate key.
     return members.map((info) => ({
       userId: Number(info.split(RoomService.DELIMITER)[0]),
       isConnected: Boolean(Number(info.split(RoomService.DELIMITER)[1])),

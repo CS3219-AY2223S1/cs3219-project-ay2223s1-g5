@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
+import { Language as PrismaLanguage } from "@prisma/client";
 
 import { PrismaService } from "src/core/prisma.service";
 
-import { Difficulty } from "~shared/types/base";
+import { Difficulty, Language } from "~shared/types/base";
 
 @Injectable()
 export class QuestionService {
@@ -18,8 +19,17 @@ export class QuestionService {
     });
   }
 
+  async getSolutionTemplateByLanguage(questionId: number, language: Language) {
+    return this.prisma.solutionTemplate.findFirst({
+      where: {
+        questionId,
+        language: language.toUpperCase() as PrismaLanguage,
+      },
+    });
+  }
+
   // gets a random question number of difficulty
-  async getIdByDifficulty(difficulty: Difficulty): Promise<number | null> {
+  async getIdByDifficulty(difficulty: Difficulty): Promise<number> {
     const questionsCount = await this.prisma.question.count({
       where: { difficulty },
     });
@@ -31,7 +41,7 @@ export class QuestionService {
       select: { id: true },
     });
     if (question === null) {
-      return 0;
+      throw new Error("Unable to select question.");
     }
     const { id } = question;
     return id;

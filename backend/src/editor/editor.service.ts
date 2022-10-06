@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Document } from "y-socket.io/dist/server/index";
+import { Doc } from "yjs";
 
 import { RedisService } from "src/redis/redis.service";
 import {
@@ -24,6 +25,14 @@ export class EditorService {
 
   async isAuthorized(roomId: string, userId: number): Promise<boolean> {
     return this.authorizationService.isAuthorized(roomId, userId);
+  }
+
+  async createDocument(roomId: string, template: string): Promise<void> {
+    const text = new Doc().getText();
+    // Monaco Editor expects line endings to follow CRLF.
+    text.insert(0, template.replace(/\n/g, "\r\n"));
+    const delta = JSON.stringify(text.toDelta());
+    await this.redisService.setKey([EditorService.NAMESPACE], roomId, delta);
   }
 
   async saveDocument(roomId: string, document: Document): Promise<void> {
