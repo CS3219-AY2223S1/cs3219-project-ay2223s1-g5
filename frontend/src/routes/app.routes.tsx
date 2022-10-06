@@ -1,6 +1,6 @@
 import { Outlet, RouteObject } from "react-router-dom";
 
-import { SocketProvider } from "src/contexts/SocketContext";
+import { SocketsProvider } from "src/contexts/SocketsContext";
 import { LandingLayout } from "src/layouts/LandingLayout";
 import { SidebarLayout } from "src/layouts/SidebarLayout";
 import { LoginPage } from "src/pages/LoginPage";
@@ -58,17 +58,17 @@ export const AppRoutes: RouteObject[] = [
           {
             path: "queue",
             element: (
-              <SocketProvider>
+              <SocketsProvider>
                 <QueuePage />
-              </SocketProvider>
+              </SocketsProvider>
             ),
           },
           {
             path: "room/:roomId",
             element: (
-              <SocketProvider>
+              <SocketsProvider>
                 <RoomPage />
-              </SocketProvider>
+              </SocketsProvider>
             ),
           },
         ],
