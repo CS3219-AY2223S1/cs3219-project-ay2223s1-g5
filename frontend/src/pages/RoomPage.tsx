@@ -324,7 +324,7 @@ export const RoomPage = () => {
                   sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}
                   value="submission"
                 >
-                  <TableContainer component={Paper}>
+                  <TableContainer sx={{ flex: 1 }} component={Paper}>
                     <Table sx={{ minWidth: "100%" }}>
                       <TableHead sx={{ bgcolor: "primary.500" }}>
                         <TableRow>
@@ -385,7 +385,7 @@ export const RoomPage = () => {
                     </Table>
                   </TableContainer>
                 </TabPanel>
-                <Box sx={{ height: "40%" }}>
+                <Box sx={{ flexGrow: 1 }}>
                   <Chat />
                 </Box>
               </Stack>
