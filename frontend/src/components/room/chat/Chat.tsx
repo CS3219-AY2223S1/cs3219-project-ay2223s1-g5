@@ -4,7 +4,7 @@ import { IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 
 import { useChat } from "src/contexts/ChatContext";
 
-import { Center } from "../Center";
+import { Center } from "../../Center";
 
 import { ChatBubble } from "./ChatBubble";
 
