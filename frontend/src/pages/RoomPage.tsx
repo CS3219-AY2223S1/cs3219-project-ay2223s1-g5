@@ -122,7 +122,7 @@ export const RoomPage = () => {
 
     socket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
       if (reason === SOCKET_IO_DISCONNECT_REASON.SERVER_CLOSE) {
-        // navigate("/dashboard");
+        navigate("/dashboard");
         return;
       }
       setSelf((self) => ({ ...self, isConnected: false }));
@@ -308,7 +308,7 @@ export const RoomPage = () => {
                 iconPosition="start"
               />
             </TabList>
-            <Stack direction="row" spacing={2} sx={{ minHeight: 1000, p: 3 }}>
+            <Stack direction="row" spacing={2} sx={{ minHeight: 900, p: 3 }}>
               <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
                 <TabPanel
                   sx={{ p: 0, minHeight: 0, flex: 1 }}
@@ -381,7 +381,7 @@ export const RoomPage = () => {
                     </Table>
                   </TableContainer>
                 </TabPanel>
-                <Box sx={{ flexGrow: 1 }}>
+                <Box sx={{ flex: 1 }}>
                   <Chat />
                 </Box>
               </Stack>
