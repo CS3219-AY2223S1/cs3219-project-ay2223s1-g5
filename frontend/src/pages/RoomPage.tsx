@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Divider, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
+import { Socket } from "socket.io-client";
 
 import { Chat } from "src/components/room/chat/Chat";
 import { Editor } from "src/components/room/Editor";
@@ -12,7 +13,7 @@ import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
 import { ChatProvider } from "src/contexts/ChatContext";
 import { EditorProvider } from "src/contexts/EditorContext";
-import { useSocket } from "src/contexts/SocketContext";
+import { useSockets } from "src/contexts/SocketsContext";
 import { useGetUsersName } from "src/hooks/useUsers";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
@@ -32,7 +33,8 @@ type Participant = {
 export const RoomPage = () => {
   const { roomId } = useParams();
   const { user } = useAuth();
-  const { socket, connect } = useSocket();
+  const { sockets, connect } = useSockets();
+  const [roomSocket, setRoomSocket] = useState<Socket | undefined>(undefined);
   const { enqueueSnackbar } = useSnackbar();
   const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [self, setSelf] = useState<Participant>({
@@ -49,14 +51,14 @@ export const RoomPage = () => {
   const navigate = useNavigate();
 
   const onLeaveRoom = useCallback(() => {
-    if (!socket) {
+    if (!roomSocket) {
       return;
     }
-    socket.off(ROOM_EVENTS.PARTNER_DISCONNECT);
-    socket.off(ROOM_EVENTS.PARTNER_LEAVE);
-    socket.off(ROOM_EVENTS.JOINED);
-    socket.emit(ROOM_EVENTS.LEAVE, { roomId });
-  }, [socket, roomId]);
+    roomSocket.off(ROOM_EVENTS.PARTNER_DISCONNECT);
+    roomSocket.off(ROOM_EVENTS.PARTNER_LEAVE);
+    roomSocket.off(ROOM_EVENTS.JOINED);
+    roomSocket.emit(ROOM_EVENTS.LEAVE, { roomId });
+  }, [roomSocket, roomId]);
 
   useEffect(() => {
     if (!roomId) {
@@ -74,23 +76,31 @@ export const RoomPage = () => {
   }, []);
 
   useEffect(() => {
-    if (socket && roomId) {
-      // Joining a room is idempotent so this should be fine.
-      socket.emit(ROOM_EVENTS.JOIN, { roomId });
-
-      // FIXME: socket.on(ROOM_EVENTS.CONNECT) should work.
-      socket.io.on("reconnect", () => {
-        socket.emit(ROOM_EVENTS.JOIN, { roomId });
-      });
+    const socket = sockets.get(ROOM_NAMESPACE);
+    if (!socket) {
+      return;
     }
-  }, [socket, roomId]);
+    setRoomSocket(socket);
+  }, [sockets]);
 
   useEffect(() => {
-    if (!socket || !roomId) {
+    if (roomSocket && roomId) {
+      // Joining a room is idempotent so this should be fine.
+      roomSocket.emit(ROOM_EVENTS.JOIN, { roomId });
+
+      // FIXME: socket.on(ROOM_EVENTS.CONNECT) should work.
+      roomSocket.io.on("reconnect", () => {
+        roomSocket.emit(ROOM_EVENTS.JOIN, { roomId });
+      });
+    }
+  }, [roomSocket, roomId]);
+
+  useEffect(() => {
+    if (!roomSocket || !roomId) {
       return;
     }
 
-    socket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
+    roomSocket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
       if (reason === SOCKET_IO_DISCONNECT_REASON.SERVER_CLOSE) {
         navigate("/dashboard");
         return;
@@ -101,25 +111,30 @@ export const RoomPage = () => {
       });
     });
 
-    socket.on(ROOM_EVENTS.PARTNER_LEAVE, ({ userId }: PartnerLeavePayload) => {
-      if (userId === user?.userId) {
-        // Self disconnection would have been caught by DISCONNECT event.
-        return;
-      }
-      const participantName = participants.find(
-        (participant) => participant.userId === userId,
-      )?.name;
-      setParticipants((participants) => [
-        ...participants.filter((participant) => participant.userId !== userId),
-      ]);
-      if (participantName) {
-        enqueueSnackbar(`${participantName} has left the room.`, {
-          variant: "warning",
-        });
-      }
-    });
+    roomSocket.on(
+      ROOM_EVENTS.PARTNER_LEAVE,
+      ({ userId }: PartnerLeavePayload) => {
+        if (userId === user?.userId) {
+          // Self disconnection would have been caught by DISCONNECT event.
+          return;
+        }
+        const participantName = participants.find(
+          (participant) => participant.userId === userId,
+        )?.name;
+        setParticipants((participants) => [
+          ...participants.filter(
+            (participant) => participant.userId !== userId,
+          ),
+        ]);
+        if (participantName) {
+          enqueueSnackbar(`${participantName} has left the room.`, {
+            variant: "warning",
+          });
+        }
+      },
+    );
 
-    socket.on(
+    roomSocket.on(
       ROOM_EVENTS.PARTNER_DISCONNECT,
       ({ userId }: PartnerDisconnectPayload) => {
         if (userId === user?.userId) {
@@ -146,11 +161,10 @@ export const RoomPage = () => {
       },
     );
 
-    socket.on(
+    roomSocket.on(
       ROOM_EVENTS.JOINED,
       ({ userId, metadata: { members, language } }: JoinedPayload) => {
         setLanguage(language);
-
         if (userId === user?.userId) {
           setSelf((self) => ({ ...self, isConnected: true }));
           enqueueSnackbar(`You are connected.`, {
@@ -194,12 +208,19 @@ export const RoomPage = () => {
     );
 
     return () => {
-      socket.off(ROOM_EVENTS.CONNECT);
-      socket.off(ROOM_EVENTS.JOINED);
-      socket.off(ROOM_EVENTS.PARTNER_DISCONNECT);
-      socket.off(ROOM_EVENTS.PARTNER_LEAVE);
+      roomSocket.off(ROOM_EVENTS.CONNECT);
+      roomSocket.off(ROOM_EVENTS.JOINED);
+      roomSocket.off(ROOM_EVENTS.PARTNER_DISCONNECT);
+      roomSocket.off(ROOM_EVENTS.PARTNER_LEAVE);
     };
-  }, [socket, roomId, navigate, user?.userId, enqueueSnackbar, participants]);
+  }, [
+    roomSocket,
+    roomId,
+    navigate,
+    user?.userId,
+    enqueueSnackbar,
+    participants,
+  ]);
 
   useEffect(() => {
     if (userInfos.length === 0) {

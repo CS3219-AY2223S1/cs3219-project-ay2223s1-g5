@@ -23,13 +23,22 @@ enum Language {
   PYTHON
 }
 
+enum Status {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  COMPILE_ERROR
+  TIME_LIMIT_EXCEEDED
+}
+
 model User {
-  id           Int     @id @default(autoincrement())
-  email        String  @unique
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
   name         String
   password     String
-  failedLogins Int     @default(0)
-  verified     Boolean @default(false)
+  failedLogins Int           @default(0)
+  verified     Boolean       @default(false)
+  roomSessions RoomSession[]
 }
 
 model Category {
@@ -61,14 +70,39 @@ model TestCase {
 }
 
 model Question {
-  id          Int                @id @default(autoincrement())
-  title       String             @unique
-  difficulty  Difficulty
-  category    Category           @relation(fields: [categoryId], references: [id])
-  categoryId  Int
-  topics      Topic[]
-  description String
-  hints       String[]
-  templates   SolutionTemplate[]
-  testcases   TestCase[]
+  id           Int                @id @default(autoincrement())
+  title        String             @unique
+  difficulty   Difficulty
+  category     Category           @relation(fields: [categoryId], references: [id])
+  categoryId   Int
+  topics       Topic[]
+  description  String
+  hints        String[]
+  templates    SolutionTemplate[]
+  testcases    TestCase[]
+  roomSessions RoomSession[]
+}
+
+model RoomSession {
+  id          String       @id @default(cuid())
+  users       User[]
+  startTime   DateTime     @default(now())
+  endTime     DateTime?
+  question    Question     @relation(fields: [questionId], references: [id])
+  questionId  Int
+  submissions Submission[]
+}
+
+model Submission {
+  id            String      @id
+  roomSession   RoomSession @relation(fields: [roomSessionId], references: [id])
+  roomSessionId String
+  status        Status      @default(PENDING)
+  language      Language
+  output        String?
+  code          String
+  runTime       Int? // In milliseconds
+  memoryUsage   Int? // In bytes
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
