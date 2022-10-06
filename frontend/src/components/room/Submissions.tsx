@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@mui/material";
 
-import { Center } from "./Center";
+import { Center } from "../Center";
 
 import { Status } from "~shared/types/base";
 

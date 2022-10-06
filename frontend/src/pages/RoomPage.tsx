@@ -3,10 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Box, Divider, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 
-import { Chat } from "src/components/chat/Chat";
-import { Editor } from "src/components/Editor";
-import { QuestionSubmissionPanel } from "src/components/QuestionSubmissionPanel";
-import { RoomStatusBar } from "src/components/RoomStatusBar";
+import { Chat } from "src/components/room/chat/Chat";
+import { Editor } from "src/components/room/Editor";
+import { QuestionSubmissionPanel } from "src/components/room/QuestionSubmissionPanel";
+import { RoomStatusBar } from "src/components/room/RoomStatusBar";
 import { StyledButton } from "src/components/StyledButton";
 import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
