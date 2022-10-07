@@ -1,151 +1,105 @@
-import { Grid, Typography } from "@mui/material";
+import {
+  AccessTime,
+  Diversity3,
+  DriveFolderUpload,
+  People,
+  Quiz,
+} from "@mui/icons-material";
+import {
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 
-import { HorizontalBarChart } from "../components/charts/HorizontalBarChart";
-import { PieChart } from "../components/charts/PieChart";
-import { ScatterPlot } from "../components/charts/ScatterPlot";
-import { VerticalBarChart } from "../components/charts/VerticalBarChart";
+import { ScatterPlot } from "src/components/charts/ScatterPlot";
+import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
+import { VerticalBarChart } from "src/components/charts/VerticalBarChart";
+import { ChartContainer } from "src/components/dashboard/ChartContainer";
 
 export const DashboardPage = () => {
+  /* Tabular Data */
+  const tableHeaders = ["DATE TIME", "QUESTION", "PEER"];
+  const tableRows = [
+    ["2020-04-26 00:26:55", "Question 1", "Peer 1"],
+    ["2020-04-27 00:26:55", "Question 2", "Peer 2"],
+    ["2020-04-28 00:27:55", "Question 3", "Peer 3"],
+    ["2020-04-29 00:27:55", "Question 4", "Peer 4"],
+    ["2020-04-30 00:27:55", "Question 5", "Peer 5"],
+    ["2020-04-31 00:27:55", "Question 6", "Peer 6"],
+    ["2020-05-01 00:27:55", "Question 7", "Peer 7"],
+  ];
+
   return (
-    <Grid container>
-      <Grid item xs={5.75}>
-        <Grid container item direction="row">
-          <Grid
-            item
-            sx={{
-              backgroundColor: "primary.main",
-              height: "40px",
-              width: "30px",
-            }}
-          ></Grid>
-          <Grid
-            item
-            sx={{
-              height: "40px",
-              display: "flex",
-              flexGrow: "1",
-              backgroundColor: "primary.light",
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{ alignSelf: "center", ml: "20px" }}
+    <Stack spacing={6}>
+      <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+        <ChartContainer
+          title={"Questions Attempted"}
+          chart={<VerticalBarChart />}
+          Icon={Quiz}
+        />
+        <ChartContainer
+          title={"Time Taken Per Question"}
+          chart={<ScatterPlot />}
+          Icon={AccessTime}
+        />
+      </Stack>
+      <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+        <ChartContainer
+          title={"Collaborators"}
+          chart={
+            <TableContainer
+              sx={{ boxShadow: "none", maxHeight: "300px" }}
+              component={Paper}
             >
-              Questions Attempted
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid item xs={12} sx={{ height: "20px" }}></Grid>
-        <Grid item xs={12} sx={{ backgroundColor: "primary.light" }}>
-          <PieChart />
-        </Grid>
-      </Grid>
-
-      <Grid item xs={0.25}></Grid>
-
-      <Grid item xs={5.75}>
-        <Grid container item direction="row">
-          <Grid
-            item
-            sx={{
-              backgroundColor: "primary.main",
-              height: "40px",
-              width: "30px",
-            }}
-          ></Grid>
-          <Grid
-            item
-            sx={{
-              height: "40px",
-              display: "flex",
-              flexGrow: "1",
-              backgroundColor: "primary.light",
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{ alignSelf: "center", ml: "20px" }}
-            >
-              Question Sources
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid item xs={12} sx={{ height: "20px" }}></Grid>
-        <Grid item xs={12} sx={{ backgroundColor: "primary.light" }}>
-          <HorizontalBarChart />
-        </Grid>
-      </Grid>
-
-      <Grid item xs={12} sx={{ height: "20px" }}></Grid>
-
-      {/* Second Stack*/}
-      <Grid item xs={5.75}>
-        <Grid container item direction="row">
-          <Grid
-            item
-            sx={{
-              backgroundColor: "primary.main",
-              height: "40px",
-              width: "30px",
-            }}
-          ></Grid>
-          <Grid
-            item
-            sx={{
-              height: "40px",
-              display: "flex",
-              flexGrow: "1",
-              backgroundColor: "primary.light",
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{ alignSelf: "center", ml: "20px" }}
-            >
-              Time Taken
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid item xs={12} sx={{ height: "20px" }}></Grid>
-        <Grid item xs={12} sx={{ backgroundColor: "primary.light" }}>
-          <ScatterPlot />
-        </Grid>
-      </Grid>
-
-      <Grid item xs={0.25}></Grid>
-
-      <Grid item xs={5.75}>
-        <Grid container item direction="row">
-          <Grid
-            item
-            sx={{
-              backgroundColor: "primary.main",
-              height: "40px",
-              width: "30px",
-            }}
-          ></Grid>
-          <Grid
-            item
-            sx={{
-              height: "40px",
-              display: "flex",
-              flexGrow: "1",
-              backgroundColor: "primary.light",
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{ alignSelf: "center", ml: "20px" }}
-            >
-              Average Time Taken
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid item xs={12} sx={{ height: "20px" }}></Grid>
-        <Grid item xs={12} sx={{ backgroundColor: "primary.light" }}>
-          <VerticalBarChart />
-        </Grid>
-      </Grid>
-    </Grid>
+              <Table sx={{ minWidth: "100%" }}>
+                <TableHead sx={{ bgcolor: "primary.500" }}>
+                  <TableRow>
+                    {tableHeaders.map((tableHeader) => (
+                      <TableCell
+                        key={tableHeader}
+                        align="center"
+                        sx={{
+                          fontWeight: "bold",
+                          color: "white",
+                        }}
+                      >
+                        {tableHeader}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {tableRows.map((row) => (
+                    <TableRow key={row[0]}>
+                      {row.map((cell) => (
+                        <TableCell key={cell} align="center">
+                          {cell}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          }
+          Icon={Diversity3}
+        />
+        <ChartContainer
+          title={"Top Collaborators"}
+          chart={<ScatterPlot />}
+          Icon={People}
+        />
+      </Stack>
+      <ChartContainer
+        title={"Submissions In The Last Year"}
+        chart={<SubmissionsHeatmap />}
+        Icon={DriveFolderUpload}
+      />
+    </Stack>
   );
 };

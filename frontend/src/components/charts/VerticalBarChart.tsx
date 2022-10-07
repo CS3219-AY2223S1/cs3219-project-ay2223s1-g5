@@ -13,7 +13,7 @@ export const VerticalBarChart = () => {
           trigger: "item",
         },
         xAxis: {
-          name: "Difficulty",
+          // name: "Difficulty",
           type: "category",
           data: ["Easy", "Medium", "Hard"],
         },
@@ -21,25 +21,26 @@ export const VerticalBarChart = () => {
           name: "Minutes",
           type: "value",
         },
+        backgroundColor: "white",
         series: [
           {
             data: [
               {
                 value: 5,
                 itemStyle: {
-                  color: theme.palette.chart.green,
+                  color: theme.palette.green[500],
                 },
               },
               {
                 value: 10,
                 itemStyle: {
-                  color: theme.palette.chart.yellow,
+                  color: theme.palette.yellow[500],
                 },
               },
               {
                 value: 15,
                 itemStyle: {
-                  color: theme.palette.chart.red,
+                  color: theme.palette.red[500],
                 },
               },
             ],
