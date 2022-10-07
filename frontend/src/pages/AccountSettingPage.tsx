@@ -34,52 +34,22 @@ export const AccountSettingPage = () => {
       <Stack direction="row">
         <List>
           <ListItem disablePadding sx={{ bgcolor: "white" }}>
-            <ListItemButton
+            <NavigationButton
+              buttonDescription={"Display Name"}
               selected={formType === "changename"}
               onClick={(event) => handleListItemClick(event, "changename")}
-              sx={{
-                "&.Mui-selected": {
-                  backgroundColor: "white",
-                  color: "primary.500",
-                },
-              }}
-            >
-              <ListItemIcon>
-                <AccountCircle
-                  sx={{
-                    color:
-                      formType === "changename"
-                        ? "primary.500"
-                        : "blueGrey.500",
-                  }}
-                />
-              </ListItemIcon>
-              <ListItemText primary="Display Name" />
-            </ListItemButton>
+              Icon={AccountCircle}
+              sx={{ pl: 1 }}
+            />
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton
+            <NavigationButton
+              buttonDescription={"Password"}
               selected={formType === "changepassword"}
               onClick={(event) => handleListItemClick(event, "changepassword")}
-              sx={{
-                "&.Mui-selected": {
-                  backgroundColor: "white",
-                  color: "primary.500",
-                },
-              }}
-            >
-              <ListItemIcon>
-                <Lock
-                  sx={{
-                    color:
-                      formType === "changepassword"
-                        ? "primary.500"
-                        : "blueGrey.500",
-                  }}
-                />
-              </ListItemIcon>
-              <ListItemText primary="Password" />
-            </ListItemButton>
+              Icon={Lock}
+              sx={{ pl: 1 }}
+            />
           </ListItem>
         </List>
         <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
@@ -87,11 +57,11 @@ export const AccountSettingPage = () => {
           <Stack spacing={4} sx={{ py: "20px", pl: 6, width: "60%" }}>
             <Stack spacing={0.5}>
               <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Update Display Name
+                Update Your Display Name
               </Typography>
               <Typography variant="body2">Personalize Your Name</Typography>
               <Typography variant="body2">
-                Display Name must contain:
+                Your display name should contain:
               </Typography>
             </Stack>
             <Stack
@@ -99,7 +69,7 @@ export const AccountSettingPage = () => {
               sx={{ justifyContent: "center" }}
               spacing={3}
             >
-              <PasswordRequirement label="8+" description="Character" />
+              <PasswordRequirement label="3+" description="Character" />
               <PasswordRequirement label="AA" description="Uppercase" />
               <PasswordRequirement label="aa" description="Lowercase" />
             </Stack>
@@ -110,13 +80,13 @@ export const AccountSettingPage = () => {
           <Stack spacing={4} sx={{ py: "20px", pl: 6, width: "60%" }}>
             <Stack spacing={0.5}>
               <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Reset Password
+                Update Your Password
               </Typography>
               <Typography variant="body2">
                 Just type it twice and try not to forget it.
               </Typography>
               <Typography variant="body2">
-                Password should be and must contain:
+                Your password should contain:
               </Typography>
             </Stack>
             <Stack
