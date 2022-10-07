@@ -3,7 +3,9 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Chip,
   CircularProgress,
+  Container,
   Divider,
   Stack,
   Typography,
@@ -25,7 +27,7 @@ export const Question = (props: QuestionPanelProps) => {
   return question ? (
     <Stack
       direction="column"
-      spacing={3}
+      spacing={2}
       sx={{
         px: 1, // Padding between scrollbar and content.
         flex: 1,
@@ -39,6 +41,19 @@ export const Question = (props: QuestionPanelProps) => {
         {question.title}
       </Typography>
       <Divider />
+      <Container
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        {question.topics.map((topic) => (
+          <Chip key={topic} label={topic} />
+        ))}
+      </Container>
       <Typography
         component={"span"}
         variant="body2"
