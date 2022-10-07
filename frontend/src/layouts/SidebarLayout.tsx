@@ -22,6 +22,7 @@ export const SidebarLayout = () => {
         sx={{
           p: 3,
           flexGrow: "1",
+          margin: "auto",
         }}
       >
         <Outlet />
