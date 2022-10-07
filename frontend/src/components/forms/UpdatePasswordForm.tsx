@@ -11,7 +11,6 @@ import { ApiResponseError } from "src/services/ApiService";
 
 export interface UpdatePasswordFormProps {
   userId: number;
-  onSubmit: () => void;
 }
 
 type UpdatePasswordFormState = {
@@ -39,7 +38,6 @@ export const UpdatePasswordForm = (props: UpdatePasswordFormProps) => {
       enqueueSnackbar("Successfully updated password!", {
         variant: "success",
       });
-      props.onSubmit();
     } catch (e: unknown) {
       enqueueSnackbar((e as ApiResponseError).message, {
         variant: "error",
