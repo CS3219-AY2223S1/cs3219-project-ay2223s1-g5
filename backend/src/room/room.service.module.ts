@@ -7,7 +7,10 @@ import { RoomServiceInterfaces } from "./room.interface";
 import { RoomService } from "./room.service";
 
 @Module({
-  imports: [EditorServiceModule, forwardRef(() => ChatServiceModule)],
+  imports: [
+    forwardRef(() => EditorServiceModule),
+    forwardRef(() => ChatServiceModule),
+  ],
   providers: [
     ...Object.values(RoomServiceInterfaces).map((name) => ({
       provide: name,

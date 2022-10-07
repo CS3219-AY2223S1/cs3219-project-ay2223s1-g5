@@ -34,6 +34,7 @@ export class RoomService
     private readonly redisService: RedisService,
     @Inject(forwardRef(() => ChatService))
     private readonly chatService: ChatService,
+    @Inject(forwardRef(() => EditorService))
     private readonly editorService: EditorService,
   ) {}
 
