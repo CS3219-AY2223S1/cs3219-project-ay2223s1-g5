@@ -2,7 +2,7 @@ import "./index.css";
 
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "@mui/material/styles";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import ReactDOM from "react-dom/client";
 
@@ -17,6 +17,7 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <ThemeProvider theme={theme}>
+        <CssBaseline />
         <App />
       </ThemeProvider>
     </BrowserRouter>

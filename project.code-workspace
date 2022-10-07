@@ -18,6 +18,12 @@
     },
     "[typescriptreact]": {
       "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[prisma]": {
+      "editor.defaultFormatter": "Prisma.prisma"
+    },
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.python"
     }
   }
 }

@@ -18,13 +18,49 @@ export class MockTwilioService {
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
   ) {
-    this.domain = configService.get("domain");
+    this.domain = this.configService.get("domain");
+  }
+
+  createConversationsToken(_: string): string {
+    return "MOCK_CONVERSATION_TOKEN";
+  }
+
+  async createChatRoom(roomId: string): Promise<string> {
+    const chatRoomSid = nanoid(10);
+    this.logger.info(`Creating chat room: ${roomId} (${chatRoomSid})`);
+    return chatRoomSid;
+  }
+
+  async joinChatRoom(
+    chatRoomSid: string,
+    userIdentity: string,
+  ): Promise<string> {
+    const participantSid = nanoid(10);
+    this.logger.info(
+      `Joining chat room [${chatRoomSid}]: ${userIdentity} (${participantSid})`,
+    );
+    return participantSid;
+  }
+
+  async leaveChatRoom(
+    chatRoomSid: string,
+    participantSid: string,
+  ): Promise<void> {
+    this.logger.info(`Leaving chat room [${chatRoomSid}]: ${participantSid}`);
+  }
+
+  async closeChatRoom(chatRoomSid: string): Promise<void> {
+    this.logger.info(`Creating chat room: ${chatRoomSid}`);
+  }
+
+  async sendSystemMessage(chatRoomSid: string, message: string): Promise<void> {
+    this.logger.info(`Sending system message [${chatRoomSid}] ${message}`);
   }
 
   async sendVerificationEmail(email: string, userId: number): Promise<void> {
     const code = nanoid(10);
     // Code expires in 10 minutes
-    this.redisService.setKey(
+    await this.redisService.setKey(
       [MockTwilioService.NAMESPACE, MockTwilioService.VERIFICATION_NAMESPACE],
       email,
       code,
@@ -61,7 +97,7 @@ export class MockTwilioService {
   ): Promise<void> {
     const code = nanoid(10);
     // Code expires in 10 minutes
-    this.redisService.setKey(
+    await this.redisService.setKey(
       [MockTwilioService.NAMESPACE, MockTwilioService.RESET_PASSWORD_NAMESPACE],
       email,
       code,

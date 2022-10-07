@@ -4,31 +4,35 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Put,
-  Request,
+  Session,
+  UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
-import { Request as ExpressRequest } from "express";
+import { Request } from "express";
 
-import { JwtAuthGuard } from "src/auth/jwt.guard";
+import { SessionGuard } from "src/auth/session.guard";
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
-import { UnauthorizedError } from "src/common/errors/unauthorized.error";
-import { VerificationService } from "src/verification/verification.service";
+import { VerificationError } from "src/common/errors/verification.error";
 
-import { ResetPasswordService } from "./reset-password.service";
+import { ResetPasswordService } from "./reset-password/reset-password.service";
+import { VerificationService } from "./verification/verification.service";
 import { UserService } from "./user.service";
 
 import {
   CreateUserReq,
   GetUserNameRes,
   RequestResetPasswordReq,
+  RequestVerifyEmailReq,
   ResetPasswordReq,
   UpdatePasswordReq,
   UpdateUserReq,
+  VerifyEmailReq,
 } from "~shared/types/api";
 
 @Controller("users")
@@ -51,40 +55,40 @@ export class UserController {
     await this.verificationService.sendVerificationEmail(user.email);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionGuard)
   @Put(":userId(\\d+)")
   async updateUser(
-    @Request() req: ExpressRequest,
+    @Session() session: Request["session"],
     @Param("userId", ParseIntPipe) userId: number,
     @Body() data: UpdateUserReq,
   ): Promise<void> {
-    if (req.user?.userId != userId) {
+    if (session.passport?.user.userId != userId) {
       throw new ForbiddenException();
     }
     await this.userService.updateUserDetails(userId, data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(SessionGuard)
   @Get(":userId(\\d+)")
   async getUserName(
     @Param("userId", ParseIntPipe) userId: number,
   ): Promise<GetUserNameRes | null> {
     const user = await this.userService.getById(userId);
     if (!user) {
-      return null;
+      throw new NotFoundException("User not found.");
     }
     const { name } = user;
     return { name };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post(":userId(\\d+)")
+  @UseGuards(SessionGuard)
+  @Post(":userId(\\d+)/password")
   async updatePassword(
-    @Request() req: ExpressRequest,
+    @Session() session: Request["session"],
     @Param("userId", ParseIntPipe) userId: number,
     @Body() data: UpdatePasswordReq,
   ): Promise<void> {
-    if (req.user?.userId != userId) {
+    if (session.passport?.user.userId != userId) {
       throw new ForbiddenException();
     }
     const { oldPassword, newPassword } = data;
@@ -111,5 +115,32 @@ export class UserController {
     @Body() { userId, code, password }: ResetPasswordReq,
   ): Promise<void> {
     await this.resetPasswordService.resetPassword(userId, code, password);
+  }
+
+  @Post("verifications")
+  async resendVerificationEmail(
+    @Body() { email }: RequestVerifyEmailReq,
+  ): Promise<void> {
+    try {
+      return await this.verificationService.sendVerificationEmail(email);
+    } catch (e: unknown) {
+      if (!(e instanceof VerificationError)) {
+        throw e;
+      }
+      throw new ConflictException(e.message);
+    }
+  }
+
+  @Patch("verifications")
+  async checkVerificationCode(
+    @Body() { userId, code }: VerifyEmailReq,
+  ): Promise<void> {
+    const result = await this.verificationService.checkVerificationCode(
+      userId,
+      code,
+    );
+    if (!result) {
+      throw new UnauthorizedException("Failed to verify user email.");
+    }
   }
 }

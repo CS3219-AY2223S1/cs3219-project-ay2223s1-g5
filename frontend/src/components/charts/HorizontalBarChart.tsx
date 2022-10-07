@@ -1,4 +1,4 @@
-import { useTheme } from "@mui/material/styles/";
+import { useTheme } from "@mui/material";
 import ReactEcharts from "echarts-for-react";
 
 export const HorizontalBarChart = () => {
@@ -36,9 +36,9 @@ export const HorizontalBarChart = () => {
           dimension: 0,
           inRange: {
             color: [
-              theme.palette.chart.red,
-              theme.palette.chart.yellow,
-              theme.palette.chart.green,
+              theme.palette.red[500],
+              theme.palette.yellow[500],
+              theme.palette.green[500],
             ],
           },
         },

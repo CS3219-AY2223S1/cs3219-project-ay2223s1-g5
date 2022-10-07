@@ -1,4 +1,4 @@
-import { useTheme } from "@mui/material/styles/";
+import { useTheme } from "@mui/material";
 import ReactEcharts from "echarts-for-react";
 
 export const PieChart = () => {
@@ -26,20 +26,20 @@ export const PieChart = () => {
               {
                 value: 30,
                 name: "Easy",
-                itemStyle: { color: theme.palette.chart.green },
+                itemStyle: { color: theme.palette.green[500] },
               },
               {
                 value: 30,
                 name: "Medium",
                 itemStyle: {
-                  color: theme.palette.chart.yellow,
+                  color: theme.palette.yellow[500],
                 },
               },
               {
                 value: 30,
                 name: "Hard",
                 itemStyle: {
-                  color: theme.palette.chart.red,
+                  color: theme.palette.red[500],
                 },
               },
             ],

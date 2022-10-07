@@ -4,18 +4,26 @@ export interface ConfigSchema {
   port: number;
   environment: "development" | "staging" | "production" | "test";
   domain: string;
-  jwt: {
+  session: {
+    name: string;
     secret: string;
-    validity: number;
+    maxAge: number;
   };
   twilio: {
     accountSid: string;
     authToken: string;
     verificationSid: string;
     resetPasswordSid: string;
+    conversationsSid: string;
+    apiKey: string;
+    apiSecret: string;
   };
   redis: {
     url: string;
+  };
+  judge0: {
+    apiKey: string;
+    apiHost: string;
   };
 }
 
@@ -45,16 +53,22 @@ export const schema: Schema<ConfigSchema> = {
     format: "required-string",
     default: "",
   },
-  jwt: {
-    secret: {
-      env: "JWT_SECRET",
+  session: {
+    name: {
+      env: "SESSION_NAME",
+      sensitive: false,
+      default: "codecollab.sid",
       format: "required-string",
-      default: "",
-      sensitive: true,
     },
-    validity: {
-      env: "JWT_VALIDITY",
-      format: "int",
+    secret: {
+      env: "SESSION_SECRET",
+      sensitive: true,
+      default: "",
+      format: "required-string",
+    },
+    maxAge: {
+      env: "SESSION_MAX_AGE",
+      format: Number,
       default: 604800000,
     },
   },
@@ -83,12 +97,43 @@ export const schema: Schema<ConfigSchema> = {
       default: "",
       sensitive: true,
     },
+    conversationsSid: {
+      env: "TWILIO_CONVERSATIONS_SID",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    apiKey: {
+      env: "TWILIO_API_KEY",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    apiSecret: {
+      env: "TWILIO_API_SECRET",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
   },
   redis: {
     url: {
       env: "REDIS_URL",
       format: "required-string",
       default: "",
+    },
+  },
+  judge0: {
+    apiKey: {
+      env: "JUDGE0_API_KEY",
+      format: "required-string",
+      default: "",
+      sensitive: true,
+    },
+    apiHost: {
+      env: "JUDGE0_API_HOST",
+      format: "required-string",
+      default: "judge0-ce.p.rapidapi.com",
     },
   },
 };

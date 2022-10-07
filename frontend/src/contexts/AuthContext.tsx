@@ -8,13 +8,12 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircularProgress, Container } from "@mui/material";
-import Cookie from "js-cookie";
 import { useSnackbar } from "notistack";
 
-import { useWhoAmI } from "src/hooks/useAuth";
+import { useLogout, useWhoAmI } from "src/hooks/useAuth";
 import { ApiResponseError } from "src/services/ApiService";
 
-import { LoginRes } from "~shared/types/api/auth.dto";
+import { LoginRes } from "~shared/types/api";
 
 type AuthContextProps = {
   user: LoginRes | null | undefined;
@@ -28,6 +27,7 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { whoAmI } = useWhoAmI();
+  const { logoutMutation } = useLogout();
   // We set adminUser to undefined to denote an uninitialized state.
   const [user, setUser] = useState<LoginRes | null | undefined>(undefined);
 
@@ -38,7 +38,6 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
         setUser(retrievedUser);
       } else {
         setUser(null);
-        Cookie.remove("accessToken");
       }
     } catch (e: unknown) {
       // eslint-disable-next-line no-console
@@ -50,9 +49,19 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
   }, []);
 
   const logout = useCallback(async () => {
-    Cookie.remove("accessToken");
-    navigate("/");
-  }, [navigate]);
+    try {
+      await logoutMutation();
+    } catch (e: unknown) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    } finally {
+      setUser(null);
+      navigate("/");
+      enqueueSnackbar("Logged out", {
+        variant: "success",
+      });
+    }
+  }, [enqueueSnackbar, logoutMutation, navigate]);
 
   // Initialize states
   useEffect(() => {
