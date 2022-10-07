@@ -9,6 +9,8 @@ export {
   LeavePayload,
   PartnerDisconnectPayload,
   PartnerLeavePayload,
+  SubmissionResultPayload,
+  SubmitPayload,
 } from "./room.dto";
 export {
   CreateUserReq,

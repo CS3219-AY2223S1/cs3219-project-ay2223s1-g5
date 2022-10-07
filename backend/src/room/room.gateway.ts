@@ -11,11 +11,18 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
 import { session } from "src/common/adapters/websocket.adapter";
+import { JudgeService } from "src/judge/judge.service";
 
 import { RoomManagementService, RoomServiceInterfaces } from "./room.interface";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
-import { JoinedPayload, JoinPayload, LeavePayload } from "~shared/types/api";
+import {
+  JoinedPayload,
+  JoinPayload,
+  LeavePayload,
+  SubmissionResultPayload,
+  SubmitPayload,
+} from "~shared/types/api";
 
 @WebSocketGateway({ namespace: ROOM_NAMESPACE })
 export class RoomGateway implements OnGatewayDisconnect {
@@ -27,6 +34,7 @@ export class RoomGateway implements OnGatewayDisconnect {
     private readonly logger: PinoLogger,
     @Inject(RoomServiceInterfaces.RoomManagementService)
     private readonly roomService: RoomManagementService,
+    private readonly judgeService: JudgeService,
   ) {}
 
   @SubscribeMessage(ROOM_EVENTS.JOIN)
@@ -66,6 +74,31 @@ export class RoomGateway implements OnGatewayDisconnect {
     await this.roomService.leaveRoom(userId, roomId);
     this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_LEAVE, { userId });
     client.disconnect();
+  }
+
+  @SubscribeMessage(ROOM_EVENTS.SUBMIT)
+  async handleSubmit(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() submitPayload: SubmitPayload,
+  ) {
+    const userId = Number(session(client).passport?.user.userId);
+    const roomId = await this.roomService.getRoom(userId);
+
+    if (!roomId) {
+      return;
+    }
+
+    const result = await this.judgeService.sendRequest(
+      submitPayload.language,
+      submitPayload.code,
+      submitPayload.template,
+      submitPayload.inputs,
+      submitPayload.output,
+    );
+
+    this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_RESULT, {
+      success: result,
+    } as SubmissionResultPayload);
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {

@@ -24,3 +24,15 @@ export type PartnerDisconnectPayload = {
 export type PartnerLeavePayload = {
   userId: number;
 };
+
+export type SubmitPayload = {
+  code: string;
+  template: string;
+  language: Language;
+  inputs: string[];
+  output: string;
+};
+
+export type SubmissionResultPayload = {
+  success: boolean;
+};
