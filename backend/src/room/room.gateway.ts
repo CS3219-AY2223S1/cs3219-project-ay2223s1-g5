@@ -36,7 +36,7 @@ export class RoomGateway implements OnGatewayDisconnect {
   ) {
     const userId = Number(session(client).passport?.user.userId);
     try {
-      const { language, members } = await this.roomService.joinRoom(
+      const { language, questionId, members } = await this.roomService.joinRoom(
         userId,
         roomId,
       );
@@ -45,6 +45,7 @@ export class RoomGateway implements OnGatewayDisconnect {
         metadata: {
           language,
           members,
+          questionId,
         },
       };
 

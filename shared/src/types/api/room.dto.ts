@@ -5,6 +5,7 @@ export type JoinedPayload = {
   metadata: {
     language: Language;
     members: { userId: number; isConnected: boolean }[];
+    questionId: number;
   };
 };
 

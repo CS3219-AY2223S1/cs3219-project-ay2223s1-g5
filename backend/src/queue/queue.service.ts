@@ -81,9 +81,17 @@ export class QueueService {
     ];
   }
 
-  async createRoom(language: Language, users: User[]): Promise<Match> {
+  async createRoom(
+    language: Language,
+    difficulty: Difficulty,
+    users: User[],
+  ): Promise<Match> {
     const userIds = users.map((user) => user.userId);
-    const roomId = await this.roomService.createRoom(language, userIds);
+    const roomId = await this.roomService.createRoom(
+      language,
+      difficulty,
+      userIds,
+    );
     return {
       roomId,
       result: users,

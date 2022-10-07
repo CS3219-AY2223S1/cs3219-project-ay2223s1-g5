@@ -11,7 +11,7 @@ export class SessionMiddleware implements NestMiddleware {
   private middleware: RequestHandler;
 
   constructor(
-    private config: ConfigService,
+    private readonly config: ConfigService,
     private readonly redis: RedisService,
   ) {
     this.middleware = session({

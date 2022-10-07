@@ -9,6 +9,7 @@ import { AuthModule } from "src/auth/auth.module";
 import { ChatModule } from "src/chat/chat.module";
 import { ExceptionFilter } from "src/common/filters/exception.filter";
 import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
+import { SessionMiddlewareModule } from "src/common/middlewares/SessionMiddleware.module";
 import { CoreModule } from "src/core/core.module";
 import { PrismaServiceModule } from "src/core/prisma.service.module";
 import { EditorModule } from "src/editor/editor.module";
@@ -55,6 +56,8 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     ChatModule,
     EditorModule,
     QuestionModule,
+    // For custom WebSocket adapter
+    SessionMiddlewareModule,
   ],
   providers: [
     {

@@ -68,7 +68,11 @@ export class QueueGateway implements OnGatewayDisconnect {
       this.server.to(user.socketId).emit(QUEUE_EVENTS.MATCH_FOUND);
     }
 
-    const match = await this.queueService.createRoom(language, users);
+    const match = await this.queueService.createRoom(
+      language,
+      difficulty,
+      users,
+    );
     for (const user of users) {
       this.server.to(user.socketId).emit(QUEUE_EVENTS.ROOM_READY, match);
     }
