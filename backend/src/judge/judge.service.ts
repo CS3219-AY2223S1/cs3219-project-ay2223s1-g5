@@ -4,6 +4,7 @@ import { AxiosInstance } from "axios";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
+import { QuestionService } from "src/question/question.service";
 
 import { CppMiddleware } from "./middleware/cpp";
 import { JavaMiddleware } from "./middleware/java";
@@ -30,6 +31,11 @@ const languageToLanguageId = (language: Language) => {
   }
 };
 
+interface TestCase {
+  inputs: string[];
+  output: string;
+}
+
 @Injectable()
 export class JudgeService {
   private axiosInstance: AxiosInstance;
@@ -37,7 +43,8 @@ export class JudgeService {
   constructor(
     @InjectPinoLogger(JudgeService.name)
     private readonly logger: PinoLogger,
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
+    private readonly questionService: QuestionService,
   ) {
     this.axiosInstance = axios.create({
       baseURL: `https://${this.configService.get("judge0.apiHost")}/`,
@@ -54,17 +61,17 @@ export class JudgeService {
   async sendRequest(
     language: Language,
     code: string,
-    template: string,
-    inputs: string[],
-    expectedOutput: string,
+    questionId: number,
   ): Promise<boolean> {
     this.logger.info("Sending code to Judge0...");
     try {
+      const template = await this.getTemplate(questionId, language);
+      const testCase = await this.getTestCase(questionId);
       const middleware = this.getMiddleware(
         language,
         template,
-        inputs,
-        expectedOutput,
+        testCase.inputs,
+        testCase.output,
       );
 
       // Replace leading tabs with whitespaces
@@ -93,6 +100,35 @@ export class JudgeService {
       this.logger.error(e);
       return false;
     }
+  }
+
+  private async getTemplate(
+    questionId: number,
+    language: Language,
+  ): Promise<string> {
+    const template = await this.questionService.getSolutionTemplateByLanguage(
+      questionId,
+      language,
+    );
+
+    if (!template) {
+      throw Error(`Template not found for question ${questionId}`);
+    }
+
+    return template.code;
+  }
+
+  private async getTestCase(questionId: number): Promise<TestCase> {
+    const testCase = await this.questionService.getTestcase(questionId);
+
+    if (!testCase) {
+      throw Error(`Testcase for question ${questionId} not found`);
+    }
+
+    return {
+      inputs: testCase.inputs,
+      output: testCase.output,
+    } as TestCase;
   }
 
   private getMiddleware(

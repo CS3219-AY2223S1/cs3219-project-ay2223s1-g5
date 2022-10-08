@@ -28,6 +28,14 @@ export class QuestionService {
     });
   }
 
+  async getTestcase(questionId: number) {
+    return this.prisma.testCase.findFirst({
+      where: {
+        questionId,
+      },
+    });
+  }
+
   // gets a random question number of difficulty
   async getIdByDifficulty(difficulty: Difficulty): Promise<number> {
     const questionsCount = await this.prisma.question.count({

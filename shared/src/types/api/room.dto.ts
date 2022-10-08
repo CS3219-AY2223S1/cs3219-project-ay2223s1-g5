@@ -27,10 +27,8 @@ export type PartnerLeavePayload = {
 
 export type SubmitPayload = {
   code: string;
-  template: string;
+  questionId: number;
   language: Language;
-  inputs: string[];
-  output: string;
 };
 
 export type SubmissionResultPayload = {

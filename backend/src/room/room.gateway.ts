@@ -91,9 +91,7 @@ export class RoomGateway implements OnGatewayDisconnect {
     const result = await this.judgeService.sendRequest(
       submitPayload.language,
       submitPayload.code,
-      submitPayload.template,
-      submitPayload.inputs,
-      submitPayload.output,
+      submitPayload.questionId,
     );
 
     this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_RESULT, {
