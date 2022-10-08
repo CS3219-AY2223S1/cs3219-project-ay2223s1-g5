@@ -10,7 +10,7 @@ import { SessionGuard } from "src/auth/session.guard";
 
 import { RoomService } from "./room.service";
 
-@Controller("questions")
+@Controller("room")
 export class RoomController {
   constructor(private roomService: RoomService) {}
 
