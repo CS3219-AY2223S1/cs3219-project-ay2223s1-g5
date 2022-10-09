@@ -59,7 +59,7 @@ export function serverMiddlewareSetup(
     if (request.isAuthenticated()) {
       next();
     } else {
-      next(new Error("unauthorized"));
+      next(new Error("Unauthorized"));
     }
   });
   return server;

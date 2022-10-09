@@ -52,7 +52,7 @@ export class ChatService {
   async joinChatRoom(roomId: string, userId: number) {
     const identity = await this.getIdentity(userId);
     if (!(await this.roomService.isAuthorized(roomId, userId))) {
-      throw new ForbiddenError("Incorrect room ID");
+      throw new ForbiddenError("Incorrect room ID.");
     }
     const chatRoomSid = await this.getChatRoomSid(roomId);
     if (!chatRoomSid) {

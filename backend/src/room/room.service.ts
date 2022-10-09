@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ChatService } from "src/chat/chat.service";
+import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { PrismaService } from "src/core/prisma.service";
 import { EditorService } from "src/editor/editor.service";
 import { QuestionService } from "src/question/question.service";
@@ -114,8 +115,7 @@ export class RoomService
     this.logger.info(`Joining room [${roomId}]: ${userId}`);
     if ((await this.getRoom(userId)) !== roomId) {
       this.logger.error(`Room mismatch [${roomId}]: ${userId}`);
-      // TODO: Improve error type.
-      throw new Error(`User ${userId} should not be in room`);
+      throw new ForbiddenError(`Incorrect room ID.`);
     }
 
     await this.redisService
@@ -151,7 +151,7 @@ export class RoomService
 
     if (!members || !language || isNaN(questionId)) {
       this.logger.warn(members);
-      throw new Error("Internal server error");
+      throw new Error();
     }
 
     return {
