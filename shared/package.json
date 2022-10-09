@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
+    "@types/validator": "^13.7.7",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
     "@typescript-eslint/parser": "^5.20.0",
     "eslint": "^8.13.0",
@@ -38,23 +39,28 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "isolatedModules": true
+        }
+      ]
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node",
-    "globals": {
-      "ts-jest": {
-        "isolatedModules": true
-      }
-    }
+    "testEnvironment": "node"
   },
   "lint-staged": {
     "**/*.(js|jsx|ts|tsx)": [
       "prettier --write",
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
+    "validator": "^13.7.0"
   }
 }

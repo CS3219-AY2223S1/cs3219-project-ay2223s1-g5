@@ -9,7 +9,7 @@ import { Timer } from "src/components/Timer";
 import { useSockets } from "src/contexts/SocketsContext";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
-import { MatchRes } from "~shared/types/api";
+import { FoundRoomPayload } from "~shared/types/api";
 import { Difficulty, Language } from "~shared/types/base";
 
 const TIMEOUT = 30;
@@ -129,7 +129,7 @@ export const QueuePage = () => {
       clearTimeout(timeoutId);
     });
 
-    queueSocket.on(QUEUE_EVENTS.ROOM_READY, (match: MatchRes) => {
+    queueSocket.on(QUEUE_EVENTS.ROOM_READY, (match: FoundRoomPayload) => {
       setMessage("Room ready. Joining...");
       clearTimeout(timeoutId);
       setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
