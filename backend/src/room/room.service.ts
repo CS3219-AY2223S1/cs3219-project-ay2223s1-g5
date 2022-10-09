@@ -3,6 +3,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ChatService } from "src/chat/chat.service";
 import { ForbiddenError } from "src/common/errors/forbidden.error";
+import { InternalServerError } from "src/common/errors/internal-server.error";
 import { PrismaService } from "src/core/prisma.service";
 import { EditorService } from "src/editor/editor.service";
 import { QuestionService } from "src/question/question.service";
@@ -55,7 +56,8 @@ export class RoomService
     );
 
     if (!template) {
-      throw new Error("Unable to load template.");
+      this.logger.error(`Unable to load template: ${questionId} [${language}]`);
+      throw new InternalServerError();
     }
 
     const room = await this.prismaService.roomSession.create({
@@ -150,8 +152,10 @@ export class RoomService
     );
 
     if (!members || !language || isNaN(questionId)) {
-      this.logger.warn(members);
-      throw new Error();
+      this.logger.error(
+        `Unable to retrieve room metadata: ${roomId} [${members} | ${language} | ${questionId}]`,
+      );
+      throw new InternalServerError();
     }
 
     return {
