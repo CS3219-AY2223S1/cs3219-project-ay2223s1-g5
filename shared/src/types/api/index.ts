@@ -1,8 +1,7 @@
 export { LoginReq, LoginRes } from "./auth.dto";
 export { CreateTokenRes } from "./chat.dto";
-export { MatchRes } from "./match.dto";
 export { GetQuestionRes } from "./question.dto";
-export { EnterQueuePayload } from "./queue.dto";
+export { EnterQueuePayload, FoundRoomPayload } from "./queue.dto";
 export {
   JoinedPayload,
   JoinPayload,

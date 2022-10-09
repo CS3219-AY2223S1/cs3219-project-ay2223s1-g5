@@ -1,3 +1,4 @@
+import { UseFilters, UsePipes, ValidationPipe } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -10,6 +11,8 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
 import { session } from "src/common/adapters/websocket.adapter";
+import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
+import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
 
 import { QueueService } from "./queue.service";
 
@@ -17,6 +20,8 @@ import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
 import { EnterQueuePayload } from "~shared/types/api";
 import { Difficulty, Language } from "~shared/types/base";
 
+@UseFilters(WsExceptionFilter)
+@UsePipes(CustomValidationPipe)
 @WebSocketGateway({ namespace: QUEUE_NAMESPACE })
 export class QueueGateway implements OnGatewayDisconnect {
   @WebSocketServer()

@@ -3,7 +3,6 @@ import { CloseOutlined, Lock, MailOutline } from "@mui/icons-material";
 import { IconButton, Link, Stack } from "@mui/material";
 import { blueGrey } from "@mui/material/colors";
 import { Box } from "@mui/system";
-import { validate } from "email-validator";
 import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
@@ -12,6 +11,7 @@ import { useAuth } from "src/contexts/AuthContext";
 import { useLogin } from "src/hooks/useAuth";
 import { useRequestVerificationEmail } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
+import isEmail from "validator/es/lib/isEmail";
 
 import { TextButton } from "../TextButton";
 
@@ -98,7 +98,7 @@ export const LoginForm = (props: LoginFormProps) => {
           rules={{
             required: "Email is required.",
             validate: (value: string) =>
-              validate(value) || "Please enter a valid email",
+              isEmail(value) || "Please enter a valid email",
           }}
           render={({
             field: { value, onBlur, onChange: formOnChange },

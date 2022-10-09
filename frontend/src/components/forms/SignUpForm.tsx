@@ -1,14 +1,14 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AccountCircle, Lock, MailOutline } from "@mui/icons-material";
 import { Stack } from "@mui/material";
-import { passwordStrength } from "check-password-strength";
-import { validate } from "email-validator";
 import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useCreateUser } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
+import isEmail from "validator/es/lib/isEmail";
+import isStrongPassword from "validator/es/lib/isStrongPassword";
 
 export interface SignUpFormProps {
   onSubmit: () => void;
@@ -59,7 +59,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
           rules={{
             required: "Email is required.",
             validate: (value: string) =>
-              validate(value) || "Please enter a valid email",
+              isEmail(value) || "Please enter a valid email",
           }}
           render={({
             field: { value, onBlur, onChange: formOnChange },
@@ -105,12 +105,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
             required: "Password is required.",
             // TODO: Abstract this and improve error message.
             validate: (value: string) => {
-              const results = passwordStrength(value);
-              return (
-                results.value === "Strong" ||
-                results.value === "Medium" ||
-                "Password is too weak."
-              );
+              return isStrongPassword(value) || "Password is too weak.";
             },
           }}
           render={({

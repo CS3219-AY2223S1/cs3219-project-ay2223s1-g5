@@ -1,4 +1,4 @@
-import { Inject } from "@nestjs/common";
+import { Inject, UseFilters, UsePipes } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -11,6 +11,8 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
 import { session } from "src/common/adapters/websocket.adapter";
+import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
+import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
 import { JudgeService } from "src/judge/judge.service";
 
 import { RoomManagementService, RoomServiceInterfaces } from "./room.interface";
@@ -24,6 +26,8 @@ import {
   SubmitPayload,
 } from "~shared/types/api";
 
+@UseFilters(WsExceptionFilter)
+@UsePipes(CustomValidationPipe)
 @WebSocketGateway({ namespace: ROOM_NAMESPACE })
 export class RoomGateway implements OnGatewayDisconnect {
   @WebSocketServer()

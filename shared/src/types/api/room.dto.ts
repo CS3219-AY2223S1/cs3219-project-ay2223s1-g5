@@ -1,4 +1,29 @@
+import { IsNumber } from "class-validator";
+
+import { IsLanguage } from "../../decorators/is-language.decorator";
+import { IsNonEmptyString } from "../../decorators/is-non-empty-string.decorator";
 import { Language } from "../base";
+
+export class LeavePayload {
+  @IsNonEmptyString()
+  roomId: string;
+}
+
+export class JoinPayload {
+  @IsNonEmptyString()
+  roomId: string;
+}
+
+export class SubmitPayload {
+  @IsNonEmptyString()
+  code: string;
+
+  @IsNumber()
+  questionId: number;
+
+  @IsLanguage()
+  language: Language;
+}
 
 export type JoinedPayload = {
   userId: number;
@@ -9,26 +34,12 @@ export type JoinedPayload = {
   };
 };
 
-export type LeavePayload = {
-  roomId: string;
-};
-
-export type JoinPayload = {
-  roomId: string;
-};
-
 export type PartnerDisconnectPayload = {
   userId: number;
 };
 
 export type PartnerLeavePayload = {
   userId: number;
-};
-
-export type SubmitPayload = {
-  code: string;
-  questionId: number;
-  language: Language;
 };
 
 export type SubmissionResultPayload = {

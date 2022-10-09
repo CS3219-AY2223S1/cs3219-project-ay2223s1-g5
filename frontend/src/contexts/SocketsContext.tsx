@@ -6,7 +6,11 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 import { io, Socket } from "socket.io-client";
+
+import { CLIENT_EVENTS } from "~shared/constants/events";
 
 type SocketsContextProps = {
   sockets: Map<string, Socket>;
@@ -21,6 +25,8 @@ export const SocketsProvider = ({
   children,
 }: PropsWithChildren): JSX.Element => {
   const [sockets, setSockets] = useState<Map<string, Socket>>(new Map());
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   const connect = useCallback(
     (namespace: string) => {
@@ -32,10 +38,34 @@ export const SocketsProvider = ({
           withCredentials: true,
           transports: ["websocket"],
         });
+        client.on(CLIENT_EVENTS.CONNECT_ERROR, (error: Error) => {
+          enqueueSnackbar(
+            error.message === "Unauthorized"
+              ? "Unauthorized"
+              : "Something went wrong",
+            {
+              variant: "error",
+            },
+          );
+          if (error.message !== "Unauthorized") {
+            // eslint-disable-next-line no-console
+            console.warn(error.message);
+          }
+          // Go back to previous page.
+          navigate(-1);
+        });
+        client.on(CLIENT_EVENTS.ERROR, (error: Error) => {
+          // eslint-disable-next-line no-console
+          console.warn(error);
+          enqueueSnackbar(error.message, {
+            variant: "error",
+          });
+          // TODO: Can provide a way for the consumer to perform some action on error?
+        });
         return new Map(sockets.set(namespace, client));
       });
     },
-    [setSockets],
+    [setSockets, enqueueSnackbar, navigate],
   );
 
   useEffect(() => {

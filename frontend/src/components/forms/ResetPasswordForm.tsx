@@ -2,13 +2,13 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Lock } from "@mui/icons-material";
 import { Stack } from "@mui/material";
-import { passwordStrength } from "check-password-strength";
 import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useResetPassword } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
+import isStrongPassword from "validator/es/lib/isStrongPassword";
 
 export interface ResetPasswordFormProps {
   userId: number;
@@ -57,12 +57,7 @@ export const ResetPasswordForm = (props: ResetPasswordFormProps) => {
             required: "Password is required.",
             // TODO: Abstract this and improve error message.
             validate: (value: string) => {
-              const results = passwordStrength(value);
-              return (
-                results.value === "Strong" ||
-                results.value === "Medium" ||
-                "Password is too weak."
-              );
+              return isStrongPassword(value) || "Password is too weak.";
             },
           }}
           render={({
