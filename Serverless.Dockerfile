@@ -15,6 +15,7 @@ COPY --from=build /opt/codecollab/serverless ./serverless
 COPY --from=build /opt/codecollab/node_modules ./node_modules
 COPY --from=build /opt/codecollab/prisma/schema.prisma ./prisma
 COPY --from=build /opt/codecollab/package.json ./
+COPY --from=build /opt/codecollab/.env ./
 
 EXPOSE 8080
 CMD ["npm", "run", "on-serverless", "start"]

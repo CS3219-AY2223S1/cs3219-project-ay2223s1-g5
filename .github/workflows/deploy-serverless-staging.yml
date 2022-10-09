@@ -1,0 +1,26 @@
+name: Deploy Serverless to Staging
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+# TODO: Replace with workflow dispatch
+on:
+  push:
+    branches:
+      - serverless/staging
+
+jobs:
+  deploy:
+    name: Deploy
+    uses: ./.github/workflows/gcp-serverless-deploy.yml
+    secrets:
+      project: ${{ secrets.GCP_PROJECT_STAGING }}
+      provider: ${{ secrets.GCP_PROVIDER_STAGING }}
+      service-account: ${{ secrets.GCP_SERVICE_ACCOUNT_STAGING }}
+    with:
+      environment: "staging"
+      job: "question-database-update"
+      job-region: "asia-southeast1"
+      repository: "serverless-registry"
+      repository-region: "asia-southeast1"
