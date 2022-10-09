@@ -24,3 +24,13 @@ export type PartnerDisconnectPayload = {
 export type PartnerLeavePayload = {
   userId: number;
 };
+
+export type SubmitPayload = {
+  code: string;
+  questionId: number;
+  language: Language;
+};
+
+export type SubmissionResultPayload = {
+  success: boolean;
+};
