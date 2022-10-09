@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { RedisService } from "src/redis/redis.service";
 import {
   RoomAuthorizationService,
@@ -49,10 +50,13 @@ export class ChatService {
   }
 
   async joinChatRoom(roomId: string, userId: number) {
-    const chatRoomSid = await this.getChatRoomSid(roomId);
     const identity = await this.getIdentity(userId);
     if (!(await this.roomService.isAuthorized(roomId, userId))) {
-      // TODO: Provide better handling for WebSocket errors
+      throw new ForbiddenError("Incorrect room ID");
+    }
+    const chatRoomSid = await this.getChatRoomSid(roomId);
+    if (!chatRoomSid) {
+      this.logger.warn(`Unable to retrieve chat room SID: ${roomId}`);
       throw new Error();
     }
     if (await this.getParticipantSid(identity)) {
@@ -60,10 +64,6 @@ export class ChatService {
       this.logger.warn(
         `User already a participant: ${userId} (${participantSid})`,
       );
-      throw new Error();
-    }
-    if (!chatRoomSid) {
-      this.logger.warn(`Unable to retrieve chat room SID: ${roomId}`);
       throw new Error();
     }
     const participantSid = await this.twilioService.joinChatRoom(
@@ -77,15 +77,15 @@ export class ChatService {
   }
 
   async leaveChatRoom(roomId: string, userId: number) {
-    const chatRoomSid = await this.getChatRoomSid(roomId);
     const identity = await this.getIdentity(userId);
+    const chatRoomSid = await this.getChatRoomSid(roomId);
+    if (!chatRoomSid) {
+      this.logger.warn(`Unable to retrieve chat room SID: ${roomId}`);
+      throw new Error();
+    }
     const participantSid = await this.getParticipantSid(identity);
     if (!participantSid) {
       this.logger.warn(`Unable to retrieve participant SID: ${userId}`);
-      throw new Error();
-    }
-    if (!chatRoomSid) {
-      this.logger.warn(`Unable to retrieve chat room SID: ${roomId}`);
       throw new Error();
     }
     this.logger.info(
