@@ -37,6 +37,7 @@ export const RoomPage = () => {
   const [roomSocket, setRoomSocket] = useState<Socket | undefined>(undefined);
   const { enqueueSnackbar } = useSnackbar();
   const [language, setLanguage] = useState<Language | undefined>(undefined);
+  const [questionId, setQuestionId] = useState<number | undefined>(undefined);
   const [self, setSelf] = useState<Participant>({
     // We know that if the page renders, user is not null.
     userId: user?.userId || NaN,
@@ -163,8 +164,13 @@ export const RoomPage = () => {
 
     roomSocket.on(
       ROOM_EVENTS.JOINED,
-      ({ userId, metadata: { members, language } }: JoinedPayload) => {
+      ({
+        userId,
+        metadata: { members, language, questionId },
+      }: JoinedPayload) => {
         setLanguage(language);
+        setQuestionId(questionId);
+
         if (userId === user?.userId) {
           setSelf((self) => ({ ...self, isConnected: true }));
           enqueueSnackbar(`You are connected.`, {
@@ -269,7 +275,7 @@ export const RoomPage = () => {
           >
             <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
               <Box sx={{ height: "60%" }}>
-                <QuestionSubmissionPanel />
+                <QuestionSubmissionPanel questionId={questionId} />
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Chat />
