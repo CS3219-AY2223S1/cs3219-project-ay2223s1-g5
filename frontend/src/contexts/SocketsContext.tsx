@@ -62,7 +62,7 @@ export const SocketsProvider = ({
           });
           // TODO: Can provide a way for the consumer to perform some action on error?
         });
-        return new Map(sockets.set(namespace, client));
+        return new Map(sockets).set(namespace, client);
       });
     },
     [setSockets, enqueueSnackbar, navigate],
