@@ -44,5 +44,4 @@ export type PartnerLeavePayload = {
 
 export type SubmissionResultPayload = {
   success: boolean;
-  hasSubmission: boolean;
 };

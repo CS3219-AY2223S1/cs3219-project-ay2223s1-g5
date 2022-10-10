@@ -8,5 +8,6 @@ export const ROOM_EVENTS = {
   PARTNER_DISCONNECT: "partnerDisconnect",
   SUBMIT: "submit",
   SUBMISSION_RESULT: "result",
+  SUBMISSION_REJECTED: "reject",
   ...BASE_EVENTS,
 };

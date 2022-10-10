@@ -13,7 +13,6 @@ import { JavascriptMiddleware } from "./middleware/javascript";
 import { JudgeMiddleware } from "./middleware/middleware";
 import { PythonMiddleware } from "./middleware/python";
 
-import { SubmissionResultPayload } from "~shared/types/api";
 import { Language } from "~shared/types/base/index";
 
 const languageToLanguageId = (language: Language) => {
@@ -68,14 +67,7 @@ export class JudgeService {
     code: string,
     questionId: number,
     roomId: string,
-  ): Promise<SubmissionResultPayload> {
-    if (await this.hasSubmission(roomId)) {
-      return {
-        success: false,
-        hasSubmission: true,
-      } as SubmissionResultPayload;
-    }
-
+  ): Promise<boolean> {
     this.logger.info("Sending code to Judge0...");
     await this.redisService.setKey([JudgeService.NAMESPACE], roomId, "");
 
@@ -108,28 +100,18 @@ export class JudgeService {
       await this.redisService.deleteKey([JudgeService.NAMESPACE], roomId);
 
       if (!response.data.stdout) {
-        return {
-          success: false,
-          hasSubmission: false,
-        } as SubmissionResultPayload;
+        return false;
       }
 
       const decodedOutput = this.decodeBase64(response.data.stdout);
-      const result = decodedOutput.trim().toLowerCase() === "true";
-      return {
-        success: result,
-        hasSubmission: false,
-      } as SubmissionResultPayload;
+      return decodedOutput.trim().toLowerCase() === "true";
     } catch (e: unknown) {
       this.logger.error(e);
-      return {
-        success: false,
-        hasSubmission: false,
-      } as SubmissionResultPayload;
+      return false;
     }
   }
 
-  private async hasSubmission(roomId: string): Promise<boolean> {
+  async hasSubmission(roomId: string): Promise<boolean> {
     return (
       (await this.redisService.getValue([JudgeService.NAMESPACE], roomId)) !=
       null
