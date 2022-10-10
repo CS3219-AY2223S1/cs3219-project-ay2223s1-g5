@@ -91,6 +91,8 @@ export class RoomGateway implements OnGatewayDisconnect {
       return;
     }
 
+    this.server.to(roomId).emit(ROOM_EVENTS.WAIT_SUBMISSION);
+
     const hasSubmission = await this.judgeService.hasSubmission(roomId);
     if (hasSubmission) {
       this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_REJECTED);

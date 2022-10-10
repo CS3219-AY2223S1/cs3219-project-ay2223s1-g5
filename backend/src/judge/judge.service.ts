@@ -107,6 +107,7 @@ export class JudgeService {
       return decodedOutput.trim().toLowerCase() === "true";
     } catch (e: unknown) {
       this.logger.error(e);
+      await this.redisService.deleteKey([JudgeService.NAMESPACE], roomId);
       return false;
     }
   }

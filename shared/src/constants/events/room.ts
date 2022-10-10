@@ -9,5 +9,6 @@ export const ROOM_EVENTS = {
   SUBMIT: "submit",
   SUBMISSION_RESULT: "result",
   SUBMISSION_REJECTED: "reject",
+  WAIT_SUBMISSION: "wait",
   ...BASE_EVENTS,
 };

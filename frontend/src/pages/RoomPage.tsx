@@ -21,6 +21,7 @@ import {
   JoinedPayload,
   PartnerDisconnectPayload,
   PartnerLeavePayload,
+  SubmitPayload,
 } from "~shared/types/api";
 import { Language } from "~shared/types/base";
 
@@ -38,6 +39,7 @@ export const RoomPage = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [questionId, setQuestionId] = useState<number | undefined>(undefined);
+  const [isWaitingForResult, setIsWaitingForResult] = useState<boolean>(false);
   const [self, setSelf] = useState<Participant>({
     // We know that if the page renders, user is not null.
     userId: user?.userId || NaN,
@@ -58,8 +60,23 @@ export const RoomPage = () => {
     roomSocket.off(ROOM_EVENTS.PARTNER_DISCONNECT);
     roomSocket.off(ROOM_EVENTS.PARTNER_LEAVE);
     roomSocket.off(ROOM_EVENTS.JOINED);
+    roomSocket.off(ROOM_EVENTS.SUBMISSION_RESULT);
+    roomSocket.off(ROOM_EVENTS.SUBMISSION_REJECTED);
+    roomSocket.off(ROOM_EVENTS.WAIT_SUBMISSION);
     roomSocket.emit(ROOM_EVENTS.LEAVE, { roomId });
   }, [roomSocket, roomId]);
+
+  const onSubmit = useCallback(() => {
+    if (!roomSocket) {
+      return;
+    }
+
+    roomSocket.emit(ROOM_EVENTS.SUBMIT, {
+      language,
+      questionId,
+      code: "", // TODO: Get code from editor
+    } as SubmitPayload);
+  }, [roomSocket, language, questionId]);
 
   useEffect(() => {
     if (!roomId) {
@@ -100,6 +117,19 @@ export const RoomPage = () => {
     if (!roomSocket || !roomId) {
       return;
     }
+
+    roomSocket.on(ROOM_EVENTS.WAIT_SUBMISSION, () => {
+      setIsWaitingForResult(true);
+    });
+
+    roomSocket.on(ROOM_EVENTS.SUBMISSION_REJECTED, () => {
+      setIsWaitingForResult(true);
+    });
+
+    roomSocket.on(ROOM_EVENTS.SUBMISSION_RESULT, () => {
+      setIsWaitingForResult(false);
+      // TODO: Display result in table
+    });
 
     roomSocket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
       if (reason === SOCKET_IO_DISCONNECT_REASON.SERVER_CLOSE) {
@@ -218,6 +248,9 @@ export const RoomPage = () => {
       roomSocket.off(ROOM_EVENTS.JOINED);
       roomSocket.off(ROOM_EVENTS.PARTNER_DISCONNECT);
       roomSocket.off(ROOM_EVENTS.PARTNER_LEAVE);
+      roomSocket.off(ROOM_EVENTS.SUBMISSION_RESULT);
+      roomSocket.off(ROOM_EVENTS.SUBMISSION_REJECTED);
+      roomSocket.off(ROOM_EVENTS.WAIT_SUBMISSION);
     };
   }, [
     roomSocket,
@@ -293,6 +326,8 @@ export const RoomPage = () => {
             <StyledButton
               label={"Submit Code"}
               sx={{ "&:hover": { boxShadow: "1" } }}
+              onClick={onSubmit}
+              disabled={isWaitingForResult}
             />
           </Stack>
         </Stack>
