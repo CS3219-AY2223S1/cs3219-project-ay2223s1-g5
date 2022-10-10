@@ -4,6 +4,7 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Post,
   UseGuards,
 } from "@nestjs/common";
 
@@ -25,7 +26,7 @@ export class RoomController {
   }
 
   @UseGuards(SessionGuard)
-  @Get(":userId(\\d+)")
+  @Post(":userId(\\d+)/leave")
   async leaveRoom(
     @Param("userId", ParseIntPipe) userId: number,
   ): Promise<void> {
@@ -34,5 +35,15 @@ export class RoomController {
       throw new NotFoundException("Room not found.");
     }
     await this.roomService.leaveRoom(userId, room);
+  }
+
+  @UseGuards(SessionGuard)
+  @Post(":userId(\\d+)/join")
+  async joinRoom(@Param("userId", ParseIntPipe) userId: number): Promise<void> {
+    const room = await this.roomService.getRoom(userId);
+    if (!room) {
+      throw new NotFoundException("Room not found.");
+    }
+    await this.roomService.joinRoom(userId, room);
   }
 }

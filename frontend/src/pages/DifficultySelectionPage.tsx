@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -9,6 +9,13 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+
+import { useAuth } from "src/contexts/AuthContext";
+import {
+  useCheckUserHasRoom,
+  useJoinRoom,
+  useLeaveRoom,
+} from "src/hooks/useRoom";
 
 import { Center } from "../components/Center";
 import { StyledButton } from "../components/StyledButton";
@@ -48,6 +55,44 @@ export const DifficultySelectionPage = () => {
     setSelectedLanguage(language);
   };
 
+  const { user } = useAuth();
+  const userId = user ? user.userId : 0;
+
+  const userHasExistingRoom: boolean =
+    useCheckUserHasRoom(userId).isUseCheckUserHasRoomLoading.valueOf();
+
+  const { useJoinRoomMutation } = useJoinRoom(userId);
+  const { useLeaveRoomMutation } = useLeaveRoom(userId);
+
+  if (userHasExistingRoom) {
+    return (
+      <Center>
+        <Stack spacing={5}>
+          <Typography
+            sx={{ fontWeight: "bold", textAlign: "center" }}
+            variant="h6"
+          >
+            You are already inside a room!
+          </Typography>
+          <Stack spacing={3}>
+            <StyledButton
+              label="Rejoin Room"
+              // TODO
+              // onClick={() => useJoinRoomMutation({ userId })}
+            />
+            <StyledButton
+              label="Leave Room"
+              // onClick={() =>
+              //   navigate(
+              //     `/room/${userId}/leave`,
+              //   )
+              // }
+            />
+          </Stack>
+        </Stack>
+      </Center>
+    );
+  }
   return (
     <Center>
       <Stack spacing={10}>
