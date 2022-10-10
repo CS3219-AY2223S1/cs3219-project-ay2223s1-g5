@@ -28,7 +28,9 @@ enum Status {
   ACCEPTED
   WRONG_ANSWER
   COMPILE_ERROR
+  RUNTIME_ERROR
   TIME_LIMIT_EXCEEDED
+  INTERNAL_ERROR
 }
 
 model User {
@@ -94,15 +96,19 @@ model RoomSession {
 }
 
 model Submission {
-  id            String      @id
-  roomSession   RoomSession @relation(fields: [roomSessionId], references: [id])
-  roomSessionId String
-  status        Status      @default(PENDING)
-  language      Language
-  output        String?
-  code          String
-  runTime       Int? // In milliseconds
-  memoryUsage   Int? // In bytes
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id             String      @id
+  roomSession    RoomSession @relation(fields: [roomSessionId], references: [id])
+  roomSessionId  String
+  status         Status      @default(PENDING)
+  language       Language
+  expectedOutput String
+  output         String?
+  errorOutput    String?
+  compileOutput  String?
+  exitCode       Int?
+  code           String
+  runTime        Int? // In milliseconds
+  memoryUsage    Int? // In bytes
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
