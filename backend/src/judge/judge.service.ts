@@ -5,6 +5,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
 import { QuestionService } from "src/question/question.service";
+import { RedisService } from "src/redis/redis.service";
 
 import { CppMiddleware } from "./middleware/cpp";
 import { JavaMiddleware } from "./middleware/java";
@@ -38,6 +39,8 @@ interface TestCase {
 
 @Injectable()
 export class JudgeService {
+  private static readonly NAMESPACE = "JUDGE";
+
   private axiosInstance: AxiosInstance;
 
   constructor(
@@ -45,6 +48,7 @@ export class JudgeService {
     private readonly logger: PinoLogger,
     private readonly configService: ConfigService,
     private readonly questionService: QuestionService,
+    private readonly redisService: RedisService,
   ) {
     this.axiosInstance = axios.create({
       baseURL: `https://${this.configService.get("judge0.apiHost")}/`,
@@ -62,8 +66,11 @@ export class JudgeService {
     language: Language,
     code: string,
     questionId: number,
+    roomId: string,
   ): Promise<boolean> {
     this.logger.info("Sending code to Judge0...");
+    await this.redisService.setKey([JudgeService.NAMESPACE], roomId, "");
+
     try {
       const template = await this.getTemplate(questionId, language);
       const testCase = await this.getTestCase(questionId);
@@ -82,7 +89,6 @@ export class JudgeService {
       code = middleware.getImports() + code;
       code += middleware.getEntryPoint();
       const encodedCode = this.encodeBase64(code);
-      this.logger.info(code);
       const response = await this.axiosInstance.post(
         "submissions",
         JSON.stringify({
@@ -91,15 +97,25 @@ export class JudgeService {
         }),
       );
 
+      await this.redisService.deleteKey([JudgeService.NAMESPACE], roomId);
+
       if (!response.data.stdout) {
         return false;
       }
+
       const decodedOutput = this.decodeBase64(response.data.stdout);
       return decodedOutput.trim().toLowerCase() === "true";
     } catch (e: unknown) {
       this.logger.error(e);
       return false;
     }
+  }
+
+  async hasSubmission(roomId: string): Promise<boolean> {
+    return (
+      (await this.redisService.getValue([JudgeService.NAMESPACE], roomId)) !=
+      null
+    );
   }
 
   private async getTemplate(

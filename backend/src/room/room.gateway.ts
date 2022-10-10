@@ -22,7 +22,6 @@ import {
   JoinedPayload,
   JoinPayload,
   LeavePayload,
-  SubmissionResultPayload,
   SubmitPayload,
 } from "~shared/types/api";
 
@@ -84,7 +83,7 @@ export class RoomGateway implements OnGatewayDisconnect {
   async handleSubmit(
     @ConnectedSocket() client: Socket,
     @MessageBody() submitPayload: SubmitPayload,
-  ) {
+  ): Promise<void> {
     const userId = Number(session(client).passport?.user.userId);
     const roomId = await this.roomService.getRoom(userId);
 
@@ -92,15 +91,20 @@ export class RoomGateway implements OnGatewayDisconnect {
       return;
     }
 
+    const hasSubmission = await this.judgeService.hasSubmission(roomId);
+    if (hasSubmission) {
+      this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_REJECTED);
+      return;
+    }
+
     const result = await this.judgeService.sendRequest(
       submitPayload.language,
       submitPayload.code,
       submitPayload.questionId,
+      roomId,
     );
 
-    this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_RESULT, {
-      success: result,
-    } as SubmissionResultPayload);
+    this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_RESULT, result);
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
