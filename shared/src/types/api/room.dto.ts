@@ -42,6 +42,6 @@ export type PartnerLeavePayload = {
   userId: number;
 };
 
-export type SubmissionResultPayload = {
-  success: boolean;
+export type SubmissionRejectedPayload = {
+  reason: string;
 };

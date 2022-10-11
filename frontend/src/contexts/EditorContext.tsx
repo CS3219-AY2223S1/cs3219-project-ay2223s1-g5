@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useMonaco } from "@monaco-editor/react";
 import * as monacoType from "monaco-editor";
+import { Socket } from "socket.io-client";
 import { MonacoBinding } from "y-monaco";
 import { SocketIOProvider } from "y-socket.io";
 import { Doc, Text } from "yjs";
@@ -16,9 +17,11 @@ import { Doc, Text } from "yjs";
 import { useAuth } from "src/contexts/AuthContext";
 
 import { EDITOR_DOCUMENT_NAME } from "~shared/constants";
+
 type EditorContextProps = {
   onMount: (editor: monacoType.editor.IStandaloneCodeEditor) => void;
   isConnected: boolean;
+  onSubmit: (callback: (code: string) => void) => void;
 };
 
 const EditorContext = createContext<EditorContextProps | undefined>(undefined);
@@ -39,6 +42,17 @@ export const EditorProvider = ({
   );
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [binding, setBinding] = useState<MonacoBinding | undefined>(undefined);
+
+  const onSubmit = useCallback(
+    (callback: (code: string) => void) => {
+      if (!document) {
+        // TODO: Show a "Not ready" snackbar.
+        return;
+      }
+      callback(document.getText(EDITOR_DOCUMENT_NAME).toJSON());
+    },
+    [document],
+  );
 
   const onMount = useCallback(
     (monacoEditor: monacoType.editor.IStandaloneCodeEditor) => {
@@ -126,6 +140,7 @@ export const EditorProvider = ({
       value={{
         onMount,
         isConnected,
+        onSubmit,
       }}
     >
       {children}
