@@ -9,5 +9,6 @@ import { RoomServiceModule } from "./room.service.module";
 @Module({
   imports: [RoomServiceModule, CoreModule, JudgeServiceModule],
   providers: [RoomGateway],
+  exports: [RoomGateway],
 })
 export class RoomModule {}
