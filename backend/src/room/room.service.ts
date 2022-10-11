@@ -141,7 +141,7 @@ export class RoomService
     );
 
     const language = Object.entries(Language).find(
-      (value) => value[0] === languageString,
+      (value) => value[1] === languageString,
     )?.[1] as Language;
 
     const questionId = Number(
