@@ -83,8 +83,6 @@ export class RoomService
       questionId.toString(),
     );
 
-    await this.chatService.createChatRoom(roomId);
-
     for (const userId of userIds) {
       await this.redisService.addKeySet(
         [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
@@ -97,11 +95,19 @@ export class RoomService
         userId.toString(),
         roomId,
       );
-
-      await this.chatService.joinChatRoom(roomId, userId);
     }
 
-    await this.editorService.createDocument(roomId, template.code);
+    const chat = this.chatService.createChatRoom(roomId).then(() => {
+      return Promise.all(
+        userIds.map((userId) => {
+          return this.chatService.joinChatRoom(roomId, userId);
+        }),
+      );
+    });
+
+    const document = this.editorService.createDocument(roomId, template.code);
+
+    await Promise.all([chat, document]);
 
     return roomId;
   }
