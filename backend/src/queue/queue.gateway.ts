@@ -1,4 +1,4 @@
-import { UseFilters, UsePipes, ValidationPipe } from "@nestjs/common";
+import { UseFilters, UsePipes } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,

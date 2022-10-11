@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_FILTER, APP_PIPE } from "@nestjs/core";
 import { ServeStaticModule } from "@nestjs/serve-static";
-import { LoggerModule, PinoLogger } from "nestjs-pino";
+import { LoggerModule } from "nestjs-pino";
 import passport from "passport";
 import { join } from "path";
 
