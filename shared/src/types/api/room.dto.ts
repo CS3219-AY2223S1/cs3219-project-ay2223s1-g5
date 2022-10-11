@@ -45,3 +45,7 @@ export type PartnerLeavePayload = {
 export type SubmissionRejectedPayload = {
   reason: string;
 };
+
+export type SubmissionUpdatedPayload = {
+  submissionId: string;
+};

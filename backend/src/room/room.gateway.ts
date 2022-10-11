@@ -92,13 +92,19 @@ export class RoomGateway implements OnGatewayDisconnect {
       return;
     }
 
+    this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_ACCEPTED);
+
     try {
-      await this.judgeService.sendRequest(
+      const completed = await this.judgeService.sendRequest(
         submitPayload.language,
         submitPayload.code,
         submitPayload.questionId,
         roomId,
       );
+      if (!completed) {
+        return;
+      }
+      this.handleSubmissionUpdate(roomId, completed.submissionId);
     } catch (e: unknown) {
       if (e instanceof Error) {
         if (!(e instanceof RateLimitError)) {
@@ -112,8 +118,6 @@ export class RoomGateway implements OnGatewayDisconnect {
       this.logger.error(e);
       // Propagate error since we can't handle it.
     }
-
-    this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_ACCEPTED);
   }
 
   async handleSubmissionUpdate(

@@ -23,6 +23,7 @@ import {
   PartnerLeavePayload,
   SubmissionRejectedPayload,
 } from "~shared/types/api";
+import { SubmissionUpdatedPayload } from "~shared/types/api/room.dto";
 import { Language } from "~shared/types/base";
 
 type Participant = {
@@ -228,6 +229,13 @@ export const RoomPage = () => {
     roomSocket.on(ROOM_EVENTS.SUBMISSION_ACCEPTED, () => {
       enqueueSnackbar("Processing submission");
     });
+
+    roomSocket.on(
+      ROOM_EVENTS.SUBMISSION_UPDATED,
+      (_payload: SubmissionUpdatedPayload) => {
+        enqueueSnackbar("Submission updated");
+      },
+    );
 
     return () => {
       roomSocket.off(ROOM_EVENTS.CONNECT);

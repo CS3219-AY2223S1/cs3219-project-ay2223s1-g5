@@ -20,9 +20,11 @@ export class JudgeController {
   async callback(
     @Body() response: Pick<Judge0Callback, "token">,
   ): Promise<void> {
-    const { roomId, submissionId } = await this.judgeService.handleCallback(
-      response,
-    );
+    const completed = await this.judgeService.handleCallback(response);
+    if (!completed) {
+      return;
+    }
+    const { roomId, submissionId } = completed;
     this.roomGateway.handleSubmissionUpdate(roomId, submissionId);
     return;
   }

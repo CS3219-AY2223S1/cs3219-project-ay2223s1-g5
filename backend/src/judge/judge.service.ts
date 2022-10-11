@@ -108,7 +108,10 @@ export class JudgeService {
     code: string,
     questionId: number,
     roomId: string,
-  ): Promise<void> {
+  ): Promise<{
+    roomId: string;
+    submissionId: string;
+  } | null> {
     // FIXME: Solve race condition by using INCR.
     if (await this.hasSubmission(roomId)) {
       throw new RateLimitError("Processing previous submission.");
@@ -153,27 +156,59 @@ export class JudgeService {
         language: language.toUpperCase() as PrismaLanguage,
       },
     });
+
+    return this.processResponse(token);
   }
 
   async handleCallback({ token }: Pick<Judge0Callback, "token">): Promise<{
     roomId: string;
     submissionId: string;
-  }> {
+  } | null> {
     const submissionId = token;
-
-    this.logger.info(submissionId);
 
     const { data } = await this.axiosInstance.get<Judge0Callback>(
       `/submissions/${submissionId}`,
     );
 
     const content = data;
+
+    this.redisService.setKey(
+      [JudgeService.NAMESPACE, "SUBMISSION"],
+      submissionId,
+      JSON.stringify(content),
+    );
+
+    if (
+      !(await this.prismaService.submission.findFirst({
+        where: { id: submissionId },
+      }))
+    ) {
+      return null;
+    }
+    // We are sure that the submission already exists and we can process it.
+    return this.processResponse(submissionId);
+  }
+
+  private async processResponse(
+    submissionId: string,
+  ): Promise<{ roomId: string; submissionId: string } | null> {
+    const storedContent = await this.redisService.getValue(
+      [JudgeService.NAMESPACE, "SUBMISSION"],
+      submissionId,
+    );
+    if (!storedContent) {
+      return null;
+    }
+    await this.redisService.deleteKey(
+      [JudgeService.NAMESPACE, "SUBMISSION"],
+      submissionId,
+    );
+    const content = JSON.parse(storedContent) as Judge0Callback;
+
     const time = Number(content.time) * secondsToMilliseconds;
     const memory = content.memory * kilobytesToBytes;
 
     // TODO: Handle result checking.
-
-    this.logger.info(data);
 
     const { roomSessionId: roomId } =
       await this.prismaService.submission.update({
