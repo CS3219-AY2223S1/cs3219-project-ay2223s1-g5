@@ -118,7 +118,7 @@ export const DifficultySelectionPage = () => {
               }
             >
               {Object.entries(Language).map((entry) => (
-                <MenuItem key={entry[0]} value={entry[0]}>
+                <MenuItem key={entry[0]} value={entry[1]}>
                   {languageToString(entry[1])}
                 </MenuItem>
               ))}
