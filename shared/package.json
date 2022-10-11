@@ -2,17 +2,19 @@
   "name": "shared",
   "version": "0.0.0",
   "description": "",
+  "author": "",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "pre-commit": "lint-staged",
-    "lint": "eslint --ext ts,tsx,js,jsx .",
-    "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
+    "dev": "tsc-watch --preserveWatchOutput",
     "build": "tsc --build --clean && tsc --build tsconfig.build.json --force",
-    "clean": "rm -rf node_modules && rm -rf build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "dev": "tsc-watch"
+    "lint": "eslint --ext ts,tsx,js,jsx .",
+    "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
+    "clean": "rm -rf node_modules && rm -rf build"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
