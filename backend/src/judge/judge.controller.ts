@@ -26,6 +26,5 @@ export class JudgeController {
     }
     const { roomId, submissionId } = completed;
     this.roomGateway.handleSubmissionUpdate(roomId, submissionId);
-    return;
   }
 }

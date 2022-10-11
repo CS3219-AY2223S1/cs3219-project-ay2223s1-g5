@@ -228,12 +228,14 @@ export const RoomPage = () => {
 
     roomSocket.on(ROOM_EVENTS.SUBMISSION_ACCEPTED, () => {
       enqueueSnackbar("Processing submission");
+      setIsSubmitLoading(true);
     });
 
     roomSocket.on(
       ROOM_EVENTS.SUBMISSION_UPDATED,
       (_payload: SubmissionUpdatedPayload) => {
         enqueueSnackbar("Submission updated");
+        setIsSubmitLoading(false);
       },
     );
 

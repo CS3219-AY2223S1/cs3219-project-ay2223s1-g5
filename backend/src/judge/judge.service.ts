@@ -170,12 +170,10 @@ export class JudgeService {
       `/submissions/${submissionId}`,
     );
 
-    const content = data;
-
     this.redisService.setKey(
       [JudgeService.NAMESPACE, "SUBMISSION"],
       submissionId,
-      JSON.stringify(content),
+      JSON.stringify(data),
     );
 
     if (
