@@ -323,7 +323,7 @@ export const RoomPage = () => {
               </Box>
             </Stack>
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Editor />
+              <Editor language={language} />
             </Box>
           </Stack>
           <Stack
