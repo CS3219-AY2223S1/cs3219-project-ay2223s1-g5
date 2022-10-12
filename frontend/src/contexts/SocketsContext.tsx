@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +26,7 @@ export const SocketsProvider = ({
   children,
 }: PropsWithChildren): JSX.Element => {
   const [sockets, setSockets] = useState<Map<string, Socket>>(new Map());
+  const socketMap = useRef<Map<string, Socket>>(sockets);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
@@ -32,6 +34,9 @@ export const SocketsProvider = ({
     (namespace: string) => {
       setSockets((sockets) => {
         if (sockets.has(namespace)) {
+          if (!sockets.get(namespace)?.connected) {
+            sockets.get(namespace)?.connect();
+          }
           return sockets;
         }
         const client = io(`/${namespace}`, {
@@ -69,13 +74,14 @@ export const SocketsProvider = ({
   );
 
   useEffect(() => {
+    socketMap.current = sockets;
+  }, [sockets]);
+
+  useEffect(() => {
     return () => {
-      setSockets((sockets) => {
-        for (const socket of sockets.values()) {
-          socket.disconnect();
-        }
-        return new Map();
-      });
+      for (const socket of socketMap.current.values()) {
+        socket.disconnect();
+      }
     };
   }, []);
 
