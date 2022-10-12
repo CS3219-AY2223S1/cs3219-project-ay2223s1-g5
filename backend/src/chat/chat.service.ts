@@ -43,30 +43,40 @@ export class ChatService {
   async createChatRoom(roomId: string) {
     const chatRoomSid = await this.twilioService.createChatRoom(roomId);
     this.logger.info(`Creating chat room [${roomId}]: ${chatRoomSid}`);
-    await this.saveChatRoomSid(roomId, chatRoomSid);
-    await this.twilioService.sendSystemMessage(
-      chatRoomSid,
-      SYSTEM_WELCOME_MESSAGE,
-    );
+    this.twilioService
+      .sendSystemMessage(chatRoomSid, SYSTEM_WELCOME_MESSAGE)
+      .catch((error) => {
+        this.logger.warn(error);
+      });
+    return this.saveChatRoomSid(roomId, chatRoomSid);
   }
 
   async joinChatRoom(roomId: string, userId: number) {
-    const identity = await this.getIdentity(userId);
     if (!(await this.roomService.isAuthorized(roomId, userId))) {
       throw new ForbiddenError("Incorrect room ID.");
     }
-    const chatRoomSid = await this.getChatRoomSid(roomId);
-    if (!chatRoomSid) {
-      this.logger.error(`Unable to retrieve chat room SID: ${roomId}`);
-      throw new InternalServerError();
-    }
-    if (await this.getParticipantSid(identity)) {
-      const participantSid = await this.getParticipantSid(identity);
-      this.logger.error(
-        `User already a participant: ${userId} (${participantSid})`,
-      );
-      throw new InternalServerError();
-    }
+    const identityPromise = this.getIdentity(userId).then(async (identity) => {
+      const result = await this.getParticipantSid(identity);
+      if (result) {
+        this.logger.error(`User already a participant: ${userId} (${result})`);
+        throw new InternalServerError();
+      }
+      return identity;
+    });
+
+    const chatRoomSidPromise = this.getChatRoomSid(roomId).then(
+      (chatRoomSid) => {
+        if (!chatRoomSid) {
+          this.logger.error(`Unable to retrieve chat room SID: ${roomId}`);
+          throw new InternalServerError();
+        }
+        return chatRoomSid;
+      },
+    );
+
+    const identity = await identityPromise;
+    const chatRoomSid = await chatRoomSidPromise;
+
     const participantSid = await this.twilioService.joinChatRoom(
       chatRoomSid,
       identity,

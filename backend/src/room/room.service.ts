@@ -50,15 +50,6 @@ export class RoomService
     userIds: number[],
   ): Promise<string> {
     const questionId = await this.questionService.getIdByDifficulty(difficulty);
-    const template = await this.questionService.getSolutionTemplateByLanguage(
-      questionId,
-      language,
-    );
-
-    if (!template) {
-      this.logger.error(`Unable to load template: ${questionId} [${language}]`);
-      throw new InternalServerError();
-    }
 
     const room = await this.prismaService.roomSession.create({
       data: {
@@ -97,6 +88,18 @@ export class RoomService
       );
     }
 
+    const document = this.questionService
+      .getSolutionTemplateByLanguage(questionId, language)
+      .then((template) => {
+        if (!template) {
+          this.logger.error(
+            `Unable to load template: ${questionId} [${language}]`,
+          );
+          throw new InternalServerError();
+        }
+        return this.editorService.createDocument(roomId, template.code);
+      });
+
     const chat = this.chatService.createChatRoom(roomId).then(() => {
       return Promise.all(
         userIds.map((userId) => {
@@ -104,8 +107,6 @@ export class RoomService
         }),
       );
     });
-
-    const document = this.editorService.createDocument(roomId, template.code);
 
     await Promise.all([chat, document]);
 
