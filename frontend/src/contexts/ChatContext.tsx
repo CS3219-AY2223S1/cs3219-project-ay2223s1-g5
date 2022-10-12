@@ -12,6 +12,12 @@ import {
   Conversation,
   Message,
 } from "@twilio/conversations";
+import {
+  connect,
+  LocalParticipant,
+  RemoteParticipant,
+  Room,
+} from "twilio-video";
 
 import { useCreateChatToken } from "src/hooks/useChat";
 
@@ -24,6 +30,8 @@ type ChatContextProps = {
   send: (content: string, callback: () => void) => Promise<void>;
   typing: () => void;
   isTyping: Set<string>;
+  selfVideoParticipant: LocalParticipant | undefined;
+  videoParticipants: Map<string, RemoteParticipant>;
 };
 
 const ChatContext = createContext<ChatContextProps | undefined>(undefined);
@@ -44,6 +52,14 @@ export const ChatProvider = ({
     Conversation | undefined
   >();
 
+  const [videoRoom, setVideoRoom] = useState<Room>();
+  const [selfVideoParticipant, setSelfVideoParticipant] = useState<
+    LocalParticipant | undefined
+  >(undefined);
+  const [videoParticipants, setVideoParticipants] = useState<
+    Map<string, RemoteParticipant>
+  >(new Map());
+
   useEffect(() => {
     const retrieveToken = async () => {
       const { token, identity } = await createChatTokenMutation();
@@ -55,9 +71,12 @@ export const ChatProvider = ({
   }, []);
 
   useEffect(() => {
-    if (client || !token || !identity || !user) {
+    if (client || videoRoom || !token || !identity || !user) {
       return;
     }
+
+    // Chat
+
     const twilioClient = new Client(token);
     setClient(twilioClient);
     twilioClient.on("initialized", async () => {
@@ -116,8 +135,49 @@ export const ChatProvider = ({
         setIsConnected(false);
       }
     });
+
+    // Video Chat
+
+    connect(token, { name: roomId, video: true, audio: true }).then((room) => {
+      setVideoRoom(room);
+      room.on("participantConnected", (participant) => {
+        setVideoParticipants((participants) => {
+          return new Map(participants).set(participant.identity, participant);
+        });
+      });
+      room.on("participantDisconnected", (participant) => {
+        setVideoParticipants((participants) => {
+          const map = new Map(participants);
+          map.delete(participant.identity);
+          return map;
+        });
+      });
+      const participants = new Map();
+      for (const participant of room.participants.values()) {
+        participants.set(participant.identity, participant);
+      }
+      setVideoParticipants(participants);
+      setSelfVideoParticipant(room.localParticipant);
+
+      return () => {
+        setVideoRoom((room) => {
+          if (room && room.localParticipant.state === "connected") {
+            room.localParticipant.tracks.forEach((trackPublication) => {
+              const track = trackPublication.track;
+              if (Object.prototype.hasOwnProperty.call(track, "stop")) {
+                // It is either a video or audio track.
+                (track as { stop: () => void }).stop();
+              }
+            });
+            room.disconnect();
+          }
+          return undefined;
+        });
+      };
+    });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, identity, user]);
+  }, [token, identity, user, roomId]);
 
   const send = useCallback(
     async (content: string, callback: () => void) => {
@@ -141,7 +201,16 @@ export const ChatProvider = ({
 
   return (
     <ChatContext.Provider
-      value={{ isConnected, messages, send, typing, isTyping, identity }}
+      value={{
+        isConnected,
+        messages,
+        send,
+        typing,
+        isTyping,
+        identity,
+        selfVideoParticipant,
+        videoParticipants,
+      }}
     >
       {children}
     </ChatContext.Provider>

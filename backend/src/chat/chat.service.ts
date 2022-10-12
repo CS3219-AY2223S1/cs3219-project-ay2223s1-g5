@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import {
+  ConflictException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ForbiddenError } from "src/common/errors/forbidden.error";
@@ -33,9 +38,14 @@ export class ChatService {
     userId: number,
   ): Promise<{ token: string; identity: string }> {
     const identity = await this.getIdentity(userId);
+    const roomId = await this.roomService.getRoom(userId);
+    if (!roomId) {
+      // TODO: Throw conflict exception instead.
+      throw new Error();
+    }
     this.logger.info(`Generating chat token: ${userId}`);
     return {
-      token: this.twilioService.createConversationsToken(identity),
+      token: this.twilioService.createChatToken(identity, roomId),
       identity,
     };
   }

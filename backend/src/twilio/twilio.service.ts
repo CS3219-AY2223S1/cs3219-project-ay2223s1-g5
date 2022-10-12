@@ -28,9 +28,12 @@ export class TwilioService {
     this.apiSecret = this.configService.get("twilio.apiSecret");
   }
 
-  createConversationsToken(userIdentity: string): string {
+  createChatToken(userIdentity: string, roomId: string): string {
     const chatGrant = new twilio.jwt.AccessToken.ChatGrant({
       serviceSid: this.conversationSid,
+    });
+    const videoGrant = new twilio.jwt.AccessToken.VideoGrant({
+      room: roomId,
     });
     const token = new twilio.jwt.AccessToken(
       this.accountSid,
@@ -39,6 +42,7 @@ export class TwilioService {
       { identity: userIdentity },
     );
     token.addGrant(chatGrant);
+    token.addGrant(videoGrant);
     return token.toJwt();
   }
 
