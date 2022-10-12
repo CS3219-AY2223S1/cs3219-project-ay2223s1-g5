@@ -189,7 +189,10 @@ export class RoomService
       `${userId.toString()}:${Status.DISCONNECTED}`,
     );
 
-    await this.chatService.leaveChatRoom(roomId, userId);
+    // We don't need to await this but we catch all errors and log them.
+    this.chatService.leaveChatRoom(roomId, userId).catch((error) => {
+      this.logger.warn(error);
+    });
 
     if (
       !(await this.redisService.getSetSize(
@@ -197,7 +200,10 @@ export class RoomService
         roomId,
       ))
     ) {
-      await this.terminateRoom(roomId);
+      // We don't need to await this but we catch all errors and log them.
+      this.terminateRoom(roomId).catch((error) => {
+        this.logger.warn(error);
+      });
     }
   }
 

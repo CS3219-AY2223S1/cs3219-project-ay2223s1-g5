@@ -79,21 +79,24 @@ export class ChatService {
 
   async leaveChatRoom(roomId: string, userId: number) {
     const identity = await this.getIdentity(userId);
-    const chatRoomSid = await this.getChatRoomSid(roomId);
-    if (!chatRoomSid) {
-      this.logger.error(`Unable to retrieve chat room SID: ${roomId}`);
-      throw new InternalServerError();
+    try {
+      const chatRoomSid = await this.getChatRoomSid(roomId);
+      if (!chatRoomSid) {
+        this.logger.error(`Unable to retrieve chat room SID: ${roomId}`);
+        throw new InternalServerError();
+      }
+      const participantSid = await this.getParticipantSid(identity);
+      if (!participantSid) {
+        this.logger.error(`Unable to retrieve participant SID: ${userId}`);
+        throw new InternalServerError();
+      }
+      this.logger.info(
+        `Leaving chat room [${chatRoomSid}]: ${userId} (${participantSid})`,
+      );
+      await this.twilioService.leaveChatRoom(chatRoomSid, participantSid);
+    } finally {
+      await this.deleteParticipantSid(identity);
     }
-    const participantSid = await this.getParticipantSid(identity);
-    if (!participantSid) {
-      this.logger.error(`Unable to retrieve participant SID: ${userId}`);
-      throw new InternalServerError();
-    }
-    this.logger.info(
-      `Leaving chat room [${chatRoomSid}]: ${userId} (${participantSid})`,
-    );
-    await this.twilioService.leaveChatRoom(chatRoomSid, participantSid);
-    await this.deleteParticipantSid(identity);
   }
 
   async closeChatRoom(roomId: string) {

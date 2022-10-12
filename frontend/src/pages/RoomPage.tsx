@@ -62,6 +62,7 @@ export const RoomPage = () => {
     roomSocket.off(ROOM_EVENTS.PARTNER_LEAVE);
     roomSocket.off(ROOM_EVENTS.JOINED);
     roomSocket.emit(ROOM_EVENTS.LEAVE, { roomId });
+    // Room socket will be disconnected by server side.
   }, [roomSocket, roomId]);
 
   useEffect(() => {

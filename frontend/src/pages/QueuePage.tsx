@@ -132,12 +132,14 @@ export const QueuePage = () => {
     queueSocket.on(QUEUE_EVENTS.ROOM_READY, (match: FoundRoomPayload) => {
       setMessage("Room ready. Joining...");
       clearTimeout(timeoutId);
+      queueSocket.disconnect();
       setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
     });
 
     queueSocket.on(QUEUE_EVENTS.EXISTING_MATCH, (roomId: string) => {
       setMessage("Existing match found. Rejoining...");
       clearTimeout(timeoutId);
+      queueSocket.disconnect();
       setTimeout(() => navigate(`/room/${roomId}`), 1000);
     });
 
