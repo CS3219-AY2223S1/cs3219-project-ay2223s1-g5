@@ -1,12 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import {
   AudioTrack,
   AudioTrackPublication,
   LocalParticipant,
-  RemoteAudioTrack,
-  RemoteParticipant,
-  RemoteVideoTrack,
   VideoTrack,
   VideoTrackPublication,
 } from "twilio-video";
@@ -31,10 +28,10 @@ const videoTrackPublicationsToTrack = (
   );
 };
 
-export const VideoChatParticipant = ({
+export const LocalVideoChatParticipant = ({
   participant,
 }: {
-  participant: RemoteParticipant | LocalParticipant;
+  participant: LocalParticipant;
 }) => {
   const [videoTrack, setVideoTrack] = useState<VideoTrack | undefined>(
     undefined,
@@ -43,41 +40,37 @@ export const VideoChatParticipant = ({
     undefined,
   );
 
-  const [refAttached, setRefAttached] = useState<number>(0);
+  const [videoRefVersion, setVideoRefVersion] = useState<number>(0);
+  const [audioRefVersion, setAudioRefVersion] = useState<number>(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const videoCallbackRef = useCallback(
+    (ref: HTMLVideoElement | null) => {
+      if (!ref) {
+        return;
+      }
+      videoRef.current = ref;
+      setVideoRefVersion((version) => version + 1);
+    },
+    [setVideoRefVersion],
+  );
+
+  const audioCallbackRef = useCallback(
+    (ref?: HTMLAudioElement | null) => {
+      if (!ref) {
+        return;
+      }
+      audioRef.current = ref;
+      setAudioRefVersion((version) => version + 1);
+    },
+    [setAudioRefVersion],
+  );
+
   useEffect(() => {
     setVideoTrack(videoTrackPublicationsToTrack(participant.videoTracks));
     setAudioTrack(audioTrackPublicationsToTrack(participant.audioTracks));
-    participant.on("trackSubscribed", (track) => {
-      if (track.kind === "video") {
-        setVideoTrack(track as VideoTrack);
-      }
-      if (track.kind === "audio") {
-        setAudioTrack(track as AudioTrack);
-      }
-    });
-
-    participant.on("trackUnsubscribed", (track) => {
-      if (track.kind === "video") {
-        setVideoTrack((current) => {
-          if ((current as unknown as RemoteVideoTrack).sid === track.sid) {
-            return undefined;
-          }
-          return current;
-        });
-      }
-      if (track.kind === "audio") {
-        setAudioTrack((current) => {
-          if ((current as unknown as RemoteAudioTrack).sid === track.sid) {
-            return undefined;
-          }
-          return current;
-        });
-      }
-    });
 
     return () => {
       setVideoTrack(undefined);
@@ -94,7 +87,7 @@ export const VideoChatParticipant = ({
     return () => {
       videoTrack.detach();
     };
-  }, [videoTrack, refAttached]);
+  }, [videoTrack, videoRefVersion]);
 
   useEffect(() => {
     if (!audioTrack || !audioRef.current) {
@@ -104,22 +97,19 @@ export const VideoChatParticipant = ({
     return () => {
       audioTrack.detach();
     };
-  }, [audioTrack]);
+  }, [audioTrack, audioRefVersion]);
 
   return (
-    <Box sx={{ flex: 1, maxHeight: "100%" }}>
+    <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
       <video
-        ref={(ref) => {
-          videoRef.current = ref;
-          setRefAttached(1);
-        }}
-        width="100%"
+        ref={videoCallbackRef}
         height="100%"
+        width="100%"
         autoPlay={true}
         muted={true}
         playsInline={true}
       />
-      <audio ref={audioRef} autoPlay={true} muted={false} />
+      <audio ref={audioCallbackRef} autoPlay={true} muted={true} />
     </Box>
   );
 };

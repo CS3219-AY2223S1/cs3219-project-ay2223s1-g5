@@ -15,6 +15,7 @@ import {
 import {
   connect,
   LocalParticipant,
+  Logger,
   RemoteParticipant,
   Room,
 } from "twilio-video";
@@ -30,9 +31,17 @@ type ChatContextProps = {
   send: (content: string, callback: () => void) => Promise<void>;
   typing: () => void;
   isTyping: Set<string>;
+  isVideoChatEnabled: boolean;
+  enableVideoChat: () => void;
   selfVideoParticipant: LocalParticipant | undefined;
   videoParticipants: Map<string, RemoteParticipant>;
+  isVideoEnabled: boolean;
+  setIsVideoEnabled: (value: boolean) => void;
+  isAudioEnabled: boolean;
+  setIsAudioEnabled: (value: boolean) => void;
 };
+
+Logger.getLogger("twilio-video").setLevel("debug");
 
 const ChatContext = createContext<ChatContextProps | undefined>(undefined);
 
@@ -52,13 +61,20 @@ export const ChatProvider = ({
     Conversation | undefined
   >();
 
+  const [isVideoChatEnabled, setIsVideoChatEnabled] = useState<boolean>(false);
   const [videoRoom, setVideoRoom] = useState<Room>();
   const [selfVideoParticipant, setSelfVideoParticipant] = useState<
     LocalParticipant | undefined
   >(undefined);
+  const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(true);
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(true);
   const [videoParticipants, setVideoParticipants] = useState<
     Map<string, RemoteParticipant>
   >(new Map());
+
+  const enableVideoChat = useCallback(() => {
+    setIsVideoChatEnabled(true);
+  }, [setIsVideoChatEnabled]);
 
   useEffect(() => {
     const retrieveToken = async () => {
@@ -71,11 +87,9 @@ export const ChatProvider = ({
   }, []);
 
   useEffect(() => {
-    if (client || videoRoom || !token || !identity || !user) {
+    if (client || !token || !identity || !user) {
       return;
     }
-
-    // Chat
 
     const twilioClient = new Client(token);
     setClient(twilioClient);
@@ -136,7 +150,13 @@ export const ChatProvider = ({
       }
     });
 
-    // Video Chat
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, identity, user, roomId]);
+
+  useEffect(() => {
+    if (videoRoom || !isVideoChatEnabled || !token || !roomId) {
+      return;
+    }
 
     connect(token, { name: roomId, video: true, audio: true }).then((room) => {
       setVideoRoom(room);
@@ -175,9 +195,38 @@ export const ChatProvider = ({
         });
       };
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, identity, user, roomId]);
+  }, [token, user, roomId, isVideoChatEnabled]);
+
+  useEffect(() => {
+    if (!selfVideoParticipant) {
+      return;
+    }
+    if (isVideoEnabled) {
+      selfVideoParticipant.videoTracks.forEach((publication) => {
+        publication.track.enable();
+      });
+    } else {
+      selfVideoParticipant.videoTracks.forEach((publication) => {
+        publication.track.disable();
+      });
+    }
+  }, [selfVideoParticipant, isVideoEnabled]);
+
+  useEffect(() => {
+    if (!selfVideoParticipant) {
+      return;
+    }
+    if (isAudioEnabled) {
+      selfVideoParticipant.audioTracks.forEach((publication) => {
+        publication.track.enable();
+      });
+    } else {
+      selfVideoParticipant.audioTracks.forEach((publication) => {
+        publication.track.disable();
+      });
+    }
+  }, [selfVideoParticipant, isAudioEnabled]);
 
   const send = useCallback(
     async (content: string, callback: () => void) => {
@@ -208,8 +257,14 @@ export const ChatProvider = ({
         typing,
         isTyping,
         identity,
+        isVideoChatEnabled,
+        enableVideoChat,
         selfVideoParticipant,
         videoParticipants,
+        isVideoEnabled,
+        setIsVideoEnabled,
+        isAudioEnabled,
+        setIsAudioEnabled,
       }}
     >
       {children}
