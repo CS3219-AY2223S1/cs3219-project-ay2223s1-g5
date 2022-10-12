@@ -11,6 +11,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
 import { session } from "src/common/adapters/websocket.adapter";
+import { RateLimitError } from "src/common/errors/rate-limit.error";
 import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
 import { JudgeService } from "src/judge/judge.service";
@@ -59,7 +60,6 @@ export class RoomGateway implements OnGatewayDisconnect {
           questionId,
         },
       };
-
       await client.join(roomId);
       this.server.to(roomId).emit(ROOM_EVENTS.JOINED, payload);
     } catch (e: unknown) {
@@ -88,23 +88,45 @@ export class RoomGateway implements OnGatewayDisconnect {
     const roomId = await this.roomService.getRoom(userId);
 
     if (!roomId) {
+      this.logger.warn(`Unable to load room: ${roomId} [${userId}]`);
       return;
     }
 
-    const hasSubmission = await this.judgeService.hasSubmission(roomId);
-    if (hasSubmission) {
-      this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_REJECTED);
-      return;
+    this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_ACCEPTED);
+
+    try {
+      const completed = await this.judgeService.sendRequest(
+        submitPayload.language,
+        submitPayload.code,
+        submitPayload.questionId,
+        roomId,
+      );
+      if (!completed) {
+        return;
+      }
+      this.handleSubmissionUpdate(roomId, completed.submissionId);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        if (!(e instanceof RateLimitError)) {
+          this.logger.error(e);
+        }
+        this.server
+          .to(roomId)
+          .emit(ROOM_EVENTS.SUBMISSION_REJECTED, { reason: e.message });
+        return;
+      }
+      this.logger.error(e);
+      // Propagate error since we can't handle it.
     }
+  }
 
-    const result = await this.judgeService.sendRequest(
-      submitPayload.language,
-      submitPayload.code,
-      submitPayload.questionId,
-      roomId,
-    );
-
-    this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_RESULT, result);
+  async handleSubmissionUpdate(
+    roomId: string,
+    submissionId: string,
+  ): Promise<void> {
+    this.server
+      .to(roomId)
+      .emit(ROOM_EVENTS.SUBMISSION_UPDATED, { submissionId });
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
