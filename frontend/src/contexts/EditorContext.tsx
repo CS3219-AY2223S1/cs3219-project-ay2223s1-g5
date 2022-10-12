@@ -9,7 +9,6 @@ import {
 } from "react";
 import { useMonaco } from "@monaco-editor/react";
 import * as monacoType from "monaco-editor";
-import { Socket } from "socket.io-client";
 import { MonacoBinding } from "y-monaco";
 import { SocketIOProvider } from "y-socket.io";
 import { Doc, Text } from "yjs";
