@@ -20,13 +20,13 @@ export const SubmissionsHeatmap = () => {
       option={{
         tooltip: {
           position: "top",
-          formatter: function (p: any) {
-            const format = p.data[0].toLocaleDateString("en-US", {
+          formatter: (params: any) => {
+            const format = params.data[0].toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
               day: "numeric",
             });
-            return "<b>" + p.data[1] + " submissions</b> on " + format;
+            return "<b>" + params.data[1] + " submissions</b> on " + format;
           },
         },
         backgroundColor: "white",
@@ -47,7 +47,7 @@ export const SubmissionsHeatmap = () => {
             left: 30,
             right: 30,
             orient: "horizontal",
-            range: "2022",
+            range: ["2022"],
           },
         ],
         series: [

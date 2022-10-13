@@ -28,19 +28,19 @@ export const VerticalBarChart = () => {
               {
                 value: 5,
                 itemStyle: {
-                  color: theme.palette.green[500],
+                  color: theme.palette.green["A400"],
                 },
               },
               {
                 value: 10,
                 itemStyle: {
-                  color: theme.palette.yellow[500],
+                  color: theme.palette.yellow["A400"],
                 },
               },
               {
                 value: 15,
                 itemStyle: {
-                  color: theme.palette.red[500],
+                  color: theme.palette.red["A400"],
                 },
               },
             ],

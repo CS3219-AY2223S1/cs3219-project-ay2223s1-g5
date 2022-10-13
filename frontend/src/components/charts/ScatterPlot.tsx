@@ -22,49 +22,49 @@ export const ScatterPlot = () => {
               {
                 value: [0, 1],
                 itemStyle: {
-                  color: theme.palette.green[500],
+                  color: theme.palette.green["A400"],
                 },
               },
               {
                 value: [0, 3],
                 itemStyle: {
-                  color: theme.palette.red[500],
+                  color: theme.palette.red["A400"],
                 },
               },
               {
                 value: [1, 4],
                 itemStyle: {
-                  color: theme.palette.yellow[500],
+                  color: theme.palette.yellow["A400"],
                 },
               },
               {
                 value: [2, 3],
                 itemStyle: {
-                  color: theme.palette.red[500],
+                  color: theme.palette.red["A400"],
                 },
               },
               {
                 value: [3, 7],
                 itemStyle: {
-                  color: theme.palette.green[500],
+                  color: theme.palette.green["A400"],
                 },
               },
               {
                 value: [4, 6],
                 itemStyle: {
-                  color: theme.palette.yellow[500],
+                  color: theme.palette.yellow["A400"],
                 },
               },
               {
                 value: [5, 6],
                 itemStyle: {
-                  color: theme.palette.yellow[500],
+                  color: theme.palette.yellow["A400"],
                 },
               },
               {
                 value: [6, 9],
                 itemStyle: {
-                  color: theme.palette.green[500],
+                  color: theme.palette.green["A400"],
                 },
               },
             ],

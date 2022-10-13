@@ -1,7 +1,7 @@
 import {
   AccessTime,
-  Diversity3,
   DriveFolderUpload,
+  Hub,
   People,
   Quiz,
 } from "@mui/icons-material";
@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@mui/material";
 
+import { NetworkChart } from "src/components/charts/NetworkChart";
 import { ScatterPlot } from "src/components/charts/ScatterPlot";
 import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
 import { VerticalBarChart } from "src/components/charts/VerticalBarChart";
@@ -49,6 +50,11 @@ export const DashboardPage = () => {
         />
       </Stack>
       <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+        <ChartContainer
+          title={"Topics Attempted"}
+          chart={<NetworkChart />}
+          Icon={Hub}
+        />
         <ChartContainer
           title={"Collaborators"}
           chart={
@@ -87,11 +93,6 @@ export const DashboardPage = () => {
               </Table>
             </TableContainer>
           }
-          Icon={Diversity3}
-        />
-        <ChartContainer
-          title={"Top Collaborators"}
-          chart={<ScatterPlot />}
           Icon={People}
         />
       </Stack>

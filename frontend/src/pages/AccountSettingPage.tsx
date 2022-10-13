@@ -19,7 +19,7 @@ export const AccountSettingPage = () => {
   };
 
   return (
-    <Paper elevation={1} sx={{ borderRadius: 3, mx: 6 }}>
+    <Paper elevation={0} sx={{ borderRadius: 3, mx: 6 }}>
       <Stack direction="row">
         <List>
           <ListItem disablePadding>
