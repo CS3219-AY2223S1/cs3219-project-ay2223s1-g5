@@ -20,7 +20,7 @@ export const Chat = () => {
   }, [messages]);
 
   return messages ? (
-    <Stack spacing={1} sx={{ height: "100%" }}>
+    <Stack spacing={1} sx={{ height: "100%", minHeight: 0 }}>
       <Stack
         spacing={1}
         sx={{ px: 1, flex: 1, overflowX: "hidden", overflowY: "scroll" }}

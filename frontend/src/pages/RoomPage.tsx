@@ -319,8 +319,12 @@ export const RoomPage = () => {
               <Box sx={{ height: "60%" }}>
                 <QuestionSubmissionPanel questionId={questionId} />
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <ChatPanel />
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                {/* TODO: Support multiple participants */}
+                <ChatPanel
+                  name={user?.name}
+                  partnerName={participants[0]?.name}
+                />
               </Box>
             </Stack>
             <Box sx={{ flex: 1, minWidth: 0 }}>

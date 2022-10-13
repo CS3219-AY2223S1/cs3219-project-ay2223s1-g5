@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import {
   AudioTrack,
   AudioTrackPublication,
@@ -7,6 +7,8 @@ import {
   VideoTrack,
   VideoTrackPublication,
 } from "twilio-video";
+
+import { Center } from "src/components/Center";
 
 const audioTrackPublicationsToTrack = (
   trackPublications: Map<string, AudioTrackPublication>,
@@ -29,9 +31,11 @@ const videoTrackPublicationsToTrack = (
 };
 
 export const LocalVideoChatParticipant = ({
+  name,
   participant,
 }: {
-  participant: LocalParticipant;
+  name?: string;
+  participant?: LocalParticipant;
 }) => {
   const [videoTrack, setVideoTrack] = useState<VideoTrack | undefined>(
     undefined,
@@ -69,6 +73,10 @@ export const LocalVideoChatParticipant = ({
   );
 
   useEffect(() => {
+    if (!participant) {
+      return;
+    }
+
     setVideoTrack(videoTrackPublicationsToTrack(participant.videoTracks));
     setAudioTrack(audioTrackPublicationsToTrack(participant.audioTracks));
 
@@ -99,16 +107,29 @@ export const LocalVideoChatParticipant = ({
   }, [audioTrack, audioRefVersion]);
 
   return (
-    <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
-      <video
-        ref={videoCallbackRef}
-        height="100%"
-        width="100%"
-        autoPlay={true}
-        muted={true}
-        playsInline={true}
-      />
-      <audio ref={audioCallbackRef} autoPlay={true} muted={true} />
-    </Box>
+    <Stack sx={{ height: "100%" }}>
+      <Typography textAlign="center">{name || "\u00A0"}</Typography>
+      <Box sx={{ height: "100%", position: "relative" }}>
+        <Box
+          sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          {videoTrack ? (
+            <video
+              ref={videoCallbackRef}
+              height="100%"
+              width="100%"
+              autoPlay={true}
+              muted={true}
+              playsInline={true}
+            />
+          ) : (
+            <Center>
+              <CircularProgress />
+            </Center>
+          )}
+          <audio ref={audioCallbackRef} autoPlay={true} muted={true} />
+        </Box>
+      </Box>
+    </Stack>
   );
 };

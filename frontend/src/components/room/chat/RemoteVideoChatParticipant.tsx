@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Avatar, Box } from "@mui/material";
+import { Avatar, Box, Stack, Typography } from "@mui/material";
 import {
   RemoteAudioTrack,
   RemoteAudioTrackPublication,
@@ -31,10 +31,12 @@ const videoTrackPublicationsToTrack = (
 };
 
 export const RemoteVideoChatParticipant = ({
+  name,
   participant,
   isMuted,
 }: {
-  participant: RemoteParticipant;
+  name?: string;
+  participant?: RemoteParticipant;
   isMuted: boolean;
 }) => {
   const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(false);
@@ -75,6 +77,10 @@ export const RemoteVideoChatParticipant = ({
   );
 
   useEffect(() => {
+    if (!participant) {
+      return;
+    }
+
     setVideoTrack(videoTrackPublicationsToTrack(participant.videoTracks));
     setAudioTrack(audioTrackPublicationsToTrack(participant.audioTracks));
     participant.on("trackSubscribed", (track) => {
@@ -158,26 +164,33 @@ export const RemoteVideoChatParticipant = ({
   }, [audioTrack, audioRefVersion]);
 
   return (
-    <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
-      {isVideoEnabled ? (
-        <video
-          ref={videoCallbackRef}
-          height="100%"
-          width="100%"
-          autoPlay={true}
-          muted={true}
-          playsInline={true}
-        />
-      ) : (
-        <Center>
-          <Avatar />
-        </Center>
-      )}
-      <audio
-        ref={audioCallbackRef}
-        autoPlay={true}
-        muted={isMuted || !isAudioEnabled}
-      />
-    </Box>
+    <Stack sx={{ height: "100%" }}>
+      <Typography textAlign="center">{name || "\u00A0"}</Typography>
+      <Box sx={{ height: "100%", position: "relative" }}>
+        <Box
+          sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          {videoTrack && isVideoEnabled ? (
+            <video
+              ref={videoCallbackRef}
+              height="100%"
+              width="100%"
+              autoPlay={true}
+              muted={true}
+              playsInline={true}
+            />
+          ) : (
+            <Center>
+              <Avatar sx={{ height: "56px", width: "56px" }} />
+            </Center>
+          )}
+          <audio
+            ref={audioCallbackRef}
+            autoPlay={true}
+            muted={isMuted || !isAudioEnabled}
+          />
+        </Box>
+      </Box>
+    </Stack>
   );
 };

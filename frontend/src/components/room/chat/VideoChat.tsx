@@ -22,49 +22,46 @@ import { LocalVideoChatParticipant } from "./LocalVideoChatParticipant";
 import { RemoteVideoChatParticipant } from "./RemoteVideoChatParticipant";
 
 // eslint-disable-next-line react/display-name
-export const VideoChat = memo(() => {
-  const {
-    isVideoChatEnabled,
-    enableVideoChat,
-    selfVideoParticipant,
-    videoParticipants,
-    isAudioEnabled,
-    setIsAudioEnabled,
-    isVideoEnabled,
-    setIsVideoEnabled,
-  } = useChat();
+export const VideoChat = memo(
+  ({ name, partnerName }: { name?: string; partnerName?: string }) => {
+    const {
+      isVideoChatEnabled,
+      enableVideoChat,
+      selfVideoParticipant,
+      videoParticipants,
+      isAudioEnabled,
+      setIsAudioEnabled,
+      isVideoEnabled,
+      setIsVideoEnabled,
+    } = useChat();
 
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+    const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const partner = useMemo(
-    () => Array.from(videoParticipants.values())[0],
-    [videoParticipants],
-  );
+    const partner = useMemo(
+      () => Array.from(videoParticipants.values())[0],
+      [videoParticipants],
+    );
 
-  useEffect(() => {
-    console.log("mounted");
-    return () => console.log("unmounted");
-  }, []);
-
-  return isVideoChatEnabled ? (
-    <Grid container spacing={1} sx={{ height: "100%" }}>
-      <Grid xs={6} item sx={{ position: "relative", height: "100%" }}>
-        {selfVideoParticipant ? (
-          <LocalVideoChatParticipant participant={selfVideoParticipant} />
-        ) : (
-          <Center>Loading...</Center>
-        )}
-      </Grid>
-      <Grid xs={6} item sx={{ position: "relative", height: "100%" }}>
-        {partner ? (
-          <RemoteVideoChatParticipant participant={partner} isMuted={isMuted} />
-        ) : (
-          <Center>
-            <CircularProgress />
-          </Center>
-        )}
-      </Grid>
-      <Grid item xs={12} sx={{ height: "40px" }}>
+    return isVideoChatEnabled ? (
+      <Stack spacing={1} sx={{ height: "100%" }}>
+        <Grid container sx={{ flex: 1 }}>
+          {/* Material UI uses negative margins to achieve spacing and that 
+         affects our video layout so we hack around it. */}
+          <Grid xs={5.75} item>
+            <LocalVideoChatParticipant
+              name={name}
+              participant={selfVideoParticipant}
+            />
+          </Grid>
+          <Grid xs={0.5} />
+          <Grid xs={5.75} item sx={{ position: "relative", flex: 1 }}>
+            <RemoteVideoChatParticipant
+              name={partnerName}
+              participant={partner}
+              isMuted={isMuted}
+            />
+          </Grid>
+        </Grid>
         <Stack direction="row" spacing={1} justifyContent="space-between">
           <Stack direction="row" spacing={1} justifyContent="space-between">
             <IconButton
@@ -72,7 +69,7 @@ export const VideoChat = memo(() => {
               onClick={() => setIsVideoEnabled(!isVideoEnabled)}
             >
               {isVideoEnabled ? (
-                <VideocamOutlined fontSize="small" />
+                <VideocamOutlined fontSize="small" color="error" />
               ) : (
                 <VideocamOffOutlined fontSize="small" />
               )}
@@ -82,7 +79,7 @@ export const VideoChat = memo(() => {
               onClick={() => setIsAudioEnabled(!isAudioEnabled)}
             >
               {isAudioEnabled ? (
-                <MicOutlined fontSize="small" />
+                <MicOutlined fontSize="small" color="error" />
               ) : (
                 <MicOffOutlined fontSize="small" />
               )}
@@ -93,17 +90,17 @@ export const VideoChat = memo(() => {
             onClick={() => setIsMuted((muted) => !muted)}
           >
             {isMuted ? (
-              <VolumeOffOutlined fontSize="small" />
+              <VolumeOffOutlined fontSize="small" color="warning" />
             ) : (
               <VolumeUpOutlined fontSize="small" />
             )}
           </IconButton>
         </Stack>
-      </Grid>
-    </Grid>
-  ) : (
-    <Center>
-      <Button onClick={enableVideoChat}>Enable Video Chat</Button>
-    </Center>
-  );
-});
+      </Stack>
+    ) : (
+      <Center>
+        <Button onClick={enableVideoChat}>Enable Video Chat</Button>
+      </Center>
+    );
+  },
+);
