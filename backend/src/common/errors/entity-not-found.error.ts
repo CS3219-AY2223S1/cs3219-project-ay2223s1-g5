@@ -5,7 +5,7 @@ import { BaseError } from "./base.error";
 export class EntityNotFoundError extends BaseError {
   constructor(message: string) {
     super(message);
-    this.name = "EntityNotFoundError";
+    this.name = "Not Found";
   }
 
   getHttpException(): HttpException {

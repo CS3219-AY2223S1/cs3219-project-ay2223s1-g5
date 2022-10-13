@@ -1,13 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { Language as PrismaLanguage } from "@prisma/client";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { InternalServerError } from "src/common/errors/internal-server.error";
 import { PrismaService } from "src/core/prisma.service";
 
 import { Difficulty, Language } from "~shared/types/base";
 
 @Injectable()
 export class QuestionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectPinoLogger(QuestionService.name)
+    private readonly logger: PinoLogger,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async getQuestionById(id: number) {
     return this.prisma.question.findUnique({
@@ -28,6 +34,14 @@ export class QuestionService {
     });
   }
 
+  async getTestcase(questionId: number) {
+    return this.prisma.testCase.findFirst({
+      where: {
+        questionId,
+      },
+    });
+  }
+
   // gets a random question number of difficulty
   async getIdByDifficulty(difficulty: Difficulty): Promise<number> {
     const questionsCount = await this.prisma.question.count({
@@ -41,7 +55,8 @@ export class QuestionService {
       select: { id: true },
     });
     if (question === null) {
-      throw new Error("Unable to select question.");
+      this.logger.error(`Unable to load question.`);
+      throw new InternalServerError();
     }
     const { id } = question;
     return id;

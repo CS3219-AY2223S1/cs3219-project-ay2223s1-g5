@@ -1,8 +1,10 @@
 {
-  "name": "peerprep",
+  "name": "codecollab",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "on-backend": "npm run --prefix backend",
     "on-frontend": "npm run --prefix frontend",
@@ -11,15 +13,13 @@
     "dev:full": "npm run all \"docker-compose --env-file backend/.env up\" \"npm run dev\"",
     "build": "npm run --prefix shared build && npm run all \"npm:on-* build\"",
     "clean": "npm run all \"npm --prefix shared run clean\" \"npm --prefix frontend run clean\" \"npm --prefix backend run clean\" && rm -rf node_modules",
-    "postinstall": "npm run all \"npm --prefix backend install\" \"npm --prefix frontend install\" \"npm --prefix shared install\" && npm run --prefix shared build && npm run --prefix frontend build",
+    "postinstall": "npm run all \"npm --prefix backend install\" \"npm --prefix frontend install\" \"npm --prefix shared install\"",
     "prepare": "husky install"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g5.git"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",

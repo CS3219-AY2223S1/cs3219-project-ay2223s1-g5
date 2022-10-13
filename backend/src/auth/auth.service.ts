@@ -7,6 +7,7 @@ import { User } from "@prisma/client";
 import { compare } from "bcrypt";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { InternalServerError } from "src/common/errors/internal-server.error";
 import { UserService } from "src/user/user.service";
 
 const FAILED_LOGIN_LIMIT = 10;
@@ -48,8 +49,8 @@ export class AuthService {
   ): Promise<Pick<User, "id" | "name" | "email">> {
     const user = await this.userService.getById(userId);
     if (!user) {
-      this.logger.warn(`Unable to retrieve user: ${userId}`);
-      throw new Error();
+      this.logger.error(`Unable to retrieve user: ${userId}`);
+      throw new InternalServerError();
     }
     return { id: user.id, name: user.name, email: user.email };
   }

@@ -1,14 +1,16 @@
 export { LoginReq, LoginRes } from "./auth.dto";
 export { CreateTokenRes } from "./chat.dto";
-export { MatchRes } from "./match.dto";
+export { Judge0Callback } from "./judge.dto";
 export { GetQuestionRes } from "./question.dto";
-export { EnterQueuePayload } from "./queue.dto";
+export { EnterQueuePayload, FoundRoomPayload } from "./queue.dto";
 export {
   JoinedPayload,
   JoinPayload,
   LeavePayload,
   PartnerDisconnectPayload,
   PartnerLeavePayload,
+  SubmissionRejectedPayload,
+  SubmitPayload,
 } from "./room.dto";
 export {
   CreateUserReq,

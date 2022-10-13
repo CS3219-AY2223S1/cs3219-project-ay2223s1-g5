@@ -2,20 +2,23 @@
   "name": "shared",
   "version": "0.0.0",
   "description": "",
+  "author": "",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "pre-commit": "lint-staged",
-    "lint": "eslint --ext ts,tsx,js,jsx .",
-    "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
+    "dev": "tsc-watch --preserveWatchOutput",
     "build": "tsc --build --clean && tsc --build tsconfig.build.json --force",
-    "clean": "rm -rf node_modules && rm -rf build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "dev": "tsc-watch"
+    "lint": "eslint --ext ts,tsx,js,jsx .",
+    "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
+    "clean": "rm -rf node_modules && rm -rf build"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
+    "@types/validator": "^13.7.7",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
     "@typescript-eslint/parser": "^5.20.0",
     "eslint": "^8.13.0",
@@ -38,23 +41,28 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "isolatedModules": true
+        }
+      ]
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node",
-    "globals": {
-      "ts-jest": {
-        "isolatedModules": true
-      }
-    }
+    "testEnvironment": "node"
   },
   "lint-staged": {
     "**/*.(js|jsx|ts|tsx)": [
       "prettier --write",
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
+    "validator": "^13.7.0"
   }
 }

@@ -30,7 +30,7 @@ export class EditorService {
   async createDocument(roomId: string, template: string): Promise<void> {
     const text = new Doc().getText();
     // Monaco Editor expects line endings to follow CRLF.
-    text.insert(0, template.replace(/\n/g, "\r\n"));
+    text.insert(0, template.replace(/(?<!\r)\n/g, "\r\n"));
     const delta = JSON.stringify(text.toDelta());
     await this.redisService.setKey([EditorService.NAMESPACE], roomId, delta);
   }

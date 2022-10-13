@@ -80,7 +80,7 @@ export class CppMiddleware extends JudgeMiddleware {
         `std::equal(res.begin(), res.end(), expectedOutput.begin());`;
     } else {
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
-      isEqual = "bool isEqual = res == expectedOuput;";
+      isEqual = "bool isEqual = res == expectedOutput;";
     }
 
     const joinedVariableNames = codePrototype.arguments

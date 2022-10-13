@@ -1,13 +1,13 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Lock } from "@mui/icons-material";
 import { Stack } from "@mui/material";
-import { passwordStrength } from "check-password-strength";
 import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useUpdatePassword } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
+import isStrongPassword from "validator/es/lib/isStrongPassword";
 
 export interface UpdatePasswordFormProps {
   userId: number;
@@ -78,15 +78,11 @@ export const UpdatePasswordForm = (props: UpdatePasswordFormProps) => {
             required: "Password is required.",
             // TODO: Abstract this and improve error message.
             validate: (value: string) => {
+              // We should do this at the backend.
               if (getValues("oldPassword") === value) {
                 return "New password cannot be the same as existing password.";
               }
-              const results = passwordStrength(value);
-              return (
-                results.value === "Strong" ||
-                results.value === "Medium" ||
-                "Password is too weak."
-              );
+              return isStrongPassword(value) || "Password is too weak.";
             },
           }}
           render={({
