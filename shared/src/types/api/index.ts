@@ -12,6 +12,7 @@ export {
   SubmissionRejectedPayload,
   SubmitPayload,
 } from "./room.dto";
+export { UserStatisticsRes } from "./statistics.dto";
 export {
   CreateUserReq,
   GetUserNameRes,
