@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   MicOffOutlined,
   MicOutlined,
@@ -21,7 +21,8 @@ import { useChat } from "src/contexts/ChatContext";
 import { LocalVideoChatParticipant } from "./LocalVideoChatParticipant";
 import { RemoteVideoChatParticipant } from "./RemoteVideoChatParticipant";
 
-export const VideoChat = () => {
+// eslint-disable-next-line react/display-name
+export const VideoChat = memo(() => {
   const {
     isVideoChatEnabled,
     enableVideoChat,
@@ -35,7 +36,15 @@ export const VideoChat = () => {
 
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const partner = Array.from(videoParticipants.values())[0];
+  const partner = useMemo(
+    () => Array.from(videoParticipants.values())[0],
+    [videoParticipants],
+  );
+
+  useEffect(() => {
+    console.log("mounted");
+    return () => console.log("unmounted");
+  }, []);
 
   return isVideoChatEnabled ? (
     <Grid container spacing={1} sx={{ height: "100%" }}>
@@ -97,4 +106,4 @@ export const VideoChat = () => {
       <Button onClick={enableVideoChat}>Enable Video Chat</Button>
     </Center>
   );
-};
+});

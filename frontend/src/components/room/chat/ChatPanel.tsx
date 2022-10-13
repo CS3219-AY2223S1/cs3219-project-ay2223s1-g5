@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChatBubbleOutline, VideoCallOutlined } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Paper, Stack, Tab } from "@mui/material";
+import { Box, Paper, Stack, Tab } from "@mui/material";
 
 import { Chat } from "./Chat";
 import { VideoChat } from "./VideoChat";
@@ -14,7 +14,7 @@ export const ChatPanel = () => {
   };
 
   return (
-    <Paper elevation={1} sx={{ py: 3, px: 2, height: "100%" }}>
+    <Paper elevation={1} sx={{ pb: 3, px: 2, height: "100%" }}>
       <Stack spacing={1} sx={{ p: 0, height: "100%" }}>
         <TabContext value={selectedPanel}>
           <TabList
@@ -47,12 +47,13 @@ export const ChatPanel = () => {
               iconPosition="start"
             />
           </TabList>
-          <TabPanel sx={{ height: "100%" }} value="chat">
+          <Box hidden={selectedPanel !== "chat"} sx={{ height: "100%" }}>
             <Chat />
-          </TabPanel>
-          <TabPanel sx={{ height: "100%" }} value="video">
+          </Box>
+          {/* Keep video chat mounted so that audio plays in the background.*/}
+          <Box hidden={selectedPanel !== "video"} sx={{ height: "100%" }}>
             <VideoChat />
-          </TabPanel>
+          </Box>
         </TabContext>
       </Stack>
     </Paper>

@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import {
@@ -15,7 +16,6 @@ import {
 import {
   connect,
   LocalParticipant,
-  Logger,
   RemoteParticipant,
   Room,
 } from "twilio-video";
@@ -41,8 +41,6 @@ type ChatContextProps = {
   setIsAudioEnabled: (value: boolean) => void;
 };
 
-Logger.getLogger("twilio-video").setLevel("debug");
-
 const ChatContext = createContext<ChatContextProps | undefined>(undefined);
 
 export const ChatProvider = ({
@@ -62,7 +60,7 @@ export const ChatProvider = ({
   >();
 
   const [isVideoChatEnabled, setIsVideoChatEnabled] = useState<boolean>(false);
-  const [videoRoom, setVideoRoom] = useState<Room>();
+  const videoRoom = useRef<Room | null>(null);
   const [selfVideoParticipant, setSelfVideoParticipant] = useState<
     LocalParticipant | undefined
   >(undefined);
@@ -154,12 +152,12 @@ export const ChatProvider = ({
   }, [token, identity, user, roomId]);
 
   useEffect(() => {
-    if (videoRoom || !isVideoChatEnabled || !token || !roomId) {
+    if (videoRoom.current || !isVideoChatEnabled || !token || !roomId) {
       return;
     }
 
     connect(token, { name: roomId, video: true, audio: true }).then((room) => {
-      setVideoRoom(room);
+      videoRoom.current = room;
       room.on("participantConnected", (participant) => {
         setVideoParticipants((participants) => {
           return new Map(participants).set(participant.identity, participant);
@@ -167,6 +165,7 @@ export const ChatProvider = ({
       });
       room.on("participantDisconnected", (participant) => {
         setVideoParticipants((participants) => {
+          participant.removeAllListeners();
           const map = new Map(participants);
           map.delete(participant.identity);
           return map;
@@ -178,23 +177,32 @@ export const ChatProvider = ({
       }
       setVideoParticipants(participants);
       setSelfVideoParticipant(room.localParticipant);
+    });
 
-      return () => {
-        setVideoRoom((room) => {
-          if (room && room.localParticipant.state === "connected") {
-            room.localParticipant.tracks.forEach((trackPublication) => {
+    const leaveVideoRoom = () => {
+      if (videoRoom.current) {
+        if (videoRoom.current.localParticipant.state === "connected") {
+          videoRoom.current.localParticipant.tracks.forEach(
+            (trackPublication) => {
               const track = trackPublication.track;
               if (Object.prototype.hasOwnProperty.call(track, "stop")) {
                 // It is either a video or audio track.
                 (track as { stop: () => void }).stop();
               }
-            });
-            room.disconnect();
-          }
-          return undefined;
-        });
-      };
-    });
+              trackPublication.unpublish();
+            },
+          );
+          videoRoom.current.disconnect();
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", leaveVideoRoom);
+
+    return () => {
+      window.removeEventListener("beforeunload", leaveVideoRoom);
+      leaveVideoRoom();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, user, roomId, isVideoChatEnabled]);
 

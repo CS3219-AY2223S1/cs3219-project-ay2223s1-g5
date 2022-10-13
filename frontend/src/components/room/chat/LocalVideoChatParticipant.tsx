@@ -75,7 +75,6 @@ export const LocalVideoChatParticipant = ({
     return () => {
       setVideoTrack(undefined);
       setAudioTrack(undefined);
-      participant.removeAllListeners();
     };
   }, [participant]);
 

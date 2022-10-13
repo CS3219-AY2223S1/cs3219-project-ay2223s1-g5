@@ -38,6 +38,7 @@ export const RemoteVideoChatParticipant = ({
   isMuted: boolean;
 }) => {
   const [isVideoEnabled, setIsVideoEnabled] = useState<boolean>(false);
+  const [isAudioEnabled, setIsAudioEnabled] = useState<boolean>(false);
   const [videoTrack, setVideoTrack] = useState<RemoteVideoTrack | undefined>(
     undefined,
   );
@@ -107,7 +108,6 @@ export const RemoteVideoChatParticipant = ({
     return () => {
       setVideoTrack(undefined);
       setAudioTrack(undefined);
-      participant.removeAllListeners();
     };
   }, [participant]);
 
@@ -123,6 +123,19 @@ export const RemoteVideoChatParticipant = ({
       setIsVideoEnabled(false);
     });
   }, [videoTrack, setIsVideoEnabled]);
+
+  useEffect(() => {
+    if (!audioTrack) {
+      return;
+    }
+    setIsAudioEnabled(audioTrack.isEnabled);
+    audioTrack.on("enabled", () => {
+      setIsAudioEnabled(true);
+    });
+    audioTrack.on("disabled", () => {
+      setIsAudioEnabled(false);
+    });
+  }, [audioTrack, setIsAudioEnabled]);
 
   useEffect(() => {
     if (!videoTrack || !videoRef.current) {
@@ -144,21 +157,27 @@ export const RemoteVideoChatParticipant = ({
     };
   }, [audioTrack, audioRefVersion]);
 
-  return isVideoEnabled ? (
+  return (
     <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
-      <video
-        ref={videoCallbackRef}
-        height="100%"
-        width="100%"
+      {isVideoEnabled ? (
+        <video
+          ref={videoCallbackRef}
+          height="100%"
+          width="100%"
+          autoPlay={true}
+          muted={true}
+          playsInline={true}
+        />
+      ) : (
+        <Center>
+          <Avatar />
+        </Center>
+      )}
+      <audio
+        ref={audioCallbackRef}
         autoPlay={true}
-        muted={true}
-        playsInline={true}
+        muted={isMuted || !isAudioEnabled}
       />
-      <audio ref={audioCallbackRef} autoPlay={true} muted={isMuted} />
     </Box>
-  ) : (
-    <Center>
-      <Avatar />
-    </Center>
   );
 };
