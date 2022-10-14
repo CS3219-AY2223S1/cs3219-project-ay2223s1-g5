@@ -46,7 +46,15 @@ export class StatisticsService {
       [Difficulty.MEDIUM]: 0,
       [Difficulty.HARD]: 0,
     };
+
+    const existing = new Set<number>();
+
     for (const session of data) {
+      // We only want to count unique questions.
+      if (existing.has(session.questionId)) {
+        continue;
+      }
+      existing.add(session.questionId);
       const { difficulty } = session.question;
       map[difficulty] = map[difficulty] + 1;
     }
@@ -130,29 +138,70 @@ export class StatisticsService {
         },
       },
     });
+
+    const existing = new Set<number>();
     const topics = new Map<number, string>();
-    const relations = new Map<number, number>();
+    const relations = new Map<number, Map<number, number>>();
     for (const session of data) {
-      const sortedTopics = session.question.topics.sort((l, r) => l.id - r.id);
+      // We only want to count unique questions.
+      if (existing.has(session.questionId)) {
+        continue;
+      }
+      existing.add(session.questionId);
+      const sortedTopics = session.question.topics.sort(
+        (lhs, rhs) => lhs.id - rhs.id,
+      );
       for (const topic of sortedTopics) {
         topics.set(topic.id, topic.name);
       }
 
-      for (let idx = 0; idx < sortedTopics.length; idx++) {
-        for (let oth = idx + 1; oth < sortedTopics.length; oth++) {
-          relations.set(sortedTopics[idx].id, sortedTopics[oth].id);
+      for (let low = 0; low < sortedTopics.length; low++) {
+        for (let high = low + 1; high < sortedTopics.length; high++) {
+          const currentMap = relations.get(sortedTopics[low].id);
+          const innerMap = currentMap || new Map<number, number>();
+          innerMap.set(
+            sortedTopics[high].id,
+            (innerMap.get(sortedTopics[high].id) || 0) + 1,
+          );
+          if (!currentMap) {
+            relations.set(sortedTopics[low].id, innerMap);
+          }
         }
       }
     }
+
+    const topicSize = new Map<number, number>();
+    for (const outerEntry of relations) {
+      const lowId = outerEntry[0];
+      for (const innerEntry of outerEntry[1]) {
+        const highId = innerEntry[1];
+        topicSize.set(lowId, (topicSize.get(lowId) || 0) + 1);
+        topicSize.set(highId, (topicSize.get(highId) || 0) + 1);
+      }
+    }
+
     return {
       topics: Array.from(topics.entries()).map((entry) => ({
         id: entry[0],
         name: entry[1],
+        count: topicSize.get(entry[0]) || 0,
       })),
-      relations: Array.from(relations.entries()).map((relation) => ({
-        lowId: relation[0],
-        highId: relation[1],
-      })),
+      relations: Array.from(relations.entries()).flatMap((edges) => {
+        return Array.from(edges[1].keys()).map((edge) => {
+          // In event of tie we set the larger ID to be the larger topic.
+          if ((topicSize.get(edges[0]) || 0) < (topicSize.get(edge) || 0)) {
+            return {
+              smallTopicId: edges[0],
+              largeTopicId: edge,
+            };
+          } else {
+            return {
+              smallTopicId: edge,
+              largeTopicId: edges[0],
+            };
+          }
+        });
+      }),
     };
   }
 }

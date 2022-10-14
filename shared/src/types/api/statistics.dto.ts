@@ -19,10 +19,11 @@ export type UserStatisticsRes = {
     topics: {
       id: number;
       name: string;
+      count: number;
     }[];
     relations: {
-      lowId: number;
-      highId: number;
+      smallTopicId: number;
+      largeTopicId: number;
     }[];
   };
 };
