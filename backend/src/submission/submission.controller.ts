@@ -12,16 +12,18 @@ import { SubmissionService } from "./submission.service";
 
 import { GetSubmissionsRes, Submission } from "~shared/types/api";
 
-@Controller("submissions")
+@Controller("room/:roomId(\\w+)/submissions")
 export class SubmissionController {
   constructor(private submissionService: SubmissionService) {}
 
   @UseGuards(SessionGuard)
-  @Get(":roomId(\\w+)")
-  async getQuestion(
+  @Get()
+  async getSubmissions(
     @Param("roomId") roomId: string,
   ): Promise<GetSubmissionsRes | null> {
-    const submissions = await this.submissionService.getSubmissionsById(roomId);
+    const submissions = await this.submissionService.getSubmissionsByRoomId(
+      roomId,
+    );
     if (submissions == null) {
       throw new NotFoundException("Submissions not found.");
     }

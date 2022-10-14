@@ -6,9 +6,9 @@ import { PrismaService } from "src/core/prisma.service";
 export class SubmissionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getSubmissionsById(id: string) {
+  async getSubmissionsByRoomId(roomId: string) {
     const roomSession = await this.prisma.roomSession.findUnique({
-      where: { id: id },
+      where: { id: roomId },
       include: {
         submissions: true,
       },

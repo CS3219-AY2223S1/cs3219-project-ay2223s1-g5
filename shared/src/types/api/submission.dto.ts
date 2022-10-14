@@ -1,7 +1,3 @@
-export type GetSubmissionsReq = {
-  roomId: string;
-};
-
 export type Submission = {
   submitTime: string;
   timeTaken: string;
