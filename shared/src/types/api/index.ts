@@ -14,6 +14,11 @@ export {
 } from "./room.dto";
 export { UserStatisticsRes } from "./statistics.dto";
 export {
+  GetSubmissionsReq,
+  GetSubmissionsRes,
+  Submission,
+} from "./submission.dto";
+export {
   CreateUserReq,
   GetUserNameRes,
   RequestResetPasswordReq,
