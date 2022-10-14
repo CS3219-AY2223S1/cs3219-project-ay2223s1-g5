@@ -10,6 +10,8 @@ import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
 
+import { GetRoomIdRes } from "../../../shared/src/types/api/room.dto";
+
 import { RoomService } from "./room.service";
 
 @Controller("room")
@@ -18,15 +20,19 @@ export class RoomController {
 
   @UseGuards(SessionGuard)
   @Get()
-  async checkUserHasRoom(
+  async getRoomId(
     @Session() session: Request["session"],
-  ): Promise<boolean> {
+  ): Promise<GetRoomIdRes | null> {
     const userId = session.passport?.user.userId;
     if (!userId) {
       throw new NotFoundException("User not found.");
     }
     const room = await this.roomService.getRoom(userId);
-    return !!room;
+    if (!room) {
+      return null;
+    }
+    const roomIdRes = { roomId: room };
+    return roomIdRes;
   }
 
   @UseGuards(SessionGuard)

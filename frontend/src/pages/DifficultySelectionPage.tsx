@@ -11,11 +11,7 @@ import {
 } from "@mui/material";
 
 import { useAuth } from "src/contexts/AuthContext";
-import {
-  useCheckUserHasRoom,
-  useJoinRoom,
-  useLeaveRoom,
-} from "src/hooks/useRoom";
+import { useGetRoomId, useLeaveRoom } from "src/hooks/useRoom";
 
 import { Center } from "../components/Center";
 import { StyledButton } from "../components/StyledButton";
@@ -58,11 +54,11 @@ export const DifficultySelectionPage = () => {
   const { user } = useAuth();
   const userId = user ? user.userId : 0;
 
-  const userHasExistingRoom: boolean =
-    useCheckUserHasRoom(userId).isUseCheckUserHasRoomLoading.valueOf();
+  const { getRoomId } = useGetRoomId();
+  const roomId = getRoomId();
+  const userHasExistingRoom = !!roomId;
 
-  const { useJoinRoomMutation } = useJoinRoom(userId);
-  const { useLeaveRoomMutation } = useLeaveRoom(userId);
+  const { useLeaveRoomMutation } = useLeaveRoom();
 
   if (userHasExistingRoom) {
     return (
@@ -77,16 +73,11 @@ export const DifficultySelectionPage = () => {
           <Stack spacing={3}>
             <StyledButton
               label="Rejoin Room"
-              // TODO
-              // onClick={() => useJoinRoomMutation({ userId })}
+              onClick={() => navigate(`/room/${roomId}`)}
             />
             <StyledButton
               label="Leave Room"
-              // onClick={() =>
-              //   navigate(
-              //     `/room/${userId}/leave`,
-              //   )
-              // }
+              onClick={() => useLeaveRoomMutation}
             />
           </Stack>
         </Stack>
