@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { differenceInSeconds, subYears } from "date-fns";
+import { differenceInSeconds, subDays, subYears } from "date-fns";
 
 import { PrismaService } from "src/core/prisma.service";
 
@@ -59,7 +59,7 @@ export class StatisticsService {
         users: { some: { id: userId } },
         endTime: { not: null },
         startTime: {
-          gte: subYears(new Date(), 1),
+          gte: subDays(new Date(), 30),
         },
       },
       include: {
