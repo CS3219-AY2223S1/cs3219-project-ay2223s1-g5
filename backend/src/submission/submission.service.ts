@@ -7,7 +7,7 @@ import { PrismaService } from "src/core/prisma.service";
 export class SubmissionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getSubmissionsByRoomId(roomId: string, userId: number) {
+  async getSessionByRoomId(roomId: string, userId: number) {
     const roomSession = await this.prisma.roomSession.findFirst({
       where: { id: roomId, users: { some: { id: userId } } },
       include: {
@@ -19,6 +19,6 @@ export class SubmissionService {
       throw new EntityNotFoundError("Room session not found.");
     }
 
-    return roomSession.submissions;
+    return roomSession;
   }
 }

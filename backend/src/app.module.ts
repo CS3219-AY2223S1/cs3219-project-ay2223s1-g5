@@ -20,6 +20,7 @@ import { QueueModule } from "src/queue/queue.module";
 import { RedisServiceModule } from "src/redis/redis.service.module";
 import { RoomModule } from "src/room/room.module";
 import { StatisticsModule } from "src/statistics/statistics.module";
+import { SubmissionModule } from "src/submission/submission.module";
 import { UserModule } from "src/user/user.module";
 
 const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
@@ -61,6 +62,7 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     QuestionModule,
     JudgeModule,
     StatisticsModule,
+    SubmissionModule,
     // For custom WebSocket adapter
     SessionMiddlewareModule,
   ],

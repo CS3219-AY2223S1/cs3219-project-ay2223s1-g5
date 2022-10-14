@@ -1,6 +1,7 @@
 export type Submission = {
-  submitTime: string;
-  timeTaken: string;
+  submitTime: Date | string;
+  timeTaken: number;
+  inputs: string[];
   expectedOutput: string;
   output: string;
   result: string;
