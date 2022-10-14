@@ -2,10 +2,14 @@ import { Injectable } from "@nestjs/common";
 
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
 import { PrismaService } from "src/core/prisma.service";
+import { QuestionService } from "src/question/question.service";
 
 @Injectable()
 export class SubmissionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly questionService: QuestionService,
+  ) {}
 
   async getSessionByRoomId(roomId: string, userId: number) {
     const roomSession = await this.prisma.roomSession.findFirst({
@@ -20,5 +24,9 @@ export class SubmissionService {
     }
 
     return roomSession;
+  }
+
+  async getTestCaseByQuestionId(questionId: number) {
+    return await this.questionService.getTestcase(questionId);
   }
 }

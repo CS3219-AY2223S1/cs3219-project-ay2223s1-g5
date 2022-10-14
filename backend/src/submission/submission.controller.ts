@@ -2,18 +2,14 @@ import { Controller, Get, Param, Session, UseGuards } from "@nestjs/common";
 import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
-import { QuestionService } from "src/question/question.service";
 
 import { SubmissionService } from "./submission.service";
 
-import { GetSubmissionsRes, Submission } from "~shared/types/api";
+import { GetSubmissionsRes } from "~shared/types/api";
 
 @Controller("room/:roomId(\\w+)/submissions")
 export class SubmissionController {
-  constructor(
-    private submissionService: SubmissionService,
-    private questionService: QuestionService,
-  ) {}
+  constructor(private submissionService: SubmissionService) {}
 
   @UseGuards(SessionGuard)
   @Get()
@@ -28,7 +24,7 @@ export class SubmissionController {
     );
 
     const submissions = roomSession.submissions;
-    const testCase = await this.questionService.getTestcase(
+    const testCase = await this.submissionService.getTestCaseByQuestionId(
       roomSession.questionId,
     );
 
@@ -36,14 +32,14 @@ export class SubmissionController {
       submissions: submissions.map((submission) => {
         return {
           submitTime: submission.createdAt,
-          timeTaken: submission.runTime,
-          inputs: testCase?.inputs,
-          expectedOutput: testCase?.output,
-          output: submission.output,
+          timeTaken: submission.runTime || NaN,
+          inputs: testCase?.inputs || [],
+          expectedOutput: testCase?.output || "",
+          output: submission.output || "",
           result: submission.status,
-        } as Submission;
+        };
       }),
-    } as GetSubmissionsRes;
+    };
 
     return submissionsReturnType;
   }
