@@ -13,6 +13,7 @@ export {
   SubmitPayload,
 } from "./room.dto";
 export { UserStatisticsRes } from "./statistics.dto";
+export { GetSubmissionsRes, Submission } from "./submission.dto";
 export {
   CreateUserReq,
   GetUserNameRes,
