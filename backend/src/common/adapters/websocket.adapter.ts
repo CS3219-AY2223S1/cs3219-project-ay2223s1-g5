@@ -66,7 +66,13 @@ export function serverMiddlewareSetup(
 }
 
 export class SocketSessionAdapter extends IoAdapter {
-  constructor(private readonly context: INestApplication) {
+  constructor(
+    private readonly context: INestApplication,
+    private readonly middlewareFactory: (
+      config: ConfigService,
+      redis: RedisService,
+    ) => NestMiddleware,
+  ) {
     super(context);
   }
 
@@ -81,7 +87,7 @@ export class SocketSessionAdapter extends IoAdapter {
   ): Server {
     const server = super.create(port, options) as Server;
 
-    const middleware = new SessionMiddleware(
+    const middleware = this.middlewareFactory(
       this.context.get(ConfigService),
       this.context.get(RedisService),
     );

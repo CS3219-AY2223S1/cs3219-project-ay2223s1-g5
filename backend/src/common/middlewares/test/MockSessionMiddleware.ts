@@ -6,12 +6,13 @@ import { Session } from "express-session";
 export class MockSessionMiddleware implements NestMiddleware {
   private middleware: RequestHandler;
 
-  constructor(userId?: number) {
+  constructor() {
     this.middleware = (request, _, next) => {
-      if (request.headers["authorization"]) {
+      if (request.headers["authorization"] && request.headers["user"]) {
         request.isAuthenticated = () => true;
+        const userId = Number(request.headers["user"]);
         request.session = {
-          passport: { user: { userId: userId || 1 } },
+          passport: { user: { userId: userId } },
         } as unknown as Session;
         next();
         return;

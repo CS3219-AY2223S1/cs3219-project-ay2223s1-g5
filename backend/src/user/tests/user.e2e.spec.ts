@@ -45,7 +45,7 @@ describe("User", () => {
 
     app = module.createNestApplication();
     // Mock session data.
-    const mockSessionMiddleware = new MockSessionMiddleware(1);
+    const mockSessionMiddleware = new MockSessionMiddleware();
     app.use(mockSessionMiddleware.use.bind(mockSessionMiddleware));
     await app.init();
   });
@@ -112,6 +112,7 @@ describe("User", () => {
       const actual = await request(app.getHttpServer())
         .get("/users/1")
         .set("Authorization", "true")
+        .set("user", "1")
         .expect(200);
 
       expect(actual.body).toMatchObject(expected);
@@ -125,6 +126,7 @@ describe("User", () => {
       await request(app.getHttpServer())
         .get("/users/50")
         .set("Authorization", "true")
+        .set("user", "1")
         .expect(404);
     });
   });

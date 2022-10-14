@@ -5,6 +5,7 @@ import { Logger } from "nestjs-pino";
 import { SocketSessionAdapter } from "src/common/adapters/websocket.adapter";
 import { ConfigService } from "src/core/config/config.service";
 
+import { SessionMiddleware } from "./common/middlewares/SessionMiddleware";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
@@ -14,7 +15,12 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
   app.setGlobalPrefix("/api");
-  app.useWebSocketAdapter(new SocketSessionAdapter(app));
+  app.useWebSocketAdapter(
+    new SocketSessionAdapter(
+      app,
+      (config, redis) => new SessionMiddleware(config, redis),
+    ),
+  );
   app.set("trust proxy", true);
 
   const configService = app.get(ConfigService);
