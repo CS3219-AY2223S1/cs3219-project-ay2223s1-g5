@@ -1,10 +1,5 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Param, Session, UseGuards } from "@nestjs/common";
+import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
 
@@ -19,14 +14,14 @@ export class SubmissionController {
   @UseGuards(SessionGuard)
   @Get()
   async getSubmissions(
+    @Session() session: Request["session"],
     @Param("roomId") roomId: string,
   ): Promise<GetSubmissionsRes | null> {
+    const userId = Number(session.passport?.user.userId);
     const submissions = await this.submissionService.getSubmissionsByRoomId(
       roomId,
+      userId,
     );
-    if (submissions == null) {
-      throw new NotFoundException("Submissions not found.");
-    }
 
     const submissionsReturnType = {
       submissions: submissions.map((submission) => {

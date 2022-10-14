@@ -1,19 +1,24 @@
 import { Injectable } from "@nestjs/common";
 
+import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
 import { PrismaService } from "src/core/prisma.service";
 
 @Injectable()
 export class SubmissionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getSubmissionsByRoomId(roomId: string) {
-    const roomSession = await this.prisma.roomSession.findUnique({
-      where: { id: roomId },
+  async getSubmissionsByRoomId(roomId: string, userId: number) {
+    const roomSession = await this.prisma.roomSession.findFirst({
+      where: { id: roomId, users: { some: { id: userId } } },
       include: {
         submissions: true,
       },
     });
 
-    return roomSession?.submissions;
+    if (!roomSession) {
+      throw new EntityNotFoundError("Room session not found.");
+    }
+
+    return roomSession.submissions;
   }
 }
