@@ -1,12 +1,12 @@
 import {
   Controller,
+  Delete,
   Get,
   NotFoundException,
-  Param,
-  ParseIntPipe,
-  Post,
+  Session,
   UseGuards,
 } from "@nestjs/common";
+import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
 
@@ -17,33 +17,29 @@ export class RoomController {
   constructor(private roomService: RoomService) {}
 
   @UseGuards(SessionGuard)
-  @Get(":userId(\\d+)")
+  @Get()
   async checkUserHasRoom(
-    @Param("userId", ParseIntPipe) userId: number,
+    @Session() session: Request["session"],
   ): Promise<boolean> {
+    const userId = session.passport?.user.userId;
+    if (!userId) {
+      throw new NotFoundException("User not found.");
+    }
     const room = await this.roomService.getRoom(userId);
     return !!room;
   }
 
   @UseGuards(SessionGuard)
-  @Post(":userId(\\d+)/leave")
-  async leaveRoom(
-    @Param("userId", ParseIntPipe) userId: number,
-  ): Promise<void> {
+  @Delete("/leave")
+  async leaveRoom(@Session() session: Request["session"]): Promise<void> {
+    const userId = session.passport?.user.userId;
+    if (!userId) {
+      throw new NotFoundException("User not found.");
+    }
     const room = await this.roomService.getRoom(userId);
     if (!room) {
       throw new NotFoundException("Room not found.");
     }
     await this.roomService.leaveRoom(userId, room);
-  }
-
-  @UseGuards(SessionGuard)
-  @Post(":userId(\\d+)/join")
-  async joinRoom(@Param("userId", ParseIntPipe) userId: number): Promise<void> {
-    const room = await this.roomService.getRoom(userId);
-    if (!room) {
-      throw new NotFoundException("Room not found.");
-    }
-    await this.roomService.joinRoom(userId, room);
   }
 }
