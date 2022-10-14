@@ -21,7 +21,7 @@ export type UserStatisticsRes = {
       name: string;
       count: number;
     }[];
-    relations: {
+    links: {
       smallTopicId: number;
       largeTopicId: number;
     }[];

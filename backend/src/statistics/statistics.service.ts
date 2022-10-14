@@ -141,7 +141,7 @@ export class StatisticsService {
 
     const existing = new Set<number>();
     const topics = new Map<number, string>();
-    const relations = new Map<number, Map<number, number>>();
+    const links = new Map<number, Map<number, number>>();
     for (const session of data) {
       // We only want to count unique questions.
       if (existing.has(session.questionId)) {
@@ -157,21 +157,21 @@ export class StatisticsService {
 
       for (let low = 0; low < sortedTopics.length; low++) {
         for (let high = low + 1; high < sortedTopics.length; high++) {
-          const currentMap = relations.get(sortedTopics[low].id);
+          const currentMap = links.get(sortedTopics[low].id);
           const innerMap = currentMap || new Map<number, number>();
           innerMap.set(
             sortedTopics[high].id,
             (innerMap.get(sortedTopics[high].id) || 0) + 1,
           );
           if (!currentMap) {
-            relations.set(sortedTopics[low].id, innerMap);
+            links.set(sortedTopics[low].id, innerMap);
           }
         }
       }
     }
 
     const topicSize = new Map<number, number>();
-    for (const outerEntry of relations) {
+    for (const outerEntry of links) {
       const lowId = outerEntry[0];
       for (const innerEntry of outerEntry[1]) {
         const highId = innerEntry[1];
@@ -186,7 +186,7 @@ export class StatisticsService {
         name: entry[1],
         count: topicSize.get(entry[0]) || 0,
       })),
-      relations: Array.from(relations.entries()).flatMap((edges) => {
+      links: Array.from(links.entries()).flatMap((edges) => {
         return Array.from(edges[1].keys()).map((edge) => {
           // In event of tie we set the larger ID to be the larger topic.
           if ((topicSize.get(edges[0]) || 0) < (topicSize.get(edge) || 0)) {
