@@ -1,3 +1,4 @@
+import { UseFilters } from "@nestjs/common";
 import { OnGatewayInit, WebSocketGateway } from "@nestjs/websockets";
 import { Request } from "express";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
@@ -6,11 +7,13 @@ import { YSocketIO } from "y-socket.io/dist/server";
 import { Document } from "y-socket.io/dist/server/index";
 
 import { serverMiddlewareSetup } from "src/common/adapters/websocket.adapter";
+import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
 import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
 
 import { EditorService } from "./editor.service";
 
 // We do not need to specify a namespace since y-socket.io does it for us.
+@UseFilters(WsExceptionFilter)
 @WebSocketGateway()
 export class EditorGateway implements OnGatewayInit {
   ySocketIo: YSocketIO;

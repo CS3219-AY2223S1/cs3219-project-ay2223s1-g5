@@ -1,13 +1,13 @@
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { MailOutline } from "@mui/icons-material";
 import { Stack } from "@mui/material";
-import { validate } from "email-validator";
 import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
 import { useRequestVerificationEmail } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
+import isEmail from "validator/es/lib/isEmail";
 
 import { TextButton } from "../TextButton";
 
@@ -60,7 +60,7 @@ export const RequestVerificationEmailForm = (
           rules={{
             required: "Email is required.",
             validate: (value: string) =>
-              validate(value) || "Please enter a valid email",
+              isEmail(value) || "Please enter a valid email",
           }}
           render={({
             field: { value, onBlur, onChange: formOnChange },

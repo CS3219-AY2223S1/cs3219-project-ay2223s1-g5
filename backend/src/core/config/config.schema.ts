@@ -31,7 +31,7 @@ addFormats({
   "required-string": {
     validate: (value?: string): void => {
       if (value == undefined || value === "") {
-        throw new Error("Required value cannot be empty");
+        throw new Error("Required value cannot be empty.");
       }
     },
   },

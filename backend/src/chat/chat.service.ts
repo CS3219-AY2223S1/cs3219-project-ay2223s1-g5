@@ -1,6 +1,8 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { ForbiddenError } from "src/common/errors/forbidden.error";
+import { InternalServerError } from "src/common/errors/internal-server.error";
 import { RedisService } from "src/redis/redis.service";
 import {
   RoomAuthorizationService,
@@ -41,31 +43,40 @@ export class ChatService {
   async createChatRoom(roomId: string) {
     const chatRoomSid = await this.twilioService.createChatRoom(roomId);
     this.logger.info(`Creating chat room [${roomId}]: ${chatRoomSid}`);
-    await this.saveChatRoomSid(roomId, chatRoomSid);
-    await this.twilioService.sendSystemMessage(
-      chatRoomSid,
-      SYSTEM_WELCOME_MESSAGE,
-    );
+    this.twilioService
+      .sendSystemMessage(chatRoomSid, SYSTEM_WELCOME_MESSAGE)
+      .catch((error) => {
+        this.logger.warn(error);
+      });
+    return this.saveChatRoomSid(roomId, chatRoomSid);
   }
 
   async joinChatRoom(roomId: string, userId: number) {
-    const chatRoomSid = await this.getChatRoomSid(roomId);
-    const identity = await this.getIdentity(userId);
     if (!(await this.roomService.isAuthorized(roomId, userId))) {
-      // TODO: Provide better handling for WebSocket errors
-      throw new Error();
+      throw new ForbiddenError("Incorrect room ID.");
     }
-    if (await this.getParticipantSid(identity)) {
-      const participantSid = await this.getParticipantSid(identity);
-      this.logger.warn(
-        `User already a participant: ${userId} (${participantSid})`,
-      );
-      throw new Error();
-    }
-    if (!chatRoomSid) {
-      this.logger.warn(`Unable to retrieve chat room SID: ${roomId}`);
-      throw new Error();
-    }
+    const identityPromise = this.getIdentity(userId).then(async (identity) => {
+      const result = await this.getParticipantSid(identity);
+      if (result) {
+        this.logger.error(`User already a participant: ${userId} (${result})`);
+        throw new InternalServerError();
+      }
+      return identity;
+    });
+
+    const chatRoomSidPromise = this.getChatRoomSid(roomId).then(
+      (chatRoomSid) => {
+        if (!chatRoomSid) {
+          this.logger.error(`Unable to retrieve chat room SID: ${roomId}`);
+          throw new InternalServerError();
+        }
+        return chatRoomSid;
+      },
+    );
+
+    const identity = await identityPromise;
+    const chatRoomSid = await chatRoomSidPromise;
+
     const participantSid = await this.twilioService.joinChatRoom(
       chatRoomSid,
       identity,
@@ -77,29 +88,32 @@ export class ChatService {
   }
 
   async leaveChatRoom(roomId: string, userId: number) {
-    const chatRoomSid = await this.getChatRoomSid(roomId);
     const identity = await this.getIdentity(userId);
-    const participantSid = await this.getParticipantSid(identity);
-    if (!participantSid) {
-      this.logger.warn(`Unable to retrieve participant SID: ${userId}`);
-      throw new Error();
+    try {
+      const chatRoomSid = await this.getChatRoomSid(roomId);
+      if (!chatRoomSid) {
+        this.logger.error(`Unable to retrieve chat room SID: ${roomId}`);
+        throw new InternalServerError();
+      }
+      const participantSid = await this.getParticipantSid(identity);
+      if (!participantSid) {
+        this.logger.error(`Unable to retrieve participant SID: ${userId}`);
+        throw new InternalServerError();
+      }
+      this.logger.info(
+        `Leaving chat room [${chatRoomSid}]: ${userId} (${participantSid})`,
+      );
+      await this.twilioService.leaveChatRoom(chatRoomSid, participantSid);
+    } finally {
+      await this.deleteParticipantSid(identity);
     }
-    if (!chatRoomSid) {
-      this.logger.warn(`Unable to retrieve chat room SID: ${roomId}`);
-      throw new Error();
-    }
-    this.logger.info(
-      `Leaving chat room [${chatRoomSid}]: ${userId} (${participantSid})`,
-    );
-    await this.twilioService.leaveChatRoom(chatRoomSid, participantSid);
-    await this.deleteParticipantSid(identity);
   }
 
   async closeChatRoom(roomId: string) {
     const chatRoomSid = await this.getChatRoomSid(roomId);
     if (!chatRoomSid) {
-      this.logger.warn(`Unable to retrieve chat room SID: ${roomId}`);
-      throw new Error();
+      this.logger.error(`Unable to retrieve chat room SID: ${roomId}`);
+      throw new InternalServerError();
     }
     this.logger.info(`Closing chat room [${roomId}]: ${chatRoomSid}`);
     await this.twilioService.closeChatRoom(chatRoomSid);
@@ -109,8 +123,8 @@ export class ChatService {
   private async getIdentity(userId: number): Promise<string> {
     const user = await this.userService.getById(userId);
     if (!user) {
-      this.logger.warn(`Unable to retrieve user: ${userId}`);
-      throw new Error();
+      this.logger.error(`Unable to retrieve user: ${userId}`);
+      throw new InternalServerError();
     }
     return user.email;
   }

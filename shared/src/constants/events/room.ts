@@ -6,5 +6,9 @@ export const ROOM_EVENTS = {
   JOIN: "join",
   PARTNER_LEAVE: "partnerLeave",
   PARTNER_DISCONNECT: "partnerDisconnect",
+  SUBMIT: "submit",
+  SUBMISSION_ACCEPTED: "accepted",
+  SUBMISSION_REJECTED: "reject",
+  SUBMISSION_UPDATED: "submission_update",
   ...BASE_EVENTS,
 };

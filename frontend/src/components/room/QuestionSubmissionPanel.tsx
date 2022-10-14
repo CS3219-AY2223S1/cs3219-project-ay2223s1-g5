@@ -3,10 +3,14 @@ import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Paper, Stack, Tab } from "@mui/material";
 
-import { Question } from "./Question";
+import { Question, QuestionPanelProps } from "./Question";
 import { Submissions } from "./Submissions";
 
-export const QuestionSubmissionPanel = () => {
+type QuestionSubmissionPanelProps = QuestionPanelProps;
+
+export const QuestionSubmissionPanel = (
+  props: QuestionSubmissionPanelProps,
+) => {
   const [selectedPanel, setSelectedPanel] = useState<
     "description" | "submissions"
   >("description");
@@ -61,7 +65,7 @@ export const QuestionSubmissionPanel = () => {
             }}
             value="description"
           >
-            <Question />
+            <Question {...props} />
           </TabPanel>
           <TabPanel
             sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}

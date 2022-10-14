@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Divider, Stack } from "@mui/material";
+import { Box, CircularProgress, Divider, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
@@ -8,7 +8,7 @@ import { Chat } from "src/components/room/chat/Chat";
 import { Editor } from "src/components/room/Editor";
 import { QuestionSubmissionPanel } from "src/components/room/QuestionSubmissionPanel";
 import { RoomStatusBar } from "src/components/room/RoomStatusBar";
-import { StyledButton } from "src/components/StyledButton";
+import { SubmitButton } from "src/components/room/SubmitButton";
 import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
 import { useAuth } from "src/contexts/AuthContext";
 import { ChatProvider } from "src/contexts/ChatContext";
@@ -21,7 +21,9 @@ import {
   JoinedPayload,
   PartnerDisconnectPayload,
   PartnerLeavePayload,
+  SubmissionRejectedPayload,
 } from "~shared/types/api";
+import { SubmissionUpdatedPayload } from "~shared/types/api/room.dto";
 import { Language } from "~shared/types/base";
 
 type Participant = {
@@ -37,6 +39,8 @@ export const RoomPage = () => {
   const [roomSocket, setRoomSocket] = useState<Socket | undefined>(undefined);
   const { enqueueSnackbar } = useSnackbar();
   const [language, setLanguage] = useState<Language | undefined>(undefined);
+  const [questionId, setQuestionId] = useState<number | undefined>(undefined);
+  const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
   const [self, setSelf] = useState<Participant>({
     // We know that if the page renders, user is not null.
     userId: user?.userId || NaN,
@@ -58,6 +62,7 @@ export const RoomPage = () => {
     roomSocket.off(ROOM_EVENTS.PARTNER_LEAVE);
     roomSocket.off(ROOM_EVENTS.JOINED);
     roomSocket.emit(ROOM_EVENTS.LEAVE, { roomId });
+    // Room socket will be disconnected by server side.
   }, [roomSocket, roomId]);
 
   useEffect(() => {
@@ -163,8 +168,13 @@ export const RoomPage = () => {
 
     roomSocket.on(
       ROOM_EVENTS.JOINED,
-      ({ userId, metadata: { members, language } }: JoinedPayload) => {
+      ({
+        userId,
+        metadata: { members, language, questionId },
+      }: JoinedPayload) => {
         setLanguage(language);
+        setQuestionId(questionId);
+
         if (userId === user?.userId) {
           setSelf((self) => ({ ...self, isConnected: true }));
           enqueueSnackbar(`You are connected.`, {
@@ -207,6 +217,29 @@ export const RoomPage = () => {
       },
     );
 
+    roomSocket.on(
+      ROOM_EVENTS.SUBMISSION_REJECTED,
+      ({ reason }: SubmissionRejectedPayload) => {
+        enqueueSnackbar(`${reason}`, {
+          variant: "error",
+        });
+        setIsSubmitLoading(false);
+      },
+    );
+
+    roomSocket.on(ROOM_EVENTS.SUBMISSION_ACCEPTED, () => {
+      enqueueSnackbar("Processing submission");
+      setIsSubmitLoading(true);
+    });
+
+    roomSocket.on(
+      ROOM_EVENTS.SUBMISSION_UPDATED,
+      (_payload: SubmissionUpdatedPayload) => {
+        enqueueSnackbar("Submission updated");
+        setIsSubmitLoading(false);
+      },
+    );
+
     return () => {
       roomSocket.off(ROOM_EVENTS.CONNECT);
       roomSocket.off(ROOM_EVENTS.JOINED);
@@ -244,6 +277,21 @@ export const RoomPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfos]);
 
+  const onSubmit = useCallback(
+    (code: string) => {
+      if (!roomSocket || !questionId || !language) {
+        return;
+      }
+      roomSocket.emit(ROOM_EVENTS.SUBMIT, {
+        code: code,
+        questionId,
+        language,
+      });
+      setIsSubmitLoading(true);
+    },
+    [language, questionId, roomSocket],
+  );
+
   return (
     <EditorProvider roomId={roomId || ""}>
       <ChatProvider roomId={roomId || ""}>
@@ -269,7 +317,7 @@ export const RoomPage = () => {
           >
             <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
               <Box sx={{ height: "60%" }}>
-                <QuestionSubmissionPanel />
+                <QuestionSubmissionPanel questionId={questionId} />
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Chat />
@@ -284,10 +332,11 @@ export const RoomPage = () => {
             justifyContent="flex-end"
             sx={{ pb: 2, px: 3 }}
           >
-            <StyledButton
-              label={"Submit Code"}
-              sx={{ "&:hover": { boxShadow: "1" } }}
-            />
+            {language && roomSocket && questionId ? (
+              <SubmitButton onSubmit={onSubmit} isLoading={isSubmitLoading} />
+            ) : (
+              <CircularProgress />
+            )}
           </Stack>
         </Stack>
       </ChatProvider>

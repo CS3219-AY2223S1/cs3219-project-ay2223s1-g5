@@ -47,7 +47,7 @@ export class UserController {
   async createUser(@Body() data: CreateUserReq): Promise<void> {
     const user = await this.userService.create(data);
     if (!user) {
-      throw new ConflictException();
+      throw new ConflictException("A user with the same email already exists.");
     }
     // We should not receive any exceptions from this call since the
     // user should not be verified on creation, and the user should exist.
@@ -63,7 +63,7 @@ export class UserController {
     @Body() data: UpdateUserReq,
   ): Promise<void> {
     if (session.passport?.user.userId != userId) {
-      throw new ForbiddenException();
+      throw new ForbiddenException("Failed to update user details.");
     }
     await this.userService.updateUserDetails(userId, data);
   }
@@ -89,7 +89,7 @@ export class UserController {
     @Body() data: UpdatePasswordReq,
   ): Promise<void> {
     if (session.passport?.user.userId != userId) {
-      throw new ForbiddenException();
+      throw new ForbiddenException("Failed to update password.");
     }
     const { oldPassword, newPassword } = data;
     await this.userService.updateUserPassword(userId, oldPassword, newPassword);
