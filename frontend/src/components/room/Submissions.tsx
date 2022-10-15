@@ -9,15 +9,21 @@ import {
   TableRow,
 } from "@mui/material";
 
-import { Center } from "../Center";
+import { useGetSubmissions } from "src/hooks/useSubmissions";
 
-import { Status } from "~shared/types/base";
+import { Center } from "../Center";
 
 /* Tabular Data */
 const tableHeaders = ["DATE", "RUNTIME", "TEST CASE", "STATUS"];
-const tableCells = ["2020-04-26 00:26:55", "0.13s", "[2,7,11,15], 9", "Pass"];
 
-export const Submissions = () => {
+export type SubmissionsPanelProps = {
+  roomId?: string;
+  signal?: boolean;
+};
+
+export const Submissions = (props: SubmissionsPanelProps) => {
+  const submissions = useGetSubmissions(props.roomId).submissions || [];
+
   return (
     <TableContainer sx={{ flex: 1 }} component={Paper}>
       <Table sx={{ minWidth: "100%" }}>
@@ -38,36 +44,46 @@ export const Submissions = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow>
-            {tableCells.map((tableCell) => (
-              <TableCell
-                key={tableCell}
-                align="center"
-                sx={{
-                  color:
-                    Object.values<string>(Status).includes(tableCell) &&
-                    tableCell === "Pass"
-                      ? "green.500"
-                      : Object.values<string>(Status).includes(tableCell)
-                      ? "red.500"
-                      : "black",
-                  fontWeight: Object.values<string>(Status).includes(tableCell)
-                    ? "bold"
-                    : "normal",
-                }}
-              >
-                <Center>
-                  {Object.values<string>(Status).includes(tableCell) &&
-                  tableCell === "Pass" ? (
-                    <CheckCircle sx={{ mr: 0.5 }} />
-                  ) : Object.values<string>(Status).includes(tableCell) ? (
-                    <Cancel sx={{ mr: 0.5 }} />
-                  ) : null}
-                  {tableCell}
-                </Center>
-              </TableCell>
-            ))}
-          </TableRow>
+          {submissions.map((submission, idx) => {
+            return (
+              <TableRow key={idx}>
+                <TableCell
+                  key={submission.submitTime.toString()}
+                  align="center"
+                >
+                  <Center>
+                    {submission.submitTime.toLocaleString("en-US")}
+                  </Center>
+                </TableCell>
+                <TableCell key={submission.timeTaken} align="center">
+                  <Center>{submission.timeTaken}</Center>
+                </TableCell>
+                <TableCell key={submission.output} align="center">
+                  <Center>
+                    {submission.inputs}, {submission.expectedOutput}
+                  </Center>
+                </TableCell>
+                <TableCell
+                  key={submission.result}
+                  align="center"
+                  sx={{
+                    color:
+                      submission.result === "Pass" ? "green.500" : "red.500",
+                    fontWeight: "bold",
+                  }}
+                >
+                  <Center>
+                    {submission.result === "Pass" ? (
+                      <CheckCircle sx={{ mr: 0.5 }} />
+                    ) : (
+                      <Cancel sx={{ mr: 0.5 }} />
+                    )}
+                    {submission.result}
+                  </Center>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>

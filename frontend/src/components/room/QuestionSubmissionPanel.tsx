@@ -3,10 +3,14 @@ import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Paper, Stack, Tab } from "@mui/material";
 
-import { Question, QuestionPanelProps } from "./Question";
+import { Question } from "./Question";
 import { Submissions } from "./Submissions";
 
-type QuestionSubmissionPanelProps = QuestionPanelProps;
+type QuestionSubmissionPanelProps = {
+  questionId?: number;
+  roomId?: string;
+  updateSubmissions?: boolean;
+};
 
 export const QuestionSubmissionPanel = (
   props: QuestionSubmissionPanelProps,
@@ -65,13 +69,16 @@ export const QuestionSubmissionPanel = (
             }}
             value="description"
           >
-            <Question {...props} />
+            <Question questionId={props.questionId} />
           </TabPanel>
           <TabPanel
             sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}
             value="submissions"
           >
-            <Submissions />
+            <Submissions
+              roomId={props.roomId}
+              signal={props.updateSubmissions}
+            />
           </TabPanel>
         </TabContext>
       </Stack>
