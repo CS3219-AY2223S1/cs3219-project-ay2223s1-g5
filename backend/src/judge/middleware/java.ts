@@ -62,6 +62,13 @@ export class JavaMiddleware extends JudgeMiddleware {
       const output = this.output.replace(/^\[/, "{").replace(/\]$/, "}");
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${output};`;
       isEqual = `boolean isEqual = Arrays.equals(res, expectedOutput);`;
+    } else if (codePrototype.returnType == "int") {
+      expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
+      isEqual =
+        "boolean isEqual = Integer.toString(res).equals(Integer.toString(expectedOutput));";
+    } else if (codePrototype.returnType == "boolean") {
+      expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
+      isEqual = "boolean isEqual = res == expectedOutput;";
     } else {
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
       isEqual =

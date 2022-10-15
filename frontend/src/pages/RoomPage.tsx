@@ -41,6 +41,7 @@ export const RoomPage = () => {
   const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [questionId, setQuestionId] = useState<number | undefined>(undefined);
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
+  const [updateSubmissions, setUpdateSubmissions] = useState<boolean>(false);
   const [self, setSelf] = useState<Participant>({
     // We know that if the page renders, user is not null.
     userId: user?.userId || NaN,
@@ -236,6 +237,7 @@ export const RoomPage = () => {
       ROOM_EVENTS.SUBMISSION_UPDATED,
       (_payload: SubmissionUpdatedPayload) => {
         enqueueSnackbar("Submission updated");
+        setUpdateSubmissions(!updateSubmissions);
         setIsSubmitLoading(false);
       },
     );
@@ -253,6 +255,7 @@ export const RoomPage = () => {
     user?.userId,
     enqueueSnackbar,
     participants,
+    updateSubmissions,
   ]);
 
   useEffect(() => {
@@ -317,7 +320,11 @@ export const RoomPage = () => {
           >
             <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
               <Box sx={{ height: "60%" }}>
-                <QuestionSubmissionPanel questionId={questionId} />
+                <QuestionSubmissionPanel
+                  questionId={questionId}
+                  roomId={roomId}
+                  updateSubmissions={updateSubmissions}
+                />
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Chat />
