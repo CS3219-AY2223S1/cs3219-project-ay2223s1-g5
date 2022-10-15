@@ -3,8 +3,8 @@ import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Paper, Stack, Tab } from "@mui/material";
 
-import { Question, QuestionPanelProps } from "./Question";
-import { Submissions } from "./Submissions";
+import { DataTable } from "src/components/charts/DataTable";
+import { Question, QuestionPanelProps } from "src/components/room/Question";
 
 type QuestionSubmissionPanelProps = QuestionPanelProps;
 
@@ -71,7 +71,12 @@ export const QuestionSubmissionPanel = (
             sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}
             value="submissions"
           >
-            <Submissions />
+            <DataTable
+              headers={["DATE", "RUNTIME", "TEST CASE", "STATUS"]}
+              rows={[
+                ["2020-04-26 00:26:55", "0.13s", "[2,7,11,15], 9", "Pass"],
+              ]}
+            />
           </TabPanel>
         </TabContext>
       </Stack>
