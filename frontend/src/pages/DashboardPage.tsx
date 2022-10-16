@@ -13,10 +13,12 @@ import { ScatterPlot } from "src/components/charts/ScatterPlot";
 import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
 import { VerticalBarChart } from "src/components/charts/VerticalBarChart";
 import { ChartContainer } from "src/components/dashboard/ChartContainer";
+import { Title } from "src/components/Title";
 
 export const DashboardPage = () => {
   return (
-    <Stack spacing={6}>
+    <Stack spacing={3}>
+      <Title title="Dashboard" />
       <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
         <ChartContainer
           title={"Questions Attempted"}
