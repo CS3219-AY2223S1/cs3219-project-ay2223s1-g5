@@ -31,7 +31,7 @@ export const AccountSettingPage = () => {
   };
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={{ height: "100%" }}>
       <Title title="Settings" />
       <Paper elevation={0}>
         <Stack direction="row" spacing={2} sx={{ ml: 2, py: 3 }}>
