@@ -1,11 +1,7 @@
-import {
-  ConflictException,
-  forwardRef,
-  Inject,
-  Injectable,
-} from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { ConflictError } from "src/common/errors/conflict.error";
 import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { InternalServerError } from "src/common/errors/internal-server.error";
 import { RedisService } from "src/redis/redis.service";
@@ -40,8 +36,7 @@ export class ChatService {
     const identity = await this.getIdentity(userId);
     const roomId = await this.roomService.getRoom(userId);
     if (!roomId) {
-      // TODO: Throw conflict exception instead.
-      throw new Error();
+      throw new ConflictError("No room found.");
     }
     this.logger.info(`Generating chat token: ${userId}`);
     return {
