@@ -20,9 +20,8 @@ import {
   Room,
 } from "twilio-video";
 
+import { useAuth } from "src/contexts/AuthContext";
 import { useCreateChatToken } from "src/hooks/useChat";
-
-import { useAuth } from "./AuthContext";
 
 type ChatContextProps = {
   identity: string;

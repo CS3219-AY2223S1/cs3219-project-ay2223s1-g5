@@ -1,8 +1,7 @@
 import { useCallback } from "react";
 
+import { StyledButton } from "src/components/StyledButton";
 import { useEditor } from "src/contexts/EditorContext";
-
-import { StyledButton } from "../StyledButton";
 
 type SubmitButtonProps = {
   onSubmit: (code: string) => void;
