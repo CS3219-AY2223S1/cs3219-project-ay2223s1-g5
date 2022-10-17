@@ -2,33 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import {
   RemoteAudioTrack,
-  RemoteAudioTrackPublication,
   RemoteParticipant,
   RemoteVideoTrack,
-  RemoteVideoTrackPublication,
 } from "twilio-video";
 
 import { Center } from "src/components/Center";
 
-const audioTrackPublicationsToTrack = (
-  trackPublications: Map<string, RemoteAudioTrackPublication>,
-): RemoteAudioTrack | undefined => {
-  return (
-    Array.from(trackPublications.values())
-      .map((trackPublication) => trackPublication.track)
-      .filter((track) => !!track)[0] || undefined
-  );
-};
-
-const videoTrackPublicationsToTrack = (
-  trackPublications: Map<string, RemoteVideoTrackPublication>,
-): RemoteVideoTrack | undefined => {
-  return (
-    Array.from(trackPublications.values())
-      .map((trackPublication) => trackPublication.track)
-      .filter((track) => !!track)[0] || undefined
-  );
-};
+import { trackPublicationToTrack } from "./utils";
 
 export const RemoteVideoChatParticipant = ({
   name,
@@ -81,8 +61,8 @@ export const RemoteVideoChatParticipant = ({
       return;
     }
 
-    setVideoTrack(videoTrackPublicationsToTrack(participant.videoTracks));
-    setAudioTrack(audioTrackPublicationsToTrack(participant.audioTracks));
+    setVideoTrack(trackPublicationToTrack(participant.videoTracks));
+    setAudioTrack(trackPublicationToTrack(participant.audioTracks));
     participant.on("trackSubscribed", (track) => {
       if (track.kind === "video") {
         setVideoTrack(track as RemoteVideoTrack);

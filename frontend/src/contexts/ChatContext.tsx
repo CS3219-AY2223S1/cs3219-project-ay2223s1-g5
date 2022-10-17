@@ -25,11 +25,17 @@ import { useCreateChatToken } from "src/hooks/useChat";
 
 type ChatContextProps = {
   identity: string;
+
+  // Chat
   isConnected: boolean;
   messages: Message[] | undefined;
   send: (content: string, callback: () => void) => Promise<void>;
   typing: () => void;
   isTyping: Set<string>;
+  hasNewMessages: boolean;
+  clearHasNewMessages: () => void;
+
+  // Video
   isVideoChatEnabled: boolean;
   enableVideoChat: () => void;
   selfVideoParticipant: LocalParticipant | undefined;
@@ -47,17 +53,24 @@ export const ChatProvider = ({
   children,
 }: PropsWithChildren & { roomId: string }): JSX.Element => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[] | undefined>(undefined);
-  const [client, setClient] = useState<Client>();
   const { createChatTokenMutation } = useCreateChatToken();
   const [token, setToken] = useState<string>("");
   const [identity, setIdentity] = useState<string>("");
+
+  // Chat
+  const [client, setClient] = useState<Client>();
+  const [messages, setMessages] = useState<Message[] | undefined>(undefined);
   const [isTyping, setIsTyping] = useState<Set<string>>(new Set());
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [activeConversation, setActiveConversation] = useState<
     Conversation | undefined
   >();
+  const [hasNewMessages, setHasNewMessages] = useState<boolean>(false);
+  const clearHasNewMessages = useCallback(() => {
+    setHasNewMessages(false);
+  }, [setHasNewMessages]);
 
+  // Video
   const [isVideoChatEnabled, setIsVideoChatEnabled] = useState<boolean>(false);
   const videoRoom = useRef<Room | null>(null);
   const [selfVideoParticipant, setSelfVideoParticipant] = useState<
@@ -110,6 +123,7 @@ export const ChatProvider = ({
         setMessages((messages) =>
           messages ? [...messages, message] : [message],
         );
+        setHasNewMessages(true);
       });
 
       // Typing indicators.
@@ -148,7 +162,7 @@ export const ChatProvider = ({
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, identity, user, roomId]);
+  }, [token, identity, user, roomId, setHasNewMessages]);
 
   useEffect(() => {
     if (videoRoom.current || !isVideoChatEnabled || !token || !roomId) {
@@ -264,6 +278,8 @@ export const ChatProvider = ({
         typing,
         isTyping,
         identity,
+        hasNewMessages,
+        clearHasNewMessages,
         isVideoChatEnabled,
         enableVideoChat,
         selfVideoParticipant,

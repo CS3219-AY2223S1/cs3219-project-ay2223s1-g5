@@ -1,34 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
-import {
-  AudioTrack,
-  AudioTrackPublication,
-  LocalParticipant,
-  VideoTrack,
-  VideoTrackPublication,
-} from "twilio-video";
+import { AudioTrack, LocalParticipant, VideoTrack } from "twilio-video";
 
 import { Center } from "src/components/Center";
 
-const audioTrackPublicationsToTrack = (
-  trackPublications: Map<string, AudioTrackPublication>,
-): AudioTrack | undefined => {
-  return (
-    Array.from(trackPublications.values())
-      .map((trackPublication) => trackPublication.track)
-      .filter((track) => !!track)[0] || undefined
-  );
-};
-
-const videoTrackPublicationsToTrack = (
-  trackPublications: Map<string, VideoTrackPublication>,
-): VideoTrack | undefined => {
-  return (
-    Array.from(trackPublications.values())
-      .map((trackPublication) => trackPublication.track)
-      .filter((track) => !!track)[0] || undefined
-  );
-};
+import { trackPublicationToTrack } from "./utils";
 
 export const LocalVideoChatParticipant = ({
   name,
@@ -77,8 +53,8 @@ export const LocalVideoChatParticipant = ({
       return;
     }
 
-    setVideoTrack(videoTrackPublicationsToTrack(participant.videoTracks));
-    setAudioTrack(audioTrackPublicationsToTrack(participant.audioTracks));
+    setVideoTrack(trackPublicationToTrack(participant.videoTracks));
+    setAudioTrack(trackPublicationToTrack(participant.audioTracks));
 
     return () => {
       setVideoTrack(undefined);

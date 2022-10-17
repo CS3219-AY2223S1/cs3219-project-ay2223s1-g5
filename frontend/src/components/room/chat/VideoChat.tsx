@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import {
   MicOffOutlined,
   MicOutlined,
@@ -7,13 +7,7 @@ import {
   VolumeOffOutlined,
   VolumeUpOutlined,
 } from "@mui/icons-material";
-import {
-  Button,
-  CircularProgress,
-  Grid,
-  IconButton,
-  Stack,
-} from "@mui/material";
+import { Button, Grid, IconButton, Stack } from "@mui/material";
 
 import { Center } from "src/components/Center";
 import { useChat } from "src/contexts/ChatContext";
