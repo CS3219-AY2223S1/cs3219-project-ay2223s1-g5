@@ -45,18 +45,27 @@ export const AccountSettingPage = () => {
             {nameToInitials(user?.name)}
           </Avatar>
           <Stack spacing={1}>
-            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-              Name
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "blueGrey.10",
-                fontStyle: "italic",
-              }}
-            >
-              Email
-            </Typography>
+            {user ? (
+              <>
+                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                  {user.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "blueGrey.10",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {user.email}
+                </Typography>
+              </>
+            ) : (
+              <>
+                <Skeleton variant="text" sx={{ fontSize: "1rem" }} />
+                <Skeleton variant="text" sx={{ fontSize: "1rem" }} />
+              </>
+            )}
           </Stack>
         </Stack>
       </Paper>
