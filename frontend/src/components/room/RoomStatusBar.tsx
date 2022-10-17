@@ -1,11 +1,10 @@
 import { Circle } from "@mui/icons-material";
 import { Avatar, Stack, Typography, useTheme } from "@mui/material";
 
+import { StyledButton } from "src/components/StyledButton";
 import { useChat } from "src/contexts/ChatContext";
 import { useEditor } from "src/contexts/EditorContext";
 import { nameToInitials } from "src/utils/string";
-
-import { StyledButton } from "../StyledButton";
 
 type RoomStatusBarProps = {
   self: { name?: string; isConnected: boolean };

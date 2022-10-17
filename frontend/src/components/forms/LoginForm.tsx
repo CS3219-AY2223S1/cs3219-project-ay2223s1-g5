@@ -7,13 +7,12 @@ import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
+import { TextButton } from "src/components/TextButton";
 import { useAuth } from "src/contexts/AuthContext";
 import { useLogin } from "src/hooks/useAuth";
 import { useRequestVerificationEmail } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
 import isEmail from "validator/es/lib/isEmail";
-
-import { TextButton } from "../TextButton";
 
 export interface LoginFormProps {
   onSubmit: () => void;

@@ -10,8 +10,8 @@ import {
   Typography,
 } from "@mui/material";
 
-import { Center } from "../components/Center";
-import { StyledButton } from "../components/StyledButton";
+import { Center } from "src/components/Center";
+import { StyledButton } from "src/components/StyledButton";
 
 import { Difficulty, Language } from "~shared/types/base";
 

@@ -2,11 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { SendOutlined } from "@mui/icons-material";
 import { IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 
+import { Center } from "src/components/Center";
+import { ChatBubble } from "src/components/room/chat/ChatBubble";
 import { useChat } from "src/contexts/ChatContext";
-
-import { Center } from "../../Center";
-
-import { ChatBubble } from "./ChatBubble";
 
 export const Chat = () => {
   const [input, setInput] = useState<string>("");

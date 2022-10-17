@@ -9,10 +9,9 @@ import { RequestVerificationEmailPage } from "src/pages/RequestVerificationEmail
 import { ResetPasswordPage } from "src/pages/ResetPasswordPage";
 import { RoomPage } from "src/pages/RoomPage";
 import { VerificationPage } from "src/pages/VerificationPage";
-
-import { NavigationBarRoutes } from "./nav.routes";
-import { ProtectedRoute } from "./ProtectedRoute";
-import { PublicRoute } from "./PublicRoute";
+import { NavigationBarRoutes } from "src/routes/nav.routes";
+import { ProtectedRoute } from "src/routes/ProtectedRoute";
+import { PublicRoute } from "src/routes/PublicRoute";
 
 export const AppRoutes: RouteObject[] = [
   {

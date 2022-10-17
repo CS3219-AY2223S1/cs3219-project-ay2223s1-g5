@@ -13,14 +13,13 @@ import {
   ListItem,
 } from "@mui/material";
 
+import { NavigationButton } from "src/components/NavigationButton";
 import { useAuth } from "src/contexts/AuthContext";
 import {
   DisplayedNavigationBarRoutes,
   HiddenNavigationBarRoutes,
 } from "src/routes/nav.routes";
 import { nameToInitials } from "src/utils/string";
-
-import { NavigationButton } from "./NavigationButton";
 
 export const NavigationBar = () => {
   const [expanded, setExpanded] = useState<boolean>(false);

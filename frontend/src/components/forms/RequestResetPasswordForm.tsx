@@ -5,11 +5,10 @@ import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
+import { TextButton } from "src/components/TextButton";
 import { useRequestResetPassword } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
 import isEmail from "validator/es/lib/isEmail";
-
-import { TextButton } from "../TextButton";
 
 export interface RequestResetPasswordForm {
   onSubmit: () => void;
