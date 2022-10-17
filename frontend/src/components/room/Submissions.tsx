@@ -39,7 +39,7 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
                 sx: { color: "red.500", fontWeight: "bold" },
                 child: (
                   <Center>
-                    <Cancel sx={{ mr: 0.5 }} /> ${submission.result}
+                    <Cancel sx={{ mr: 0.5 }} /> {submission.result}
                   </Center>
                 ),
               },
