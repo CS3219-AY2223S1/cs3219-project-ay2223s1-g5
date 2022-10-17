@@ -1,4 +1,5 @@
-import { useQuery } from "react-query";
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from "react-query";
 
 import { ApiService } from "src/services/ApiService";
 
@@ -12,7 +13,7 @@ export const useGetSubmissions = (roomId?: string) => {
     return data?.submissions.reverse() || [];
   };
   const { data: submissions, isLoading: isGetSubmissionsLoading } = useQuery(
-    ["SUBMISSION", roomId || ""],
+    ["SUBMISSIONS", roomId || ""],
     getSubmissions,
     { enabled: !!roomId },
   );
@@ -20,4 +21,15 @@ export const useGetSubmissions = (roomId?: string) => {
     submissions,
     isGetSubmissionsLoading,
   };
+};
+
+export const useRefreshSubmissions = (roomId?: string) => {
+  const queryClient = useQueryClient();
+  const refreshSubmissions = useCallback(() => {
+    if (!roomId) {
+      return;
+    }
+    queryClient.invalidateQueries(["SUBMISSIONS", roomId]);
+  }, [queryClient, roomId]);
+  return { refreshSubmissions };
 };
