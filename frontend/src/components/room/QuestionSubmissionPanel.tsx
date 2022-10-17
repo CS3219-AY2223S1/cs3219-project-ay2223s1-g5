@@ -3,10 +3,9 @@ import { CheckCircle, DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Paper, Stack, Tab } from "@mui/material";
 
+import { Center } from "src/components/Center";
 import { DataTable } from "src/components/charts/DataTable";
 import { Question, QuestionPanelProps } from "src/components/room/Question";
-
-import { Center } from "../Center";
 
 type QuestionSubmissionPanelProps = QuestionPanelProps;
 
