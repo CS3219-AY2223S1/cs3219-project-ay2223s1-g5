@@ -10,11 +10,10 @@ const tableHeaders = ["DATE", "RUNTIME", "TEST CASE", "STATUS"];
 
 export type SubmissionsPanelProps = {
   roomId?: string;
-  signal?: boolean;
 };
 
-export const Submissions = (props: SubmissionsPanelProps) => {
-  const submissions = useGetSubmissions(props.roomId).submissions || [];
+export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
+  const submissions = useGetSubmissions(roomId).submissions || [];
 
   return (
     <DataTable
