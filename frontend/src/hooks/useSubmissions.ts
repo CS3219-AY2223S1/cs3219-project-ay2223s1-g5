@@ -10,7 +10,14 @@ export const useGetSubmissions = (roomId?: string) => {
     const { data } = await ApiService.get<GetSubmissionsRes | undefined>(
       `/room/${roomId}/submissions`,
     );
-    return data?.submissions.reverse() || [];
+
+    if (!data) {
+      return [];
+    }
+
+    return data.submissions.sort((x, y) => {
+      return x.submitTime > y.submitTime ? -1 : 0;
+    });
   };
   const { data: submissions, isLoading: isGetSubmissionsLoading } = useQuery(
     ["SUBMISSIONS", roomId || ""],
