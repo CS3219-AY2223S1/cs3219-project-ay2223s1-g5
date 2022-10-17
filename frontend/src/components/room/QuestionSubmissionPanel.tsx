@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
+import { CheckCircle, DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Paper, Stack, Tab } from "@mui/material";
 
+import { Center } from "src/components/Center";
 import { DataTable } from "src/components/charts/DataTable";
 import { Question, QuestionPanelProps } from "src/components/room/Question";
 
@@ -74,7 +75,19 @@ export const QuestionSubmissionPanel = (
             <DataTable
               headers={["DATE", "RUNTIME", "TEST CASE", "STATUS"]}
               rows={[
-                ["2020-04-26 00:26:55", "0.13s", "[2,7,11,15], 9", "Pass"],
+                [
+                  "2020-04-26 00:26:55",
+                  "0.13s",
+                  "[2,7,11,15], 9",
+                  {
+                    sx: { color: "green.500", fontWeight: "bold" },
+                    child: (
+                      <Center>
+                        <CheckCircle sx={{ mr: 0.5 }} /> Pass
+                      </Center>
+                    ),
+                  },
+                ],
               ]}
             />
           </TabPanel>

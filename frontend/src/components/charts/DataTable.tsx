@@ -1,21 +1,19 @@
-import { Cancel, CheckCircle } from "@mui/icons-material";
+import { ReactNode } from "react";
 import {
   Paper,
+  SxProps,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Theme,
 } from "@mui/material";
-
-import { Center } from "src/components/Center";
-
-import { Status } from "~shared/types/base";
 
 type DataTableProps = {
   headers: string[];
-  rows: string[][];
+  rows: (string | { child: ReactNode; sx: SxProps<Theme> })[][];
 };
 
 export const DataTable = ({ headers, rows }: DataTableProps) => {
@@ -42,36 +40,23 @@ export const DataTable = ({ headers, rows }: DataTableProps) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row[0]}>
-              {row.map((cell) => (
-                <TableCell
-                  key={cell}
-                  align="center"
-                  sx={{
-                    color:
-                      Object.values<string>(Status).includes(cell) &&
-                      cell === "Pass"
-                        ? "green.500"
-                        : Object.values<string>(Status).includes(cell)
-                        ? "red.500"
-                        : "black",
-                    fontWeight: Object.values<string>(Status).includes(cell)
-                      ? "bold"
-                      : "normal",
-                  }}
-                >
-                  <Center>
-                    {Object.values<string>(Status).includes(cell) &&
-                    cell === "Pass" ? (
-                      <CheckCircle sx={{ mr: 0.5 }} />
-                    ) : Object.values<string>(Status).includes(cell) ? (
-                      <Cancel sx={{ mr: 0.5 }} />
-                    ) : null}
+          {rows.map((row, index) => (
+            <TableRow key={index}>
+              {row.map((cell, cellIndex) =>
+                typeof cell === "string" ? (
+                  <TableCell key={cell} align="center">
                     {cell}
-                  </Center>
-                </TableCell>
-              ))}
+                  </TableCell>
+                ) : (
+                  <TableCell
+                    key={`${index}|${cellIndex}`}
+                    align="center"
+                    sx={cell.sx}
+                  >
+                    {cell.child}
+                  </TableCell>
+                ),
+              )}
             </TableRow>
           ))}
         </TableBody>
