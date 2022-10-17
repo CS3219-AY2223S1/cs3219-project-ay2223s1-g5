@@ -14,6 +14,7 @@ import { useAuth } from "src/contexts/AuthContext";
 import { ChatProvider } from "src/contexts/ChatContext";
 import { EditorProvider } from "src/contexts/EditorContext";
 import { useSockets } from "src/contexts/SocketsContext";
+import { useRefreshSubmissions } from "src/hooks/useSubmissions";
 import { useGetUsersName } from "src/hooks/useUsers";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
@@ -40,7 +41,14 @@ export const RoomPage = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [questionId, setQuestionId] = useState<number | undefined>(undefined);
+
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
+  const [hasNewSubmissions, setHasNewSubmissions] = useState<boolean>(false);
+  const { refreshSubmissions } = useRefreshSubmissions(roomId);
+  const clearHasNewSubmissions = useCallback(() => {
+    setHasNewSubmissions(false);
+  }, [setHasNewSubmissions]);
+
   const [self, setSelf] = useState<Participant>({
     // We know that if the page renders, user is not null.
     userId: user?.userId || NaN,
@@ -236,6 +244,8 @@ export const RoomPage = () => {
       ROOM_EVENTS.SUBMISSION_UPDATED,
       (_payload: SubmissionUpdatedPayload) => {
         enqueueSnackbar("Submission updated");
+        refreshSubmissions();
+        setHasNewSubmissions(true);
         setIsSubmitLoading(false);
       },
     );
@@ -253,6 +263,8 @@ export const RoomPage = () => {
     user?.userId,
     enqueueSnackbar,
     participants,
+    hasNewSubmissions,
+    refreshSubmissions,
   ]);
 
   useEffect(() => {
@@ -317,7 +329,12 @@ export const RoomPage = () => {
           >
             <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
               <Box sx={{ height: "60%" }}>
-                <QuestionSubmissionPanel questionId={questionId} />
+                <QuestionSubmissionPanel
+                  questionId={questionId}
+                  roomId={roomId}
+                  hasNewSubmissions={hasNewSubmissions}
+                  clearHasNewSubmissions={clearHasNewSubmissions}
+                />
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Chat />

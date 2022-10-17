@@ -1,26 +1,39 @@
-import { useState } from "react";
-import { CheckCircle, DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Paper, Stack, Tab } from "@mui/material";
+import { Badge, Paper, Stack, Tab } from "@mui/material";
 
-import { Center } from "src/components/Center";
-import { DataTable } from "src/components/charts/DataTable";
-import { Question, QuestionPanelProps } from "src/components/room/Question";
+import { Question } from "./Question";
+import { Submissions } from "./Submissions";
 
-type QuestionSubmissionPanelProps = QuestionPanelProps;
+type QuestionSubmissionPanelProps = {
+  questionId?: number;
+  roomId?: string;
+  hasNewSubmissions: boolean;
+  clearHasNewSubmissions: () => void;
+};
 
-export const QuestionSubmissionPanel = (
-  props: QuestionSubmissionPanelProps,
-) => {
+export const QuestionSubmissionPanel = ({
+  questionId,
+  roomId,
+  hasNewSubmissions,
+  clearHasNewSubmissions,
+}: QuestionSubmissionPanelProps) => {
   const [selectedPanel, setSelectedPanel] = useState<
     "description" | "submissions"
   >("description");
 
+  useEffect(() => {
+    if (hasNewSubmissions && selectedPanel === "submissions") {
+      clearHasNewSubmissions();
+    }
+  }, [clearHasNewSubmissions, hasNewSubmissions, selectedPanel]);
+
   const handleChange = (
     _: React.SyntheticEvent | undefined,
-    formType: "description" | "submissions",
+    panel: "description" | "submissions",
   ) => {
-    setSelectedPanel(formType);
+    setSelectedPanel(panel);
   };
 
   return (
@@ -53,7 +66,16 @@ export const QuestionSubmissionPanel = (
                 fontWeight: "bold",
                 textTransform: "none",
               }}
-              icon={<DriveFolderUpload />}
+              icon={
+                <Badge
+                  variant="dot"
+                  color="secondary"
+                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                  invisible={!hasNewSubmissions}
+                >
+                  <DriveFolderUpload />
+                </Badge>
+              }
               iconPosition="start"
             />
           </TabList>
@@ -66,30 +88,13 @@ export const QuestionSubmissionPanel = (
             }}
             value="description"
           >
-            <Question {...props} />
+            <Question questionId={questionId} />
           </TabPanel>
           <TabPanel
             sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}
             value="submissions"
           >
-            <DataTable
-              headers={["DATE", "RUNTIME", "TEST CASE", "STATUS"]}
-              rows={[
-                [
-                  "2020-04-26 00:26:55",
-                  "0.13s",
-                  "[2,7,11,15], 9",
-                  {
-                    sx: { color: "green.500", fontWeight: "bold" },
-                    child: (
-                      <Center>
-                        <CheckCircle sx={{ mr: 0.5 }} /> Pass
-                      </Center>
-                    ),
-                  },
-                ],
-              ]}
-            />
+            <Submissions roomId={roomId} />
           </TabPanel>
         </TabContext>
       </Stack>
