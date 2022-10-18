@@ -325,7 +325,7 @@ export const RoomPage = () => {
           <Stack
             direction="row"
             spacing={2}
-            sx={{ minHeight: 900, p: 3, pb: 2 }}
+            sx={{ p: 3, pb: 2, flex: 1, minHeight: 0 }}
           >
             <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
               <Box sx={{ height: "60%" }}>
