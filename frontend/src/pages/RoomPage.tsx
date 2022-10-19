@@ -4,7 +4,7 @@ import { Box, CircularProgress, Divider, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
-import { Chat } from "src/components/room/chat/Chat";
+import { ChatPanel } from "src/components/room/chat/ChatPanel";
 import { Editor } from "src/components/room/Editor";
 import { QuestionSubmissionPanel } from "src/components/room/QuestionSubmissionPanel";
 import { RoomStatusBar } from "src/components/room/RoomStatusBar";
@@ -336,8 +336,12 @@ export const RoomPage = () => {
                   clearHasNewSubmissions={clearHasNewSubmissions}
                 />
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <Chat />
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                {/* TODO: Support multiple participants */}
+                <ChatPanel
+                  name={user?.name}
+                  partnerName={participants[0]?.name}
+                />
               </Box>
             </Stack>
             <Box sx={{ flex: 1, minWidth: 0 }}>
