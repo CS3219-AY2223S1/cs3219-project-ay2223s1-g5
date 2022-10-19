@@ -2,14 +2,12 @@ import {
   Body,
   ConflictException,
   Controller,
-  ForbiddenException,
   Get,
   NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
-  Put,
   Session,
   UnauthorizedException,
   UseGuards,
@@ -56,16 +54,15 @@ export class UserController {
   }
 
   @UseGuards(SessionGuard)
-  @Put(":userId(\\d+)")
+  @Patch()
   async updateUser(
     @Session() session: Request["session"],
-    @Param("userId", ParseIntPipe) userId: number,
     @Body() data: UpdateUserReq,
   ): Promise<void> {
-    if (session.passport?.user.userId != userId) {
-      throw new ForbiddenException("Failed to update user details.");
-    }
-    await this.userService.updateUserDetails(userId, data);
+    await this.userService.updateUserDetails(
+      session.passport?.user.userId || 0,
+      data,
+    );
   }
 
   @UseGuards(SessionGuard)
@@ -82,17 +79,17 @@ export class UserController {
   }
 
   @UseGuards(SessionGuard)
-  @Post(":userId(\\d+)/password")
+  @Post("password")
   async updatePassword(
     @Session() session: Request["session"],
-    @Param("userId", ParseIntPipe) userId: number,
     @Body() data: UpdatePasswordReq,
   ): Promise<void> {
-    if (session.passport?.user.userId != userId) {
-      throw new ForbiddenException("Failed to update password.");
-    }
     const { oldPassword, newPassword } = data;
-    await this.userService.updateUserPassword(userId, oldPassword, newPassword);
+    await this.userService.updateUserPassword(
+      session.passport?.user.userId || 0,
+      oldPassword,
+      newPassword,
+    );
   }
 
   @Post("reset-password")
