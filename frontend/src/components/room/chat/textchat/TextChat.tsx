@@ -3,8 +3,9 @@ import { SendOutlined } from "@mui/icons-material";
 import { IconButton, Stack, TextField, Typography } from "@mui/material";
 
 import { Center } from "src/components/Center";
-import { ChatBubble } from "src/components/room/chat/ChatBubble";
 import { useChat } from "src/contexts/ChatContext";
+
+import { ChatBubble } from "./ChatBubble";
 
 export const Chat = () => {
   const [input, setInput] = useState<string>("");
@@ -30,7 +31,7 @@ export const Chat = () => {
               ref={index === messages.length - 1 ? latestMessage : undefined}
               key={message.sid}
               content={message.body || ""}
-              color={message.author === self ? "primary" : "secondary"}
+              color={message.author === self ? "primary" : "blueGrey"}
               author={(message.attributes as { name: string }).name}
               align={message.author === self ? "flex-end" : "flex-start"}
             />

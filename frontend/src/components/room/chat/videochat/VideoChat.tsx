@@ -7,9 +7,10 @@ import {
   VolumeOffOutlined,
   VolumeUpOutlined,
 } from "@mui/icons-material";
-import { Button, Grid, IconButton, Stack } from "@mui/material";
+import { Grid, IconButton, Stack } from "@mui/material";
 
 import { Center } from "src/components/Center";
+import { StyledButton } from "src/components/StyledButton";
 import { useChat } from "src/contexts/ChatContext";
 
 import { LocalVideoChatParticipant } from "./LocalVideoChatParticipant";
@@ -84,7 +85,7 @@ export const VideoChat = memo(
             onClick={() => setIsMuted((muted) => !muted)}
           >
             {isMuted ? (
-              <VolumeOffOutlined fontSize="small" color="warning" />
+              <VolumeOffOutlined fontSize="small" color="error" />
             ) : (
               <VolumeUpOutlined fontSize="small" />
             )}
@@ -93,7 +94,7 @@ export const VideoChat = memo(
       </Stack>
     ) : (
       <Center>
-        <Button onClick={enableVideoChat}>Enable Video Chat</Button>
+        <StyledButton onClick={enableVideoChat} label="Enable Video Chat" />
       </Center>
     );
   },

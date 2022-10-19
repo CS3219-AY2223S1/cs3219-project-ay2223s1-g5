@@ -3,9 +3,10 @@ import { ChatBubbleOutline, VideoCallOutlined } from "@mui/icons-material";
 import { TabContext, TabList } from "@mui/lab";
 import { Badge, Box, Paper, Stack, Tab } from "@mui/material";
 
-import { Chat } from "src/components/room/chat/Chat";
-import { VideoChat } from "src/components/room/chat/VideoChat";
 import { useChat } from "src/contexts/ChatContext";
+
+import { Chat } from "./textchat/TextChat";
+import { VideoChat } from "./videochat/VideoChat";
 
 // eslint-disable-next-line react/display-name
 export const ChatPanel = memo(

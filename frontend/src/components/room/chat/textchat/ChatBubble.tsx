@@ -4,7 +4,7 @@ import { Box, Stack, Typography } from "@mui/material";
 type ChatBubbleProps = {
   author: string;
   content: string;
-  color: "primary" | "secondary";
+  color: string;
   align: "flex-start" | "flex-end";
 };
 
