@@ -81,7 +81,13 @@ export const SignUpForm = (props: SignUpFormProps) => {
         <Controller
           name="name"
           defaultValue={""}
-          rules={{ required: "Name is required." }}
+          rules={{
+            required: "Name is required.",
+            minLength: {
+              value: 3,
+              message: "Display name must be at least 3 characters.",
+            },
+          }}
           render={({
             field: { value, onBlur, onChange: formOnChange },
             fieldState: { error },

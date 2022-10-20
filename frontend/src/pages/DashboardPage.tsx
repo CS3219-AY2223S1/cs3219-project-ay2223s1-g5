@@ -1,38 +1,68 @@
-import { Grid, Typography } from "@mui/material";
+import {
+  AccessTime,
+  DriveFolderUpload,
+  Hub,
+  People,
+  Quiz,
+} from "@mui/icons-material";
+import { Box, Stack } from "@mui/material";
 
-import { BarChart } from "../components/charts/BarChart";
-import { PieChart } from "../components/charts/PieChart";
+import { DataTable } from "src/components/charts/DataTable";
+import { NetworkChart } from "src/components/charts/NetworkChart";
+import { ScatterPlot } from "src/components/charts/ScatterPlot";
+import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
+import { VerticalBarChart } from "src/components/charts/VerticalBarChart";
+import { ChartContainer } from "src/components/dashboard/ChartContainer";
+import { Title } from "src/components/Title";
 
 export const DashboardPage = () => {
   return (
-    <Grid container>
-      <Grid item xs={4}>
-        <Grid container direction="row">
-          <Grid item sx={{ bgcolor: "primary.500", width: "16px" }}></Grid>
-          <Grid item sx={{ flex: 1 }}>
-            <Typography variant="body1" sx={{ pl: 2, py: 1 }}>
-              Questions Attempted
-            </Typography>
-          </Grid>
-        </Grid>
-
-        <Grid item xs={12}>
-          <PieChart />
-        </Grid>
-      </Grid>
-      <Grid item xs={8}>
-        <Grid container direction="row">
-          <Grid item sx={{ bgcolor: "primary.500", width: "16px" }}></Grid>
-          <Grid item sx={{ flex: 1 }}>
-            <Typography variant="body1" sx={{ pl: 2, py: 1 }}>
-              Question Sources
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <BarChart />
-        </Grid>
-      </Grid>
-    </Grid>
+    <Stack spacing={3}>
+      <Title title="Dashboard" />
+      <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+        <ChartContainer
+          title={"Questions Attempted"}
+          chart={<VerticalBarChart />}
+          Icon={Quiz}
+        />
+        <ChartContainer
+          title={"Time Taken Per Question"}
+          chart={<ScatterPlot />}
+          Icon={AccessTime}
+        />
+      </Stack>
+      <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+        <ChartContainer
+          title={"Topics Attempted"}
+          chart={<NetworkChart />}
+          Icon={Hub}
+        />
+        <ChartContainer
+          title={"Collaborators"}
+          chart={
+            <Box sx={{ height: "300px", overflowY: "auto" }}>
+              <DataTable
+                headers={["DATE TIME", "QUESTION", "PEER"]}
+                rows={[
+                  ["2020-04-26 00:26:55", "Question 1", "Peer 1"],
+                  ["2020-04-27 00:26:55", "Question 2", "Peer 2"],
+                  ["2020-04-28 00:27:55", "Question 3", "Peer 3"],
+                  ["2020-04-29 00:27:55", "Question 4", "Peer 4"],
+                  ["2020-04-30 00:27:55", "Question 5", "Peer 5"],
+                  ["2020-04-31 00:27:55", "Question 6", "Peer 6"],
+                  ["2020-05-01 00:27:55", "Question 7", "Peer 7"],
+                ]}
+              />
+            </Box>
+          }
+          Icon={People}
+        />
+      </Stack>
+      <ChartContainer
+        title={"Submissions In The Last Year"}
+        chart={<SubmissionsHeatmap />}
+        Icon={DriveFolderUpload}
+      />
+    </Stack>
   );
 };

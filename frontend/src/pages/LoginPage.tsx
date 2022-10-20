@@ -6,8 +6,7 @@ import { Container, Stack, Tab, Typography } from "@mui/material";
 import { Center } from "src/components/Center";
 import { LoginForm } from "src/components/forms/LoginForm";
 import { RequestResetPasswordForm } from "src/components/forms/RequestResetPasswordForm";
-
-import { SignUpForm } from "../components/forms/SignUpForm";
+import { SignUpForm } from "src/components/forms/SignUpForm";
 
 export const LoginPage = () => {
   const [formType, setFormType] = useState<

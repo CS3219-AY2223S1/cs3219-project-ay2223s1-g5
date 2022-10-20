@@ -13,9 +13,8 @@ import {
 import DOMPurify from "dompurify";
 import parse from "html-react-parser";
 
-import { useGetQuestion } from "src/hooks/useQuestion";
-
-import { Center } from "../Center";
+import { Center } from "src/components/Center";
+import { useGetQuestion } from "src/hooks/useQuestions";
 
 export type QuestionPanelProps = {
   questionId?: number;

@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_FILTER, APP_PIPE } from "@nestjs/core";
 import { ServeStaticModule } from "@nestjs/serve-static";
-import { LoggerModule, PinoLogger } from "nestjs-pino";
+import { LoggerModule } from "nestjs-pino";
 import passport from "passport";
 import { join } from "path";
 
@@ -14,10 +14,13 @@ import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
 import { CoreModule } from "src/core/core.module";
 import { PrismaServiceModule } from "src/core/prisma.service.module";
 import { EditorModule } from "src/editor/editor.module";
+import { JudgeModule } from "src/judge/judge.module";
 import { QuestionModule } from "src/question/question.module";
 import { QueueModule } from "src/queue/queue.module";
 import { RedisServiceModule } from "src/redis/redis.service.module";
 import { RoomModule } from "src/room/room.module";
+import { StatisticsModule } from "src/statistics/statistics.module";
+import { SubmissionModule } from "src/submission/submission.module";
 import { UserModule } from "src/user/user.module";
 
 const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
@@ -57,6 +60,9 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     ChatModule,
     EditorModule,
     QuestionModule,
+    JudgeModule,
+    StatisticsModule,
+    SubmissionModule,
     // For custom WebSocket adapter
     SessionMiddlewareModule,
   ],

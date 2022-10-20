@@ -50,15 +50,6 @@ export class RoomService
     userIds: number[],
   ): Promise<string> {
     const questionId = await this.questionService.getIdByDifficulty(difficulty);
-    const template = await this.questionService.getSolutionTemplateByLanguage(
-      questionId,
-      language,
-    );
-
-    if (!template) {
-      this.logger.error(`Unable to load template: ${questionId} [${language}]`);
-      throw new InternalServerError();
-    }
 
     const room = await this.prismaService.roomSession.create({
       data: {
@@ -83,8 +74,6 @@ export class RoomService
       questionId.toString(),
     );
 
-    await this.chatService.createChatRoom(roomId);
-
     for (const userId of userIds) {
       await this.redisService.addKeySet(
         [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
@@ -97,11 +86,29 @@ export class RoomService
         userId.toString(),
         roomId,
       );
-
-      await this.chatService.joinChatRoom(roomId, userId);
     }
 
-    await this.editorService.createDocument(roomId, template.code);
+    const document = this.questionService
+      .getSolutionTemplateByLanguage(questionId, language)
+      .then((template) => {
+        if (!template) {
+          this.logger.error(
+            `Unable to load template: ${questionId} [${language}]`,
+          );
+          throw new InternalServerError();
+        }
+        return this.editorService.createDocument(roomId, template.code);
+      });
+
+    const chat = this.chatService.createChatRoom(roomId).then(() => {
+      return Promise.all(
+        userIds.map((userId) => {
+          return this.chatService.joinChatRoom(roomId, userId);
+        }),
+      );
+    });
+
+    await Promise.all([chat, document]);
 
     return roomId;
   }
@@ -141,7 +148,7 @@ export class RoomService
     );
 
     const language = Object.entries(Language).find(
-      (value) => value[0] === languageString,
+      (value) => value[1] === languageString,
     )?.[1] as Language;
 
     const questionId = Number(
@@ -183,7 +190,10 @@ export class RoomService
       `${userId.toString()}:${Status.DISCONNECTED}`,
     );
 
-    await this.chatService.leaveChatRoom(roomId, userId);
+    // We don't need to await this but we catch all errors and log them.
+    this.chatService.leaveChatRoom(roomId, userId).catch((error) => {
+      this.logger.warn(error);
+    });
 
     if (
       !(await this.redisService.getSetSize(
@@ -191,7 +201,10 @@ export class RoomService
         roomId,
       ))
     ) {
-      await this.terminateRoom(roomId);
+      // We don't need to await this but we catch all errors and log them.
+      this.terminateRoom(roomId).catch((error) => {
+        this.logger.warn(error);
+      });
     }
   }
 

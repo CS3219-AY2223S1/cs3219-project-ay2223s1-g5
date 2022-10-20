@@ -11,7 +11,7 @@ export interface RoomBasicService {
   getRoom(userId: number): Promise<string | null>;
 }
 
-export interface RoomAuthorizationService {
+export interface RoomAuthorizationService extends RoomBasicService {
   isAuthorized(roomId: string, userId: number): Promise<boolean>;
 }
 

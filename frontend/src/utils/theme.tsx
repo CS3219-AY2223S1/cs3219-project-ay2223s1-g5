@@ -56,6 +56,7 @@ const colors = {
 
 const theme = createTheme({
   typography: {
+    fontFamily: "Inter",
     fontSize: 16,
   },
   palette: {

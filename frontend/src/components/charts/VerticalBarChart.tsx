@@ -1,54 +1,57 @@
-import { useTheme } from "@mui/material";
+import { useTheme } from "@mui/material/styles/";
 import ReactEcharts from "echarts-for-react";
 
-export const PieChart = () => {
+export const VerticalBarChart = () => {
   const theme = useTheme();
   return (
     <ReactEcharts
       option={{
         title: {
-          text: "Questions Attempted",
-          subtext: "By Difficulty",
           left: "center",
         },
         tooltip: {
           trigger: "item",
         },
-        legend: {
-          orient: "horizontal",
-          bottom: "bottom",
+        xAxis: {
+          // name: "Difficulty",
+          type: "category",
+          data: ["Easy", "Medium", "Hard"],
         },
+        yAxis: {
+          name: "Minutes",
+          type: "value",
+        },
+        backgroundColor: "white",
         series: [
           {
-            type: "pie",
-            radius: "50%",
             data: [
               {
-                value: 30,
-                name: "Easy",
-                itemStyle: { color: theme.palette.green[500] },
-              },
-              {
-                value: 30,
-                name: "Medium",
+                value: 5,
                 itemStyle: {
-                  color: theme.palette.yellow[500],
+                  color: theme.palette.green["A400"],
                 },
               },
               {
-                value: 30,
-                name: "Hard",
+                value: 10,
                 itemStyle: {
-                  color: theme.palette.red[500],
+                  color: theme.palette.yellow["A400"],
+                },
+              },
+              {
+                value: 15,
+                itemStyle: {
+                  color: theme.palette.red["A400"],
                 },
               },
             ],
+            type: "bar",
             emphasis: {
               itemStyle: {
                 shadowBlur: 10,
                 shadowOffsetX: 0,
                 shadowColor: "rgba(0, 0, 0, 0.5)",
               },
+              focus: "self",
             },
           },
         ],

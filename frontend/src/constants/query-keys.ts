@@ -1,0 +1,5 @@
+export const QUERY_KEYS = {
+  USERS: "USERS",
+  SUBMISSIONS: "SUBMISSIONS",
+  QUESTIONS: "QUESTIONS",
+};
