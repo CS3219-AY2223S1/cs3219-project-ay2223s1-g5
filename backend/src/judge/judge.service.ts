@@ -46,10 +46,13 @@ const statusIdToStatus = (status: number, output?: string) => {
       return Status.PENDING;
     }
     case 3: {
-      // We compare results manually and don't rely on Judge 0.
-      return output?.toLowerCase().trim() === "true"
-        ? Status.ACCEPTED
-        : Status.WRONG_ANSWER;
+      if (output?.toLowerCase().trim() === "true") {
+        return Status.ACCEPTED;
+      }
+      if (output?.toLowerCase().trim() === "false") {
+        return Status.WRONG_ANSWER;
+      }
+      return Status.RUNTIME_ERROR;
     }
     case 4: {
       return Status.WRONG_ANSWER;
