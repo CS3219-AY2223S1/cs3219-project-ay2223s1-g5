@@ -97,7 +97,7 @@ export class JavaMiddleware extends JudgeMiddleware {
       `    ${expectedOutput}\n` +
       `    ${codePrototype.returnType} res = solution.${codePrototype.functionName}(${joinedVariableNames});\n` +
       `    ${isEqual}\n` +
-      `    System.out.print(isEqual ? "True" : "False");\n` +
+      `    System.err.print(isEqual ? "True" : "False");\n` +
       `  }\n` +
       `}\n`
     );

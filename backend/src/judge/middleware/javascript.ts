@@ -53,7 +53,7 @@ export class JavascriptMiddleware extends JudgeMiddleware {
       `const expectedOutput = ${this.output};\n` +
       `const result = ${codePrototype.functionName}(${joinedVariableNames});\n` +
       `${isEqual}\n` +
-      `console.log(isEqual);\n`
+      `console.error(isEqual);\n`
     );
   }
 }

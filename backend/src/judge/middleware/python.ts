@@ -10,7 +10,8 @@ export class PythonMiddleware extends JudgeMiddleware {
       "from typing import List\n" +
       "import collections\n" +
       "import math\n" +
-      "import random\n"
+      "import random\n" +
+      "import sys\n"
     );
   }
 
@@ -51,7 +52,7 @@ export class PythonMiddleware extends JudgeMiddleware {
       `\n` +
       variables.join("\n") +
       `\n` +
-      `print(Solution().${codePrototype.functionName}(${joinedVariableNames}) == ${this.output})\n`
+      `print(Solution().${codePrototype.functionName}(${joinedVariableNames}) == ${this.output}, file=sys.stderr)\n`
     );
   }
 }

@@ -229,10 +229,10 @@ export class JudgeService {
             ? this.decodeBase64(content.compile_output)
             : undefined,
           exitCode: content.exit_code,
-          status: content.stdout
+          status: content.stderr
             ? statusIdToStatus(
                 content.status.id,
-                this.decodeBase64(content.stdout),
+                this.decodeBase64(content.stderr),
               )
             : statusIdToStatus(content.status.id),
         },

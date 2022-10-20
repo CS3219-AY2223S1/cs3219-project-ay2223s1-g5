@@ -94,7 +94,7 @@ export class CppMiddleware extends JudgeMiddleware {
       `  ${expectedOutput}\n` +
       `  ${codePrototype.returnType} res = Solution().${codePrototype.functionName}(${joinedVariableNames});\n` +
       `  ${isEqual}\n` +
-      `  printf("%s", isEqual ? "true" : "false");\n` +
+      `  fprintf(stderr, "%s", isEqual ? "true" : "false");\n` +
       `}\n`
     );
   }
