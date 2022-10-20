@@ -17,4 +17,5 @@ code {
 pre {
   font-family: "Source Code Pro", monospace;
   background-color: var(--lightgray);
+  white-space: pre-line;
 }
