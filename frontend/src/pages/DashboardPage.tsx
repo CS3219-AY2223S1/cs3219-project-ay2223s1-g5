@@ -22,13 +22,13 @@ import { Difficulty } from "~shared/types/base/index";
 export const DashboardPage = () => {
   const { statistics } = useGetUserStatistics();
   const [attemptSummary, setAttemptSummary] = useState<
-    Record<Difficulty, number> | undefined
+    Record<Difficulty | string, number> | undefined
   >();
   const [durationSummary, setDurationSummary] = useState<
     | {
-        difficulty: Difficulty;
+        difficulty: Difficulty | string;
         timetaken: number;
-        date: Date;
+        date: Date | string;
       }[]
     | undefined
   >();
@@ -36,13 +36,13 @@ export const DashboardPage = () => {
     | {
         userName: string;
         questionTitle: string;
-        date: Date;
+        date: Date | string;
       }[]
     | undefined
   >();
   const [heatmapData, setHeatmapData] = useState<
     | {
-        date: Date;
+        date: Date | string;
       }[]
     | undefined
   >();

@@ -1,19 +1,19 @@
 import { Difficulty } from "../base";
 
 export type UserStatisticsRes = {
-  attemptSummary: Record<Difficulty, number>;
+  attemptSummary: Record<Difficulty | string, number>;
   durationSummary: {
-    difficulty: Difficulty;
+    difficulty: Difficulty | string;
     timetaken: number;
-    date: Date;
+    date: Date | string;
   }[];
   peerSummary: {
     userName: string;
     questionTitle: string;
-    date: Date;
+    date: Date | string;
   }[];
   heatmapData: {
-    date: Date;
+    date: Date | string;
   }[];
   networkData: {
     topics: {

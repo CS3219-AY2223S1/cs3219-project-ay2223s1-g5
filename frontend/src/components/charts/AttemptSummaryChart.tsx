@@ -30,7 +30,7 @@ export const AttemptSummaryChart = ({
           ],
         },
         yAxis: {
-          name: "Minutes",
+          name: "Attempts",
           type: "value",
         },
         backgroundColor: "white",

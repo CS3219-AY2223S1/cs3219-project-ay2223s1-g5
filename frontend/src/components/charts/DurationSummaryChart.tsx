@@ -1,4 +1,5 @@
 import { useTheme } from "@mui/material/styles/";
+import { format } from "date-fns";
 import ReactEcharts from "echarts-for-react";
 
 import { Difficulty } from "~shared/types/base/index";
@@ -6,9 +7,9 @@ import { Difficulty } from "~shared/types/base/index";
 type DurationSummaryProps = {
   durationSummary:
     | {
-        difficulty: Difficulty;
+        difficulty: Difficulty | string;
         timetaken: number;
-        date: Date;
+        date: Date | string;
       }[]
     | undefined;
 };
@@ -17,49 +18,26 @@ export const DurationSummaryChart = ({
   durationSummary,
 }: DurationSummaryProps) => {
   const theme = useTheme();
-
-  const processDates = (
-    durationSummary:
-      | {
-          difficulty: Difficulty;
-          timetaken: number;
-          date: Date;
-        }[]
-      | undefined,
-  ) => {
-    const xAxis = new Set<string>();
-    if (!durationSummary) {
-      return;
-    } else {
-      // Sort the durationSummary first
-      durationSummary.sort((a, b) => a.date.getTime() - b.date.getTime());
-      // Then process it
-      durationSummary.map((duration) => {
-        const today = new Date();
-        const oneMonthAgo = new Date(
-          new Date().setMonth(new Date().getMonth() - 1),
-        );
-        const attemptDate = duration.date;
-        if (attemptDate >= oneMonthAgo && attemptDate <= today) {
-          const date =
-            attemptDate.getDate() +
-            "/" +
-            (attemptDate.getMonth() + 1) +
-            "/" +
-            attemptDate.getFullYear();
-          xAxis.add(date);
-        }
-      });
-      return Array.from(xAxis);
+  const getPastThirtyDays = () => {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(new Date().setDate(today.getDate() - 29));
+    const xAxis = [];
+    for (
+      let date = thirtyDaysAgo;
+      date <= today;
+      date.setDate(date.getDate() + 1)
+    ) {
+      xAxis.push(format(new Date(date), "d/M/yyyy"));
     }
+    return xAxis;
   };
 
   const processData = (
     durationSummary:
       | {
-          difficulty: Difficulty;
+          difficulty: Difficulty | string;
           timetaken: number;
-          date: Date;
+          date: Date | string;
         }[]
       | undefined,
   ) => {
@@ -75,19 +53,14 @@ export const DurationSummaryChart = ({
         const timetaken = duration.timetaken;
         const attemptDate = duration.date;
         const color =
-          difficulty === "EASY"
+          difficulty === Difficulty.EASY
             ? theme.palette.green["A400"]
-            : difficulty === "MEDIUM"
+            : difficulty === Difficulty.MEDIUM
             ? theme.palette.yellow["A400"]
-            : difficulty === "HARD"
+            : difficulty === Difficulty.HARD
             ? theme.palette.red["A400"]
             : undefined;
-        const date =
-          attemptDate.getDate() +
-          "/" +
-          (attemptDate.getMonth() + 1) +
-          "/" +
-          attemptDate.getFullYear();
+        const date = format(new Date(attemptDate), "d/M/yyyy");
         const point = { value: [date, timetaken], itemStyle: { color: color } };
         points.add(point);
       });
@@ -102,7 +75,7 @@ export const DurationSummaryChart = ({
           trigger: "item",
         },
         xAxis: {
-          data: !durationSummary ? [] : processDates(durationSummary),
+          data: getPastThirtyDays(),
         },
         yAxis: { name: "Minutes" },
         backgroundColor: "white",
