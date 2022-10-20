@@ -23,7 +23,7 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
           `${submission.submitTime}`,
           `${submission.timeTaken}`,
           `${submission.inputs}, ${submission.expectedOutput}`,
-          submission.result === "Pass"
+          submission.result === "ACCEPTED"
             ? {
                 sx: {
                   color: "green.500",
@@ -31,7 +31,7 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
                 },
                 child: (
                   <Center>
-                    <CheckCircle sx={{ mr: 0.5 }} /> Pass
+                    <CheckCircle sx={{ mr: 0.5 }} /> {submission.result}
                   </Center>
                 ),
               }
