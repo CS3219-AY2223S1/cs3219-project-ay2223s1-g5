@@ -16,6 +16,7 @@ import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
 import { ChartContainer } from "src/components/dashboard/ChartContainer";
 import { Title } from "src/components/Title";
 import { useGetUserStatistics } from "src/hooks/useStatistics";
+import { formatDate } from "src/utils/string";
 
 import { Difficulty } from "~shared/types/base/index";
 
@@ -104,7 +105,7 @@ export const DashboardPage = () => {
                     ? []
                     : peerSummary.map((summary) => {
                         return [
-                          summary.date.toString(),
+                          formatDate(summary.date),
                           summary.questionTitle,
                           summary.userName,
                         ];

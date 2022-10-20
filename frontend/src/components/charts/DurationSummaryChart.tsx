@@ -1,5 +1,5 @@
 import { useTheme } from "@mui/material/styles/";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import ReactEcharts from "echarts-for-react";
 
 import { Difficulty } from "~shared/types/base/index";
@@ -20,14 +20,14 @@ export const DurationSummaryChart = ({
   const theme = useTheme();
   const getPastThirtyDays = () => {
     const today = new Date();
-    const thirtyDaysAgo = new Date(new Date().setDate(today.getDate() - 29));
+    const thirtyDaysAgo = subDays(new Date(), 30);
     const xAxis = [];
     for (
       let date = thirtyDaysAgo;
       date <= today;
       date.setDate(date.getDate() + 1)
     ) {
-      xAxis.push(format(new Date(date), "d/M/yyyy"));
+      xAxis.push(format(new Date(date), "d/M"));
     }
     return xAxis;
   };

@@ -1,6 +1,8 @@
 import { useTheme } from "@mui/material/styles/";
 import ReactEcharts from "echarts-for-react";
 
+import { titleCase } from "src/utils/string";
+
 import { Difficulty } from "~shared/types/base/index";
 
 type AttemptSummaryProps = {
@@ -23,10 +25,9 @@ export const AttemptSummaryChart = ({
         xAxis: {
           type: "category",
           data: [
-            Difficulty.EASY.charAt(0) + Difficulty.EASY.slice(1).toLowerCase(),
-            Difficulty.MEDIUM.charAt(0) +
-              Difficulty.MEDIUM.slice(1).toLowerCase(),
-            Difficulty.HARD.charAt(0) + Difficulty.HARD.slice(1).toLowerCase(),
+            titleCase(Difficulty.EASY),
+            titleCase(Difficulty.MEDIUM),
+            titleCase(Difficulty.HARD),
           ],
         },
         yAxis: {

@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 
+import { QUERY_KEYS } from "src/constants/query-keys";
 import { ApiService } from "src/services/ApiService";
 
 import { UserStatisticsRes } from "~shared/types/api";
@@ -12,7 +13,7 @@ export const useGetUserStatistics = () => {
     return data;
   };
   const { data: statistics, isLoading: isGetUserStatisticsLoading } = useQuery(
-    ["STATISTICS"],
+    [QUERY_KEYS.STATISTICS],
     getUserStatistics,
   );
   return {

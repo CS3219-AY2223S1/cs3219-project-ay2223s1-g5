@@ -22,3 +22,7 @@ export const normaliseStatus = (string?: string) => {
 export const formatDate = (date: Date | string) => {
   return format(new Date(date), "h:ma d/M/yy");
 };
+
+export const titleCase = (string: string) => {
+  return string.charAt(0) + string.slice(1).toLowerCase();
+};

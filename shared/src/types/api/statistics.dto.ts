@@ -1,9 +1,9 @@
 import { Difficulty } from "../base";
 
 export type UserStatisticsRes = {
-  attemptSummary: Record<Difficulty | string, number>;
+  attemptSummary: Record<Difficulty, number>;
   durationSummary: {
-    difficulty: Difficulty | string;
+    difficulty: Difficulty;
     timetaken: number;
     date: Date | string;
   }[];
