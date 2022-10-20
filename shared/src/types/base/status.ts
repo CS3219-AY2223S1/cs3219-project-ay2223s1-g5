@@ -1,7 +1,9 @@
-// These values are rendered on the front-end submission screen
 export enum Status {
-  PASS = "Pass",
-  COMPILATION_ERROR = "Compilation Error",
-  FAIL = "Fail",
-  TIME_LIMIT_EXCEED = "Time Limit Exceed",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  WRONG_ANSWER = "WRONG_ANSWER",
+  COMPILE_ERROR = "COMPILE_ERROR",
+  RUNTIME_ERROR = "RUNTIME_ERROR",
+  TIME_LIMIT_EXCEEDED = "TIME_LIMIT_EXCEEDED",
+  INTERNAL_ERROR = "INTERNAL_ERROR",
 }

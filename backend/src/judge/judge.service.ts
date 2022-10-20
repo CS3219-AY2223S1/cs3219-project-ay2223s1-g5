@@ -39,13 +39,20 @@ const languageToLanguageId = (language: Language) => {
   }
 };
 
-const statusIdToStatus = (status: number) => {
+const statusIdToStatus = (status: number, output?: string) => {
   switch (status) {
     case 1:
-    case 2:
-    case 3: {
-      // We compare results manually and don't rely on Judge 0.
+    case 2: {
       return Status.PENDING;
+    }
+    case 3: {
+      if (output?.toLowerCase().trim() === "true") {
+        return Status.ACCEPTED;
+      }
+      if (output?.toLowerCase().trim() === "false") {
+        return Status.WRONG_ANSWER;
+      }
+      return Status.RUNTIME_ERROR;
     }
     case 4: {
       return Status.WRONG_ANSWER;
@@ -206,8 +213,6 @@ export class JudgeService {
     const time = Number(content.time) * secondsToMilliseconds;
     const memory = content.memory * kilobytesToBytes;
 
-    // TODO: Handle result checking.
-
     const { roomSessionId: roomId } =
       await this.prismaService.submission.update({
         where: { id: submissionId },
@@ -224,7 +229,12 @@ export class JudgeService {
             ? this.decodeBase64(content.compile_output)
             : undefined,
           exitCode: content.exit_code,
-          status: statusIdToStatus(content.status.id), // TODO: Update depending on result
+          status: content.stdout
+            ? statusIdToStatus(
+                content.status.id,
+                this.decodeBase64(content.stdout),
+              )
+            : statusIdToStatus(content.status.id),
         },
         select: {
           roomSessionId: true,

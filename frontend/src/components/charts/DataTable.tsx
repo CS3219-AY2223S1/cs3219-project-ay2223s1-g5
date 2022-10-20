@@ -13,15 +13,12 @@ import {
 
 type DataTableProps = {
   headers: string[];
-  rows: (string | { child: ReactNode; sx: SxProps<Theme> })[][];
+  rows: (string | { child: ReactNode; sx?: SxProps<Theme> })[][];
 };
 
 export const DataTable = ({ headers, rows }: DataTableProps) => {
   return (
-    <TableContainer
-      sx={{ boxShadow: "none", maxHeight: "300px" }}
-      component={Paper}
-    >
+    <TableContainer sx={{ boxShadow: "none" }} component={Paper}>
       <Table sx={{ minWidth: "100%" }}>
         <TableHead sx={{ bgcolor: "primary.500" }}>
           <TableRow>
