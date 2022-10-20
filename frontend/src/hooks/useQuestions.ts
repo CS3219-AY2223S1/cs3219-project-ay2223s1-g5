@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 
+import { QUERY_KEYS } from "src/constants/query-keys";
 import { ApiService } from "src/services/ApiService";
 
 import { GetQuestionRes } from "~shared/types/api";
@@ -12,7 +13,7 @@ export const useGetQuestion = (questionId?: number) => {
     return data;
   };
   const { data: question, isLoading: isGetQuestionLoading } = useQuery(
-    ["QUESTION", questionId?.toString() || ""],
+    [QUERY_KEYS.QUESTIONS, questionId?.toString() || ""],
     getQuestion,
     { enabled: !!questionId },
   );

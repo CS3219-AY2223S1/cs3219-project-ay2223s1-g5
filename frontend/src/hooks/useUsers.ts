@@ -1,5 +1,6 @@
-import { useMutation, useQueries, useQuery } from "react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "react-query";
 
+import { QUERY_KEYS } from "src/constants/query-keys";
 import { ApiResponseError, ApiService } from "src/services/ApiService";
 
 import {
@@ -9,6 +10,7 @@ import {
   RequestVerifyEmailReq,
   ResetPasswordReq,
   UpdatePasswordReq,
+  UpdateUserReq,
   VerifyEmailReq,
 } from "~shared/types/api";
 
@@ -32,7 +34,7 @@ export const useGetUserName = (userId?: number) => {
     return data;
   };
   const { data: user, isLoading: isGetUserNameLoading } = useQuery(
-    ["USER", userId?.toString() || ""],
+    [QUERY_KEYS.USERS, userId?.toString() || ""],
     getUserName,
     {
       enabled: !!userId,
@@ -54,7 +56,7 @@ export const useGetUsersName = (
   const results = useQueries(
     userIds.map((userId) => {
       return {
-        queryKey: ["USER", userId.toString()],
+        queryKey: [QUERY_KEYS.USERS, userId.toString()],
         queryFn: () =>
           getUserName(userId).then((value) => ({ ...value, userId })),
         onError: (e: ApiResponseError) => {
@@ -73,9 +75,25 @@ export const useGetUsersName = (
   })[];
 };
 
-export const useUpdatePassword = (userId: number) => {
+export const useUpdateDisplayName = (userId: number) => {
+  const queryClient = useQueryClient();
+  const updateDisplayName = async (input: UpdateUserReq) => {
+    await ApiService.patch<void>(`/users`, input);
+    queryClient.invalidateQueries([QUERY_KEYS.USERS, userId.toString()]);
+  };
+  const {
+    isLoading: isUpdateDisplayNameLoading,
+    mutateAsync: updateDisplayNameMutation,
+  } = useMutation(updateDisplayName);
+  return {
+    isUpdateDisplayNameLoading,
+    updateDisplayNameMutation,
+  };
+};
+
+export const useUpdatePassword = () => {
   const updatePassword = async (input: UpdatePasswordReq) => {
-    await ApiService.post<void>(`/users/${userId}/password`, input);
+    await ApiService.post<void>(`/users/password`, input);
   };
   const {
     isLoading: isUpdatePasswordLoading,

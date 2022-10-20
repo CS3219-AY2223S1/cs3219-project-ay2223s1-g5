@@ -24,7 +24,7 @@ export const ChangePassword = () => {
         <PasswordRequirement label="aa" description="Lowercase" />
         <PasswordRequirement label="@$#" description="Symbol" />
       </Stack>
-      <UpdatePasswordForm userId={user?.userId || 0} />
+      <UpdatePasswordForm />
     </Stack>
   );
 };

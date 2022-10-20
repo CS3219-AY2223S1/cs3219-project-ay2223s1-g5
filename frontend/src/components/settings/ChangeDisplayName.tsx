@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 
-import { UpdatePasswordForm } from "src/components/forms/UpdatePasswordForm";
+import { UpdateDisplayNameForm } from "src/components/forms/UpdateDisplayNameForm";
 import { PasswordRequirement } from "src/components/PasswordRequirement";
 import { useAuth } from "src/contexts/AuthContext";
 
@@ -20,11 +20,12 @@ export const ChangeDisplayName = () => {
       </Stack>
       <Stack direction="row" sx={{ justifyContent: "center" }} spacing={3}>
         <PasswordRequirement label="3+" description="Character" />
-        <PasswordRequirement label="AA" description="Uppercase" />
-        <PasswordRequirement label="aa" description="Lowercase" />
       </Stack>
       {/* To add ChangeNameForm here */}
-      <UpdatePasswordForm userId={user?.userId || 0} />
+      <UpdateDisplayNameForm
+        userId={user?.userId || 0}
+        name={user?.name || ""}
+      />
     </Stack>
   );
 };
