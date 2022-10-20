@@ -6,7 +6,7 @@ import {
   PendingOutlined,
   SvgIconComponent,
 } from "@mui/icons-material";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 import { DataTable } from "src/components/charts/DataTable";
 import { useGetSubmissions } from "src/hooks/useSubmissions";
@@ -34,10 +34,11 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
 
   const onClose = useCallback(() => {
     setIsOpen(false);
+    setSubmission(undefined);
   }, [setIsOpen]);
 
   return (
-    <>
+    <Box sx={{ height: "100%", overflowY: "auto" }}>
       {submission && (
         <SubmissionDialog {...submission} isOpen={isOpen} onClose={onClose} />
       )}
@@ -100,6 +101,6 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
           ];
         })}
       />
-    </>
+    </Box>
   );
 };

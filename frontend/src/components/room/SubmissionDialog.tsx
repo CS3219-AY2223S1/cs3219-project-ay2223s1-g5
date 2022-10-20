@@ -1,4 +1,4 @@
-import { ExpandMore } from "@mui/icons-material";
+import { Close, ExpandMore } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -31,7 +32,18 @@ export const SubmissionDialog = (
 ) => {
   return (
     <Dialog open={props.isOpen} scroll="paper" onClose={props.onClose}>
-      <DialogTitle>Submission Details</DialogTitle>
+      <DialogTitle
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        Submission Details
+        <IconButton onClick={props.onClose}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
       <DialogContent>
         <Stack spacing={1}>
           <Typography>

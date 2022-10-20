@@ -91,7 +91,12 @@ export const QuestionSubmissionPanel = ({
             <Question questionId={questionId} />
           </TabPanel>
           <TabPanel
-            sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}
+            sx={{
+              p: 0,
+              minHeight: 0,
+              flex: 1,
+              overflow: "hidden",
+            }}
             value="submissions"
           >
             <Submissions roomId={roomId} />
