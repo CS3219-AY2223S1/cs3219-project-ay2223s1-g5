@@ -23,6 +23,7 @@
     "@mui/material": "^5.10.3",
     "@twilio/conversations": "^2.2.0",
     "axios": "^0.27.2",
+    "date-fns": "^2.29.3",
     "dompurify": "^2.4.0",
     "echarts": "^5.3.3",
     "echarts-for-react": "^3.0.2",
