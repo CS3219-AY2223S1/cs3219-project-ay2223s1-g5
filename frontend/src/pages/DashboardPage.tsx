@@ -5,7 +5,7 @@ import {
   People,
   Quiz,
 } from "@mui/icons-material";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
 import { DataTable } from "src/components/charts/DataTable";
 import { NetworkChart } from "src/components/charts/NetworkChart";
@@ -40,18 +40,20 @@ export const DashboardPage = () => {
         <ChartContainer
           title={"Collaborators"}
           chart={
-            <DataTable
-              headers={["DATE TIME", "QUESTION", "PEER"]}
-              rows={[
-                ["2020-04-26 00:26:55", "Question 1", "Peer 1"],
-                ["2020-04-27 00:26:55", "Question 2", "Peer 2"],
-                ["2020-04-28 00:27:55", "Question 3", "Peer 3"],
-                ["2020-04-29 00:27:55", "Question 4", "Peer 4"],
-                ["2020-04-30 00:27:55", "Question 5", "Peer 5"],
-                ["2020-04-31 00:27:55", "Question 6", "Peer 6"],
-                ["2020-05-01 00:27:55", "Question 7", "Peer 7"],
-              ]}
-            />
+            <Box sx={{ height: "300px", overflowY: "auto" }}>
+              <DataTable
+                headers={["DATE TIME", "QUESTION", "PEER"]}
+                rows={[
+                  ["2020-04-26 00:26:55", "Question 1", "Peer 1"],
+                  ["2020-04-27 00:26:55", "Question 2", "Peer 2"],
+                  ["2020-04-28 00:27:55", "Question 3", "Peer 3"],
+                  ["2020-04-29 00:27:55", "Question 4", "Peer 4"],
+                  ["2020-04-30 00:27:55", "Question 5", "Peer 5"],
+                  ["2020-04-31 00:27:55", "Question 6", "Peer 6"],
+                  ["2020-05-01 00:27:55", "Question 7", "Peer 7"],
+                ]}
+              />
+            </Box>
           }
           Icon={People}
         />

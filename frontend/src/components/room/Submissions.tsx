@@ -1,50 +1,106 @@
-import { Cancel, CheckCircle } from "@mui/icons-material";
+import { useCallback, useState } from "react";
+import {
+  Cancel,
+  CheckCircle,
+  Error,
+  PendingOutlined,
+  SvgIconComponent,
+} from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 
 import { DataTable } from "src/components/charts/DataTable";
 import { useGetSubmissions } from "src/hooks/useSubmissions";
+import { normaliseStatus } from "src/utils/string";
 
 import { Center } from "../Center";
+import { StyledButton } from "../StyledButton";
 
-/* Tabular Data */
-const tableHeaders = ["DATE", "RUNTIME", "TEST CASE", "STATUS"];
+import { SubmissionDialog, SubmissionDialogContent } from "./SubmissionDialog";
+
+import { Status } from "~shared/types/base";
+
+const HEADERS = ["ID", "STATUS", "DETAILS"];
 
 export type SubmissionsPanelProps = {
   roomId?: string;
 };
 
 export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [submission, setSubmission] = useState<
+    SubmissionDialogContent | undefined
+  >(undefined);
   const submissions = useGetSubmissions(roomId).submissions || [];
 
+  const onClose = useCallback(() => {
+    setIsOpen(false);
+    setSubmission(undefined);
+  }, [setIsOpen]);
+
   return (
-    <DataTable
-      headers={tableHeaders}
-      rows={submissions.map((submission) => {
-        return [
-          `${submission.submitTime}`,
-          `${submission.timeTaken}`,
-          `${submission.inputs}, ${submission.expectedOutput}`,
-          submission.result === "ACCEPTED"
-            ? {
-                sx: {
-                  color: "green.500",
-                  fontWeight: "bold",
-                },
-                child: (
-                  <Center>
-                    <CheckCircle sx={{ mr: 0.5 }} /> {submission.result}
-                  </Center>
-                ),
-              }
-            : {
-                sx: { color: "red.500", fontWeight: "bold" },
-                child: (
-                  <Center>
-                    <Cancel sx={{ mr: 0.5 }} /> {submission.result}
-                  </Center>
-                ),
-              },
-        ];
-      })}
-    />
+    <Box sx={{ height: "100%", overflowY: "auto" }}>
+      {submission && (
+        <SubmissionDialog {...submission} isOpen={isOpen} onClose={onClose} />
+      )}
+      <DataTable
+        headers={HEADERS}
+        rows={submissions.map((submission, index) => {
+          const color =
+            submission.status === Status.ACCEPTED
+              ? "green.500"
+              : submission.status === Status.PENDING
+              ? undefined
+              : "red.500";
+          const status = normaliseStatus(submission.status);
+          const Symbol: SvgIconComponent =
+            submission.status === Status.ACCEPTED
+              ? CheckCircle
+              : submission.status === Status.PENDING
+              ? PendingOutlined
+              : submission.status === Status.INTERNAL_ERROR
+              ? Error
+              : Cancel;
+
+          return [
+            `${index + 1}`,
+            {
+              sx: { color },
+              child: (
+                <Center>
+                  <>
+                    <Symbol sx={{ mr: 0.5 }} />
+                    <Typography>{status}</Typography>
+                  </>
+                </Center>
+              ),
+            },
+            {
+              child: (
+                <Center>
+                  <StyledButton
+                    disabled={submission.status === Status.PENDING}
+                    onClick={() => {
+                      setSubmission({
+                        submitTime: new Date(submission.submitTime),
+                        status: submission.status,
+                        inputs: submission.inputs,
+                        output: submission.expectedOutput,
+                        runTime: submission.runTime || 0,
+                        memoryUsage: submission.memoryUsage || 0,
+                        code: submission.code,
+                        standardOutput: submission.standardOutput,
+                        compilationError: submission.compileOutput,
+                      });
+                      setIsOpen(true);
+                    }}
+                    label="View"
+                  />
+                </Center>
+              ),
+            },
+          ];
+        })}
+      />
+    </Box>
   );
 };
