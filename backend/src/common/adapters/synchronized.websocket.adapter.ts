@@ -1,13 +1,15 @@
 import { INestApplication } from "@nestjs/common";
 import { IoAdapter } from "@nestjs/platform-socket.io";
 import { createAdapter, RedisAdapter } from "@socket.io/redis-adapter";
-import { createClient } from "redis";
+import { createClient, RedisClientType } from "redis";
 import { Namespace, Server, ServerOptions } from "socket.io";
 
 import { ConfigService } from "src/core/config/config.service";
 
 export class SynchronizedSocketAdapter extends IoAdapter {
-  private adapterConstructor: (nsp: Namespace) => RedisAdapter;
+  private adapter: (nsp: Namespace) => RedisAdapter;
+  private publishClient: RedisClientType;
+  private subscribeClient: RedisClientType;
 
   constructor(protected readonly context: INestApplication) {
     super(context);
@@ -16,18 +18,25 @@ export class SynchronizedSocketAdapter extends IoAdapter {
   async activate(): Promise<void> {
     const url = this.context.get(ConfigService).get("redis.url");
 
-    const publishClient = createClient({ url });
-    const subscribeClient = createClient({ url });
+    this.publishClient = createClient({ url });
+    this.subscribeClient = createClient({ url });
 
-    await Promise.all([publishClient.connect(), subscribeClient.connect()]);
+    await Promise.all([
+      this.publishClient.connect(),
+      this.subscribeClient.connect(),
+    ]);
 
-    this.adapterConstructor = createAdapter(publishClient, subscribeClient);
+    this.adapter = createAdapter(this.publishClient, this.subscribeClient);
+  }
+
+  async deactivate(): Promise<void> {
+    await this.publishClient.quit();
+    await this.subscribeClient.quit();
   }
 
   createIOServer(port: number, options: ServerOptions) {
     const server = super.createIOServer(port, options) as Server;
-    console.log(server);
-    server.adapter(this.adapterConstructor);
+    server.adapter(this.adapter);
     return server;
   }
 }
