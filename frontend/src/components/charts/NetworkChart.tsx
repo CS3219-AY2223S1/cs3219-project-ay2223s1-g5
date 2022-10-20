@@ -88,7 +88,6 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
             layout: "force",
             draggable: true,
             force: {
-              // repulsion: [200, 400],
               friction: 0.3,
               gravity: 0.03,
             },

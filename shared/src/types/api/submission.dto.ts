@@ -1,10 +1,15 @@
+import { Status } from "../base";
+
 export type Submission = {
   submitTime: Date | string;
-  timeTaken: number;
+  status: Status;
+  code: string;
   inputs: string[];
   expectedOutput: string;
-  output: string;
-  result: string;
+  runTime?: number;
+  memoryUsage?: number;
+  standardOutput?: string;
+  compileOutput?: string;
 };
 
 export type GetSubmissionsRes = {

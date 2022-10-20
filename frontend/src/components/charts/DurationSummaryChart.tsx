@@ -102,7 +102,6 @@ export const DurationSummaryChart = ({
           trigger: "item",
         },
         xAxis: {
-          // name: "Day",
           data: !durationSummary ? [] : processDates(durationSummary),
         },
         yAxis: { name: "Minutes" },

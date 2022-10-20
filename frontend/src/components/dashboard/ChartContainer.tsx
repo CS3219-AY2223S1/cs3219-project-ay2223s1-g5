@@ -10,7 +10,7 @@ type ChartContainerProps = {
 
 export const ChartContainer = ({ title, chart, Icon }: ChartContainerProps) => {
   return (
-    <Stack spacing={2} sx={{ width: "100%" }}>
+    <Stack spacing={2} sx={{ width: "100%", height: "100%", overflow: "none" }}>
       <Typography
         variant="body1"
         sx={{

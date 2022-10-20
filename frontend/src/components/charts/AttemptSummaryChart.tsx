@@ -21,9 +21,13 @@ export const AttemptSummaryChart = ({
           trigger: "item",
         },
         xAxis: {
-          // name: "Difficulty",
           type: "category",
-          data: [Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD],
+          data: [
+            Difficulty.EASY.charAt(0) + Difficulty.EASY.slice(1).toLowerCase(),
+            Difficulty.MEDIUM.charAt(0) +
+              Difficulty.MEDIUM.slice(1).toLowerCase(),
+            Difficulty.HARD.charAt(0) + Difficulty.HARD.slice(1).toLowerCase(),
+          ],
         },
         yAxis: {
           name: "Minutes",

@@ -6,7 +6,7 @@ import {
   People,
   Quiz,
 } from "@mui/icons-material";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
 import { AttemptSummaryChart } from "src/components/charts/AttemptSummaryChart";
 import { DataTable } from "src/components/charts/DataTable";
@@ -64,13 +64,12 @@ export const DashboardPage = () => {
   useEffect(() => {
     if (!statistics) {
       return;
-    } else {
-      setAttemptSummary(statistics.attemptSummary);
-      setDurationSummary(statistics.durationSummary);
-      setPeerSummary(statistics.peerSummary);
-      setHeatmapData(statistics.heatmapData);
-      setNetworkData(statistics.networkData);
     }
+    setAttemptSummary(statistics.attemptSummary);
+    setDurationSummary(statistics.durationSummary);
+    setPeerSummary(statistics.peerSummary);
+    setHeatmapData(statistics.heatmapData);
+    setNetworkData(statistics.networkData);
   }, [statistics]);
 
   return (
@@ -97,20 +96,22 @@ export const DashboardPage = () => {
         <ChartContainer
           title={"Collaborators"}
           chart={
-            <DataTable
-              headers={["DATE TIME", "QUESTION", "PEER"]}
-              rows={
-                !peerSummary
-                  ? []
-                  : peerSummary.map((summary) => {
-                      return [
-                        summary.date.toString(),
-                        summary.questionTitle,
-                        summary.userName,
-                      ];
-                    })
-              }
-            />
+            <Box sx={{ height: "300px", overflowY: "auto" }}>
+              <DataTable
+                headers={["DATE TIME", "QUESTION", "PEER"]}
+                rows={
+                  !peerSummary
+                    ? []
+                    : peerSummary.map((summary) => {
+                        return [
+                          summary.date.toString(),
+                          summary.questionTitle,
+                          summary.userName,
+                        ];
+                      })
+                }
+              />
+            </Box>
           }
           Icon={People}
         />
