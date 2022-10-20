@@ -119,7 +119,7 @@ export const DashboardPage = () => {
       </Stack>
       <ChartContainer
         title={"Submissions In The Last Year"}
-        chart={<SubmissionsHeatmap />}
+        chart={<SubmissionsHeatmap heatmapData={heatmapData} />}
         Icon={DriveFolderUpload}
       />
     </Stack>
