@@ -7,7 +7,7 @@ import { io } from "socket.io-client";
 import request from "supertest";
 
 import { AuthModule } from "src/auth/auth.module";
-import { SocketSessionAdapter } from "src/common/adapters/websocket.adapter";
+import { SocketSessionAdapter } from "src/common/adapters/session.websocket.adapter";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
 import { PrismaServiceModule } from "src/core/prisma.service.module";
 import { TestClient } from "src/core/test/test-client";

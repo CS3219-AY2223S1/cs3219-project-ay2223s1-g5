@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import { YSocketIO } from "y-socket.io/dist/server";
 import { Document } from "y-socket.io/dist/server/index";
 
-import { serverMiddlewareSetup } from "src/common/adapters/websocket.adapter";
+import { serverMiddlewareSetup } from "src/common/adapters/session.websocket.adapter";
 import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
 import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
 
