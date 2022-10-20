@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   AccessTime,
   DriveFolderUpload,
@@ -7,34 +8,90 @@ import {
 } from "@mui/icons-material";
 import { Stack } from "@mui/material";
 
+import { AttemptSummaryChart } from "src/components/charts/AttemptSummaryChart";
 import { DataTable } from "src/components/charts/DataTable";
+import { DurationSummaryChart } from "src/components/charts/DurationSummaryChart";
 import { NetworkChart } from "src/components/charts/NetworkChart";
-import { ScatterPlot } from "src/components/charts/ScatterPlot";
 import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
-import { VerticalBarChart } from "src/components/charts/VerticalBarChart";
 import { ChartContainer } from "src/components/dashboard/ChartContainer";
 import { Title } from "src/components/Title";
+import { useGetUserStatistics } from "src/hooks/useStatistics";
+
+import { Difficulty } from "~shared/types/base/index";
 
 export const DashboardPage = () => {
+  const { statistics } = useGetUserStatistics();
+  const [attemptSummary, setAttemptSummary] = useState<
+    Record<Difficulty, number> | undefined
+  >();
+  const [durationSummary, setDurationSummary] = useState<
+    | {
+        difficulty: Difficulty;
+        timetaken: number;
+        date: Date;
+      }[]
+    | undefined
+  >();
+  const [peerSummary, setPeerSummary] = useState<
+    | {
+        userName: string;
+        questionTitle: string;
+        date: Date;
+      }[]
+    | undefined
+  >();
+  const [heatmapData, setHeatmapData] = useState<
+    | {
+        date: Date;
+      }[]
+    | undefined
+  >();
+  const [networkData, setNetworkData] = useState<
+    | {
+        topics: {
+          id: number;
+          name: string;
+          count: number;
+        }[];
+        links: {
+          smallTopicId: number;
+          largeTopicId: number;
+        }[];
+      }
+    | undefined
+  >();
+
+  useEffect(() => {
+    if (!statistics) {
+      return;
+    } else {
+      setAttemptSummary(statistics.attemptSummary);
+      setDurationSummary(statistics.durationSummary);
+      setPeerSummary(statistics.peerSummary);
+      setHeatmapData(statistics.heatmapData);
+      setNetworkData(statistics.networkData);
+    }
+  }, [statistics]);
+
   return (
     <Stack spacing={3}>
       <Title title="Dashboard" />
       <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
         <ChartContainer
           title={"Questions Attempted"}
-          chart={<VerticalBarChart />}
+          chart={<AttemptSummaryChart attemptSummary={attemptSummary} />}
           Icon={Quiz}
         />
         <ChartContainer
           title={"Time Taken Per Question"}
-          chart={<ScatterPlot />}
+          chart={<DurationSummaryChart durationSummary={durationSummary} />}
           Icon={AccessTime}
         />
       </Stack>
       <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
         <ChartContainer
           title={"Topics Attempted"}
-          chart={<NetworkChart />}
+          chart={<NetworkChart networkData={networkData} />}
           Icon={Hub}
         />
         <ChartContainer
@@ -42,15 +99,17 @@ export const DashboardPage = () => {
           chart={
             <DataTable
               headers={["DATE TIME", "QUESTION", "PEER"]}
-              rows={[
-                ["2020-04-26 00:26:55", "Question 1", "Peer 1"],
-                ["2020-04-27 00:26:55", "Question 2", "Peer 2"],
-                ["2020-04-28 00:27:55", "Question 3", "Peer 3"],
-                ["2020-04-29 00:27:55", "Question 4", "Peer 4"],
-                ["2020-04-30 00:27:55", "Question 5", "Peer 5"],
-                ["2020-04-31 00:27:55", "Question 6", "Peer 6"],
-                ["2020-05-01 00:27:55", "Question 7", "Peer 7"],
-              ]}
+              rows={
+                !peerSummary
+                  ? []
+                  : peerSummary.map((summary) => {
+                      return [
+                        summary.date.toString(),
+                        summary.questionTitle,
+                        summary.userName,
+                      ];
+                    })
+              }
             />
           }
           Icon={People}

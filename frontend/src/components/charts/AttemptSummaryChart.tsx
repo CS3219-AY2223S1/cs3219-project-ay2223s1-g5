@@ -1,7 +1,15 @@
 import { useTheme } from "@mui/material/styles/";
 import ReactEcharts from "echarts-for-react";
 
-export const VerticalBarChart = () => {
+import { Difficulty } from "~shared/types/base/index";
+
+type AttemptSummaryProps = {
+  attemptSummary: Record<Difficulty, number> | undefined;
+};
+
+export const AttemptSummaryChart = ({
+  attemptSummary,
+}: AttemptSummaryProps) => {
   const theme = useTheme();
   return (
     <ReactEcharts
@@ -15,7 +23,7 @@ export const VerticalBarChart = () => {
         xAxis: {
           // name: "Difficulty",
           type: "category",
-          data: ["Easy", "Medium", "Hard"],
+          data: [Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD],
         },
         yAxis: {
           name: "Minutes",
@@ -26,19 +34,19 @@ export const VerticalBarChart = () => {
           {
             data: [
               {
-                value: 5,
+                value: !attemptSummary ? 0 : attemptSummary.EASY,
                 itemStyle: {
                   color: theme.palette.green["A400"],
                 },
               },
               {
-                value: 10,
+                value: !attemptSummary ? 0 : attemptSummary.MEDIUM,
                 itemStyle: {
                   color: theme.palette.yellow["A400"],
                 },
               },
               {
-                value: 15,
+                value: !attemptSummary ? 0 : attemptSummary.HARD,
                 itemStyle: {
                   color: theme.palette.red["A400"],
                 },

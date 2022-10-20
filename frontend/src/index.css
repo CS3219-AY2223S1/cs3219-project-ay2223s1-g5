@@ -19,4 +19,5 @@ code {
 
 pre {
   background-color: var(--lightgray);
+  white-space: pre-line;
 }
