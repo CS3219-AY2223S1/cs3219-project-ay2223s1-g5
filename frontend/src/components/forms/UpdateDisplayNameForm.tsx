@@ -5,6 +5,7 @@ import { useSnackbar } from "notistack";
 
 import { InputWithIcon } from "src/components/InputWithIcon";
 import { StyledButton } from "src/components/StyledButton";
+import { useAuth } from "src/contexts/AuthContext";
 import { useUpdateDisplayName } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
 
@@ -19,6 +20,7 @@ type UpdateDisplayNameFormState = {
 
 export const UpdateDisplayNameForm = (props: UpdateDisplayNameFormProps) => {
   const { enqueueSnackbar } = useSnackbar();
+  const { getUser } = useAuth();
   const { updateDisplayNameMutation, isUpdateDisplayNameLoading } =
     useUpdateDisplayName(props.userId);
 
@@ -32,6 +34,7 @@ export const UpdateDisplayNameForm = (props: UpdateDisplayNameFormProps) => {
       enqueueSnackbar("Successfully updated display name!", {
         variant: "success",
       });
+      getUser();
     } catch (e: unknown) {
       enqueueSnackbar((e as ApiResponseError).message, {
         variant: "error",
