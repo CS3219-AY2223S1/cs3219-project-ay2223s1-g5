@@ -5,6 +5,7 @@ import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
+import { StyledButton } from "src/components/StyledButton";
 import { Timer } from "src/components/Timer";
 import { useSockets } from "src/contexts/SocketsContext";
 
@@ -158,7 +159,7 @@ export const QueuePage = () => {
 
   return (
     <Stack
-      spacing={4}
+      spacing={12}
       sx={{
         height: "100vh",
         width: "100%",
@@ -167,12 +168,27 @@ export const QueuePage = () => {
         justifyContent: "center",
       }}
     >
-      {timerVariant === "determinate" ? (
-        <Timer size="4rem" state={timer} total={TIMEOUT} />
-      ) : (
-        <CircularProgress size="4rem" />
-      )}
-      <Typography component={"span"}>{message}</Typography>
+      <Stack
+        spacing={4}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {timerVariant === "determinate" ? (
+          <Timer size="4rem" state={timer} total={TIMEOUT} />
+        ) : (
+          <CircularProgress size="4rem" />
+        )}
+        <Typography component={"span"}>{message}</Typography>
+      </Stack>
+      <StyledButton
+        label="Exit"
+        color="error"
+        disabled={timerVariant === "indeterminate"}
+        onClick={() => navigate(-1)}
+      />
     </Stack>
   );
 };

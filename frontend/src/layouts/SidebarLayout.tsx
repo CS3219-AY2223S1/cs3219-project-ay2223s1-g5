@@ -5,7 +5,10 @@ import { NavigationBar } from "src/components/NavigationBar";
 
 export const SidebarLayout = () => {
   return (
-    <Stack direction="row">
+    <Stack
+      direction="row"
+      sx={{ minWidth: "100vw", width: "100vw", maxWidth: "100vw" }}
+    >
       <Stack sx={{ minWidth: "200px", bgcolor: "blueGrey.50" }}>
         <NavigationBar />
       </Stack>
@@ -13,7 +16,8 @@ export const SidebarLayout = () => {
       <Stack
         spacing={2}
         sx={{
-          flexGrow: "1",
+          minWidth: 0,
+          flex: "1",
           borderTop: "10px solid",
           borderColor: "primary.500",
           justifyContent: "center",

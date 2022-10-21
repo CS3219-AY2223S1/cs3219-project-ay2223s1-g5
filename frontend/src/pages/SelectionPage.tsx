@@ -32,7 +32,7 @@ const languageToString = (language: Language) => {
   }
 };
 
-export const DifficultySelectionPage = () => {
+export const SelectionPage = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     Difficulty | undefined
   >(undefined);
