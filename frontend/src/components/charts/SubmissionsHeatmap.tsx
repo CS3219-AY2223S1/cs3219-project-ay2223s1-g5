@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles/";
-import { format } from "date-fns";
+import { endOfDay, format, startOfDay, subYears } from "date-fns";
 import ReactEcharts from "echarts-for-react";
 
 type SubmissionHeatmapProps = {
@@ -26,30 +26,19 @@ export const SubmissionsHeatmap = ({ heatmapData }: SubmissionHeatmapProps) => {
     const data = [];
     if (!heatmapData) {
       return;
-    } else {
-      heatmapData.map((data) => {
-        const formattedDate = format(new Date(data.date), "yyyy/M/d");
-        if (dateSubmissionMap.has(formattedDate)) {
-          const submissionCount = dateSubmissionMap.get(formattedDate);
-          if (!submissionCount) {
-            return;
-          } else {
-            const newSubmissionCount = submissionCount + 1;
-            dateSubmissionMap.set(formattedDate, newSubmissionCount);
-          }
-        } else {
-          dateSubmissionMap.set(formattedDate, 1);
-        }
-      });
-      for (const entry of dateSubmissionMap.entries()) {
-        const date = entry[0];
-        const submissions = entry[1];
-        data.push([new Date(date), submissions]);
-
-        // Find largest number of submissions in the year to set range of submission values
-        if (submissions > maxSubmissions) {
-          setMaxSubmissions(submissions);
-        }
+    }
+    heatmapData.map((data) => {
+      const formattedDate = format(new Date(data.date), "yyyy-MM-dd");
+      const submissionCount = dateSubmissionMap.get(formattedDate) || 0;
+      dateSubmissionMap.set(formattedDate, submissionCount + 1);
+    });
+    for (const entry of dateSubmissionMap.entries()) {
+      const date = entry[0];
+      const submissions = entry[1];
+      data.push([new Date(date), submissions]);
+      // Find largest number of submissions in the year to set range of submission values
+      if (submissions > maxSubmissions) {
+        setMaxSubmissions(submissions);
       }
     }
     return data;
@@ -60,13 +49,13 @@ export const SubmissionsHeatmap = ({ heatmapData }: SubmissionHeatmapProps) => {
       option={{
         tooltip: {
           position: "top",
-          formatter: (params: any) => {
-            const format = params.data[0].toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
-            return "<b>" + params.data[1] + " submissions</b> on " + format;
+          formatter: (params: { data: [Date, number] }) => {
+            const date = params.data[0];
+            const submissions = params.data[1];
+            const formattedDate = format(date, "dd MMM yyyy");
+            return (
+              "Submissions: <b>" + submissions + "</b> on " + formattedDate
+            );
           },
         },
         backgroundColor: "white",
@@ -87,7 +76,7 @@ export const SubmissionsHeatmap = ({ heatmapData }: SubmissionHeatmapProps) => {
             left: 30,
             right: 30,
             orient: "horizontal",
-            range: [new Date().getFullYear()],
+            range: [startOfDay(subYears(new Date(), 1)), endOfDay(new Date())],
           },
         ],
         series: [

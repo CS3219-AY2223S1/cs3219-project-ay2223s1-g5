@@ -35,15 +35,14 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
     }>();
     if (!topics) {
       return;
-    } else {
-      topics.map((topic) => {
-        const stringId = topic["id"].toString();
-        const { count: symbolSize, count: value, id, ...rest } = topic;
-        const node = { symbolSize, value, id: stringId, ...rest };
-        nodes.add(node);
-      });
-      return Array.from(nodes);
     }
+    topics.map((topic) => {
+      const stringId = topic["id"].toString();
+      const { count: symbolSize, count: value, id, ...rest } = topic;
+      const node = { symbolSize, value, id: stringId, ...rest };
+      nodes.add(node);
+    });
+    return Array.from(nodes);
   };
 
   const processLinks = (
@@ -57,15 +56,14 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
     const links = new Set<{ source: string; target: string }>();
     if (!edges) {
       return;
-    } else {
-      edges.map((edge) => {
-        const sourceStringId = edge["smallTopicId"].toString();
-        const targetStringId = edge["largeTopicId"].toString();
-        const link = { source: sourceStringId, target: targetStringId };
-        links.add(link);
-      });
-      return Array.from(links);
     }
+    edges.map((edge) => {
+      const sourceStringId = edge["smallTopicId"].toString();
+      const targetStringId = edge["largeTopicId"].toString();
+      const link = { source: sourceStringId, target: targetStringId };
+      links.add(link);
+    });
+    return Array.from(links);
   };
 
   const data = {
@@ -77,7 +75,7 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
     <ReactEcharts
       option={{
         tooltip: {
-          formatter: "Questions Attempted: {c0}",
+          formatter: "Questions Attempted: <b>{c0}</b>",
         },
         backgroundColor: "white",
         animationDuration: 1500,
@@ -106,7 +104,6 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
               fontFamily: "sans-serif",
             },
             lineStyle: {
-              // color: "source",
               curveness: 0,
               width: 1.5,
             },
