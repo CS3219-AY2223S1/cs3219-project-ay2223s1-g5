@@ -10,7 +10,7 @@ import {
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
-import { session } from "src/common/adapters/websocket.adapter";
+import { session } from "src/common/adapters/session.websocket.adapter";
 import { RateLimitError } from "src/common/errors/rate-limit.error";
 import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";

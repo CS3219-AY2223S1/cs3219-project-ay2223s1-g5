@@ -1,13 +1,13 @@
 import { INestApplication, NestMiddleware } from "@nestjs/common";
-import { IoAdapter } from "@nestjs/platform-socket.io";
 import { Request, Response } from "express";
 import passport from "passport";
 import { Server, ServerOptions, Socket } from "socket.io";
 import { ExtendedError, Namespace } from "socket.io/dist/namespace";
 
-import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
 import { ConfigService } from "src/core/config/config.service";
 import { RedisService } from "src/redis/redis.service";
+
+import { SynchronizedSocketAdapter } from "./synchronized.websocket.adapter";
 
 export const session = (socket: Socket): Request["session"] => {
   return (socket.request as Request).session;
@@ -65,9 +65,9 @@ export function serverMiddlewareSetup(
   return server;
 }
 
-export class SocketSessionAdapter extends IoAdapter {
+export class SessionSocketAdapter extends SynchronizedSocketAdapter {
   constructor(
-    private readonly context: INestApplication,
+    protected readonly context: INestApplication,
     private readonly middlewareFactory: (
       config: ConfigService,
       redis: RedisService,
