@@ -18,6 +18,7 @@ import { useRefreshSubmissions } from "src/hooks/useSubmissions";
 import { useGetUsersName } from "src/hooks/useUsers";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
+import { CLIENT_EVENTS } from "~shared/constants/events";
 import {
   JoinedPayload,
   PartnerDisconnectPayload,
@@ -93,8 +94,17 @@ export const RoomPage = () => {
     if (!socket) {
       return;
     }
+    // Replace error handler
+    socket.on(CLIENT_EVENTS.ERROR, (error: Error) => {
+      socket.off(CLIENT_EVENTS.DISCONNECT);
+      enqueueSnackbar(error.message, { variant: "error" });
+      // TODO: Transmit error code instead
+      if (error.message === "Duplicate connection") {
+        navigate("/select-difficulty");
+      }
+    });
     setRoomSocket(socket);
-  }, [sockets]);
+  }, [enqueueSnackbar, navigate, sockets]);
 
   useEffect(() => {
     if (roomSocket && roomId) {

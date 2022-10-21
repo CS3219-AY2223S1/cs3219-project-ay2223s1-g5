@@ -2,6 +2,7 @@ import { UseFilters, UsePipes } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
@@ -10,20 +11,21 @@ import {
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
-import { session } from "src/common/adapters/websocket.adapter";
+import { session } from "src/common/adapters/session.websocket.adapter";
 import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
 
 import { QueueService } from "./queue.service";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
+import { CLIENT_EVENTS } from "~shared/constants/events";
 import { EnterQueuePayload } from "~shared/types/api";
 import { Difficulty, Language } from "~shared/types/base";
 
 @UseFilters(WsExceptionFilter)
 @UsePipes(CustomValidationPipe)
 @WebSocketGateway({ namespace: QUEUE_NAMESPACE })
-export class QueueGateway implements OnGatewayDisconnect {
+export class QueueGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Namespace;
 
@@ -81,6 +83,17 @@ export class QueueGateway implements OnGatewayDisconnect {
     for (const user of users) {
       this.server.to(user.socketId).emit(QUEUE_EVENTS.ROOM_READY, match);
     }
+  }
+
+  async handleConnection(client: Socket) {
+    const userId = Number(session(client).passport?.user.userId);
+    const existing = await this.server.to(`user:${userId}`).allSockets();
+    if (existing.size > 0) {
+      this.server.to(Array.from(existing)).emit(CLIENT_EVENTS.ERROR, {
+        message: "Duplicate connection",
+      } as Error);
+    }
+    await client.join(`user:${userId}`);
   }
 
   async handleDisconnect(client: Socket) {
