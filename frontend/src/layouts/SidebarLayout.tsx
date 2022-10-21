@@ -7,7 +7,7 @@ export const SidebarLayout = () => {
   return (
     <Stack
       direction="row"
-      sx={{ minWidth: "100vw", width: "100vw", maxWidth: "100vw" }}
+      sx={{ minWidth: 0, width: "100%", maxWidth: "100vw" }}
     >
       <Stack sx={{ minWidth: "200px", bgcolor: "blueGrey.50" }}>
         <NavigationBar />

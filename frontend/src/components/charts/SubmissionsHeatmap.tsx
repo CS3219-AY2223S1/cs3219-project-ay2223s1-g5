@@ -48,6 +48,7 @@ export const SubmissionsHeatmap = ({ heatmapData }: SubmissionHeatmapProps) => {
     <ReactEcharts
       option={{
         tooltip: {
+          confine: true,
           position: "top",
           formatter: (params: { data: [Date, number] }) => {
             const date = params.data[0];
