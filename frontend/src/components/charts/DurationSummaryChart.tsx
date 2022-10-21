@@ -47,25 +47,24 @@ export const DurationSummaryChart = ({
     }>();
     if (!durationSummary) {
       return;
-    } else {
-      durationSummary.map((duration) => {
-        const difficulty = duration.difficulty;
-        const timetaken = duration.timetaken;
-        const attemptDate = duration.date;
-        const color =
-          difficulty === Difficulty.EASY
-            ? theme.palette.green["A400"]
-            : difficulty === Difficulty.MEDIUM
-            ? theme.palette.yellow["A400"]
-            : difficulty === Difficulty.HARD
-            ? theme.palette.red["A400"]
-            : undefined;
-        const date = format(new Date(attemptDate), "d/M/yyyy");
-        const point = { value: [date, timetaken], itemStyle: { color: color } };
-        points.add(point);
-      });
-      return Array.from(points);
     }
+    durationSummary.map((duration) => {
+      const difficulty = duration.difficulty;
+      const timetaken = duration.timetaken;
+      const attemptDate = duration.date;
+      const color =
+        difficulty === Difficulty.EASY
+          ? theme.palette.green["A400"]
+          : difficulty === Difficulty.MEDIUM
+          ? theme.palette.yellow["A400"]
+          : difficulty === Difficulty.HARD
+          ? theme.palette.red["A400"]
+          : undefined;
+      const date = format(new Date(attemptDate), "d/M");
+      const point = { value: [date, timetaken], itemStyle: { color: color } };
+      points.add(point);
+    });
+    return Array.from(points);
   };
 
   return (
@@ -73,6 +72,11 @@ export const DurationSummaryChart = ({
       option={{
         tooltip: {
           trigger: "item",
+          formatter: (params: { data: { value: [string, number] } }) => {
+            const date = params.data.value[0];
+            const timetaken = params.data.value[1];
+            return "Time Taken (Minutes): <b>" + timetaken + " </b> on " + date;
+          },
         },
         xAxis: {
           data: getPastThirtyDays(),

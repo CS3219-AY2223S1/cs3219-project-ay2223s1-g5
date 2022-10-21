@@ -21,6 +21,10 @@ export const AttemptSummaryChart = ({
         },
         tooltip: {
           trigger: "item",
+          formatter: (params: { data: { value: number } }) => {
+            const attempts = params.data.value;
+            return "Questions Attempted: <b>" + attempts + "</b>";
+          },
         },
         xAxis: {
           type: "category",
