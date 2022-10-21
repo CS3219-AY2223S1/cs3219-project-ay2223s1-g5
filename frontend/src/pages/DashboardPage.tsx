@@ -99,7 +99,7 @@ export const DashboardPage = () => {
           chart={
             <Box sx={{ height: "300px", overflowY: "auto" }}>
               <DataTable
-                headers={["DATE TIME", "QUESTION", "PEER"]}
+                headers={["Date", "Question", "Peer"]}
                 rows={
                   !peerSummary
                     ? []

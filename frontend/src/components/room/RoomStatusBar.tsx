@@ -25,6 +25,7 @@ export const RoomStatusBar = (props: RoomStatusBarProps) => {
         sx={{ display: "flex", alignItems: "center" }}
       >
         <Avatar
+          key={props.self.name}
           sx={{
             width: "40px",
             height: "40px",
@@ -39,9 +40,9 @@ export const RoomStatusBar = (props: RoomStatusBarProps) => {
         >
           {nameToInitials(props.self.name)}
         </Avatar>
-        {props.participants.map((participant) => (
+        {props.participants.map((participant, index) => (
           <Avatar
-            key={participant.name}
+            key={participant.name || index}
             sx={{
               width: "40px",
               height: "40px",

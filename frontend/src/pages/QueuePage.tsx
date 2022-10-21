@@ -37,7 +37,7 @@ export const QueuePage = () => {
       enqueueSnackbar("No difficulty level or language specified", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
       return;
     }
 
@@ -50,7 +50,7 @@ export const QueuePage = () => {
       enqueueSnackbar("Invalid difficulty level", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
     }
 
     const normalizedLanguage = language.toUpperCase();
@@ -62,7 +62,7 @@ export const QueuePage = () => {
       enqueueSnackbar("Invalid language", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
     }
   }, [difficulty, language, navigate, enqueueSnackbar]);
 
@@ -87,7 +87,7 @@ export const QueuePage = () => {
     // Replace error handler
     socket.on(CLIENT_EVENTS.ERROR, (error: Error) => {
       enqueueSnackbar(error.message, { variant: "error" });
-      navigate("/select-difficulty");
+      navigate("/select");
     });
     setQueueSocket(socket);
   }, [enqueueSnackbar, navigate, sockets]);

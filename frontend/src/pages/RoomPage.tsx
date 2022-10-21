@@ -79,7 +79,7 @@ export const RoomPage = () => {
       enqueueSnackbar("Invalid room ID", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
       return;
     }
   }, [roomId, navigate, enqueueSnackbar]);
@@ -100,7 +100,7 @@ export const RoomPage = () => {
       enqueueSnackbar(error.message, { variant: "error" });
       // TODO: Transmit error code instead
       if (error.message === "Duplicate connection") {
-        navigate("/select-difficulty");
+        navigate("/select");
       }
     });
     setRoomSocket(socket);
@@ -122,8 +122,8 @@ export const RoomPage = () => {
     if (!roomSocket || !roomId) {
       return;
     }
-
-    roomSocket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
+    roomSocket.off(CLIENT_EVENTS.DISCONNECT);
+    roomSocket.on(CLIENT_EVENTS.DISCONNECT, (reason: string) => {
       if (reason === SOCKET_IO_DISCONNECT_REASON.SERVER_CLOSE) {
         navigate("/dashboard");
         return;

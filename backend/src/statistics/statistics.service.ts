@@ -174,7 +174,7 @@ export class StatisticsService {
     for (const outerEntry of links) {
       const lowId = outerEntry[0];
       for (const innerEntry of outerEntry[1]) {
-        const highId = innerEntry[1];
+        const highId = innerEntry[0];
         topicSize.set(lowId, (topicSize.get(lowId) || 0) + 1);
         topicSize.set(highId, (topicSize.get(highId) || 0) + 1);
       }
