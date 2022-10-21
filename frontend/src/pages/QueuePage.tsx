@@ -9,6 +9,7 @@ import { Timer } from "src/components/Timer";
 import { useSockets } from "src/contexts/SocketsContext";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
+import { CLIENT_EVENTS } from "~shared/constants/events";
 import { FoundRoomPayload } from "~shared/types/api";
 import { Difficulty, Language } from "~shared/types/base";
 
@@ -82,8 +83,13 @@ export const QueuePage = () => {
     if (!socket) {
       return;
     }
+    // Replace error handler
+    socket.on(CLIENT_EVENTS.ERROR, (error: Error) => {
+      enqueueSnackbar(error.message, { variant: "error" });
+      navigate("/select-difficulty");
+    });
     setQueueSocket(socket);
-  }, [sockets]);
+  }, [enqueueSnackbar, navigate, sockets]);
 
   useEffect(() => {
     if (!queueSocket) {

@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { io, Socket } from "socket.io-client";
 
+import { SOCKET_IO_DISCONNECT_REASON } from "src/constants/socket.io";
+
 import { CLIENT_EVENTS } from "~shared/constants/events";
 
 type SocketsContextProps = {
@@ -65,7 +67,11 @@ export const SocketsProvider = ({
           enqueueSnackbar(error.message, {
             variant: "error",
           });
-          // TODO: Can provide a way for the consumer to perform some action on error?
+        });
+        client.on(CLIENT_EVENTS.DISCONNECT, (reason: string) => {
+          if (reason === SOCKET_IO_DISCONNECT_REASON.SERVER_CLOSE) {
+            navigate(-1);
+          }
         });
         return new Map(sockets).set(namespace, client);
       });
