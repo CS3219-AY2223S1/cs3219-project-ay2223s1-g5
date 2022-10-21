@@ -8,11 +8,18 @@ export abstract class JudgeMiddleware {
   template: string;
   inputs: string[];
   output: string;
+  canaryValue: string;
 
-  constructor(template: string, inputs: string[], output: string) {
+  constructor(
+    template: string,
+    inputs: string[],
+    output: string,
+    canaryValue: string,
+  ) {
     this.template = template;
     this.inputs = inputs;
     this.output = output;
+    this.canaryValue = canaryValue;
   }
 
   getEntryPoint() {
