@@ -50,7 +50,7 @@ export const DurationSummaryChart = ({
     }
     durationSummary.map((duration) => {
       const difficulty = duration.difficulty;
-      const timetaken = duration.timetaken;
+      const timetaken = Number((duration.timetaken / 60).toFixed(2));
       const attemptDate = duration.date;
       const color =
         difficulty === Difficulty.EASY
