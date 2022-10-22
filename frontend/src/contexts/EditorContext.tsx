@@ -102,7 +102,6 @@ export const EditorProvider = ({
 
     const webRTCProviderInstance = new WebrtcProvider(roomId, document, {
       signaling: [
-        "wss://signaling.yjs.dev",
         "wss://y-webrtc-signaling-eu.herokuapp.com",
         "wss://y-webrtc-signaling-us.herokuapp.com",
       ],
