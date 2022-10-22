@@ -1,5 +1,16 @@
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
+const primitiveTypes = [
+  "int",
+  "byte",
+  "short",
+  "long",
+  "float",
+  "double",
+  "boolean",
+  "char",
+];
+
 export class JavaMiddleware extends JudgeMiddleware {
   constructor(template: string, inputs: string[], output: string) {
     super(template, inputs, output);
@@ -62,11 +73,9 @@ export class JavaMiddleware extends JudgeMiddleware {
       const output = this.output.replace(/^\[/, "{").replace(/\]$/, "}");
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${output};`;
       isEqual = `boolean isEqual = Arrays.equals(res, expectedOutput);`;
-    } else if (codePrototype.returnType == "int") {
-      expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
-      isEqual =
-        "boolean isEqual = Integer.toString(res).equals(Integer.toString(expectedOutput));";
-    } else if (codePrototype.returnType == "boolean") {
+    } else if (
+      primitiveTypes.some((type) => type === codePrototype.returnType)
+    ) {
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
       isEqual = "boolean isEqual = res == expectedOutput;";
     } else {
