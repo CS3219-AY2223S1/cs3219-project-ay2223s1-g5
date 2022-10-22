@@ -16,6 +16,8 @@ import { EditorService } from "./editor.service";
 @UseFilters(WsExceptionFilter)
 @WebSocketGateway()
 export class EditorGateway implements OnGatewayInit {
+  private static readonly SYNCHORNIZE_DESTROY_EVENT =
+    "EDITOR:SYNCHORNIZE-DESTROY";
   ySocketIo: YSocketIO;
 
   constructor(
@@ -28,6 +30,9 @@ export class EditorGateway implements OnGatewayInit {
   afterInit(server: Server) {
     // We install authentication middleware on all dynamic namespaces created
     server.on("new_namespace", (namespace) => {
+      if (!namespace.name.startsWith("/yjs|")) {
+        return;
+      }
       namespace = serverMiddlewareSetup(namespace, this.middleware);
       // Extract room ID
       const roomId = namespace.name.replace(/\/yjs\|/, "");
@@ -41,6 +46,7 @@ export class EditorGateway implements OnGatewayInit {
         }
       });
     });
+
     this.ySocketIo = new YSocketIO(server);
     this.ySocketIo.initialize();
 
@@ -49,6 +55,7 @@ export class EditorGateway implements OnGatewayInit {
       const roomId = document.name;
       await this.editorService.loadDocument(roomId, document);
     });
+
     this.ySocketIo.on(
       "all-document-connections-closed",
       async (document: Document) => {
@@ -56,7 +63,15 @@ export class EditorGateway implements OnGatewayInit {
         await this.editorService.saveDocument(roomId, document);
         this.logger.info(`Destroying document: ${document.name}}`);
         document.destroy();
+        server.serverSideEmit(EditorGateway.SYNCHORNIZE_DESTROY_EVENT, {
+          roomId: roomId,
+        });
       },
     );
+
+    server.on(EditorGateway.SYNCHORNIZE_DESTROY_EVENT, ({ roomId }) => {
+      this.logger.info(`Synchronizing document destruction: ${roomId}}`);
+      this.ySocketIo.documents.get(roomId)?.destroy();
+    });
   }
 }
