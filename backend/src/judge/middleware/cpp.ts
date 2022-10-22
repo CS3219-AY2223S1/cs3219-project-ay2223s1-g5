@@ -1,8 +1,13 @@
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class CppMiddleware extends JudgeMiddleware {
-  constructor(template: string, inputs: string[], output: string) {
-    super(template, inputs, output);
+  constructor(
+    template: string,
+    inputs: string[],
+    output: string,
+    canaryValue: string,
+  ) {
+    super(template, inputs, output, canaryValue);
   }
 
   getImports(): string {
@@ -94,7 +99,7 @@ export class CppMiddleware extends JudgeMiddleware {
       `  ${expectedOutput}\n` +
       `  ${codePrototype.returnType} res = Solution().${codePrototype.functionName}(${joinedVariableNames});\n` +
       `  ${isEqual}\n` +
-      `  printf("%s", isEqual ? "true" : "false");\n` +
+      `  fprintf(stderr, "${this.canaryValue}|%s", isEqual ? "true" : "false");\n` +
       `}\n`
     );
   }

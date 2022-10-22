@@ -1,8 +1,13 @@
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
 export class PythonMiddleware extends JudgeMiddleware {
-  constructor(template: string, inputs: string[], output: string) {
-    super(template, inputs, output);
+  constructor(
+    template: string,
+    inputs: string[],
+    output: string,
+    canaryValue: string,
+  ) {
+    super(template, inputs, output, canaryValue);
   }
 
   getImports(): string {
@@ -10,7 +15,8 @@ export class PythonMiddleware extends JudgeMiddleware {
       "from typing import List\n" +
       "import collections\n" +
       "import math\n" +
-      "import random\n"
+      "import random\n" +
+      "import sys\n"
     );
   }
 
@@ -51,7 +57,10 @@ export class PythonMiddleware extends JudgeMiddleware {
       `\n` +
       variables.join("\n") +
       `\n` +
-      `print(Solution().${codePrototype.functionName}(${joinedVariableNames}) == ${this.output})\n`
+      `if (Solution().${codePrototype.functionName}(${joinedVariableNames}) == ${this.output}):\n` +
+      `  print("${this.canaryValue}|true", file=sys.stderr)\n` +
+      `else:\n` +
+      `  print("${this.canaryValue}|false", file=sys.stderr)\n`
     );
   }
 }

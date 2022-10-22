@@ -12,8 +12,13 @@ const primitiveTypes = [
 ];
 
 export class JavaMiddleware extends JudgeMiddleware {
-  constructor(template: string, inputs: string[], output: string) {
-    super(template, inputs, output);
+  constructor(
+    template: string,
+    inputs: string[],
+    output: string,
+    canaryValue: string,
+  ) {
+    super(template, inputs, output, canaryValue);
   }
 
   getImports(): string {
@@ -97,7 +102,7 @@ export class JavaMiddleware extends JudgeMiddleware {
       `    ${expectedOutput}\n` +
       `    ${codePrototype.returnType} res = solution.${codePrototype.functionName}(${joinedVariableNames});\n` +
       `    ${isEqual}\n` +
-      `    System.out.print(isEqual ? "True" : "False");\n` +
+      `    System.err.print(isEqual ? "${this.canaryValue}|true" : "${this.canaryValue}|false");\n` +
       `  }\n` +
       `}\n`
     );
