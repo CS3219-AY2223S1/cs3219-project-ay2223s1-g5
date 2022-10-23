@@ -147,8 +147,15 @@ export const QueuePage = () => {
       if (index === -1) {
         index = 1;
       }
-      // FIXME: We stagger the users here to prevent some bug in the
-      // webrtc client from preventing bidirectional syncing.
+      /* We stagger the entry time of users because when two users
+         simultaneously try to establish a webrtc connection with each other
+         the FSM of the signalling process is violated and a connection is
+         not established.
+
+         When both parties initiate an offer which interleaves, the second answer
+         results in an error because a stable state was already achieved when the
+         first answer was accepted.
+      */
       setTimeout(
         () => {
           setMessage("Room ready. Joining...");
