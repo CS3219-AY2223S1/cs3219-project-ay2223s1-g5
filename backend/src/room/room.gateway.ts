@@ -50,15 +50,14 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const userId = Number(session(client).passport?.user.userId);
     try {
-      const { language, questionId, members } = await this.roomService.joinRoom(
-        userId,
-        roomId,
-      );
+      const { language, questionId, members, password } =
+        await this.roomService.joinRoom(userId, roomId);
       const payload: JoinedPayload = {
         userId,
         metadata: {
-          language,
           members,
+          password,
+          language,
           questionId,
         },
       };

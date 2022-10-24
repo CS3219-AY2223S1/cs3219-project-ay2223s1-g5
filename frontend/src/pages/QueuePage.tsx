@@ -7,6 +7,7 @@ import { Socket } from "socket.io-client";
 
 import { StyledButton } from "src/components/StyledButton";
 import { Timer } from "src/components/Timer";
+import { useAuth } from "src/contexts/AuthContext";
 import { useSockets } from "src/contexts/SocketsContext";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
@@ -17,6 +18,7 @@ import { Difficulty, Language } from "~shared/types/base";
 const TIMEOUT = 30;
 
 export const QueuePage = () => {
+  const { user } = useAuth();
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const difficulty = params.get("difficulty");
@@ -137,10 +139,33 @@ export const QueuePage = () => {
     });
 
     queueSocket.on(QUEUE_EVENTS.ROOM_READY, (match: FoundRoomPayload) => {
-      setMessage("Room ready. Joining...");
-      clearTimeout(timeoutId);
       queueSocket.disconnect();
-      setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
+      clearTimeout(timeoutId);
+      let index = match.result.findIndex(
+        ({ userId }) => userId === user?.userId,
+      );
+      if (index === -1) {
+        index = 1;
+      }
+      /* We stagger the entry time of users because when two users
+         simultaneously try to establish a webrtc connection with each other
+         the FSM of the signalling process is violated and a connection is
+         not established.
+
+         When both parties initiate an offer which interleaves, the second answer
+         results in an error because a stable state was already achieved when the
+         first answer was accepted.
+      */
+      setTimeout(
+        () => {
+          setMessage("Room ready. Joining...");
+        },
+        index === 0 ? 0 : 600,
+      );
+      setTimeout(
+        () => navigate(`/room/${match.roomId}`),
+        index === 0 ? 300 : 600,
+      );
     });
 
     queueSocket.on(QUEUE_EVENTS.EXISTING_MATCH, (roomId: string) => {

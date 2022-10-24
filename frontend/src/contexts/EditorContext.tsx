@@ -11,14 +11,17 @@ import { useMonaco } from "@monaco-editor/react";
 import * as monacoType from "monaco-editor";
 import { MonacoBinding } from "y-monaco";
 import { SocketIOProvider } from "y-socket.io";
+import { WebrtcProvider } from "y-webrtc";
 import { Doc, Text } from "yjs";
 
 import { useAuth } from "src/contexts/AuthContext";
+import { Awareness } from "y-protocols/awareness";
 
 import { EDITOR_DOCUMENT_NAME } from "~shared/constants";
 
 type EditorContextProps = {
   onMount: (editor: monacoType.editor.IStandaloneCodeEditor) => void;
+  isReady: boolean;
   isConnected: boolean;
   onSubmit: (callback: (code: string) => void) => void;
 };
@@ -27,8 +30,12 @@ const EditorContext = createContext<EditorContextProps | undefined>(undefined);
 
 export const EditorProvider = ({
   roomId,
+  roomPassword,
   children,
-}: PropsWithChildren & { roomId: string }): JSX.Element => {
+}: PropsWithChildren & {
+  roomId: string;
+  roomPassword: string;
+}): JSX.Element => {
   const { user } = useAuth();
   const monaco = useMonaco();
   const editor = useRef<monacoType.editor.IStandaloneCodeEditor | null>(null);
@@ -36,10 +43,16 @@ export const EditorProvider = ({
   const [isEditorMounted, setIsEditorMounted] = useState<boolean>(false);
   const [document, setDocument] = useState<Doc | undefined>(undefined);
   const [type, setType] = useState<Text | undefined>(undefined);
-  const [provider, setProvider] = useState<SocketIOProvider | undefined>(
-    undefined,
-  );
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [awareness, setAwareness] = useState<Awareness | undefined>(undefined);
+  const [socketIOProvider, setSocketIOProvider] = useState<
+    SocketIOProvider | undefined
+  >(undefined);
+  const [webRTCProvider, setWebRTCProvider] = useState<
+    WebrtcProvider | undefined
+  >(undefined);
+  const [isSocketIOSynced, setIsSocketIOSynced] = useState<boolean>(false);
+  const [isSocketIOConnected, setIsSocketIOConnected] =
+    useState<boolean>(false);
   const [binding, setBinding] = useState<MonacoBinding | undefined>(undefined);
 
   const onSubmit = useCallback(
@@ -75,57 +88,111 @@ export const EditorProvider = ({
 
   // Create and bind provider to document.
   useEffect(() => {
-    if (!document || provider) {
+    if (!document || socketIOProvider || webRTCProvider || awareness) {
       return;
     }
-    const socketIOProvider = new SocketIOProvider(
+    const awarenessInstance = new Awareness(document);
+    const socketIOProviderInstance = new SocketIOProvider(
       `${window.location.protocol}//${window.location.host}`,
       roomId,
       document,
-      { autoConnect: true },
+      { autoConnect: true, awareness: awarenessInstance },
     );
-    setProvider(socketIOProvider);
-  }, [document, provider, roomId]);
+    setSocketIOProvider(socketIOProviderInstance);
+
+    const webRTCProviderInstance = new WebrtcProvider(roomId, document, {
+      signaling: [
+        "wss://y-webrtc-signaling-eu.herokuapp.com",
+        "wss://y-webrtc-signaling-us.herokuapp.com",
+      ],
+      password: roomPassword,
+      awareness: awarenessInstance,
+      maxConns: 10,
+      filterBcConns: false,
+      peerOpts: {},
+    });
+    setWebRTCProvider(webRTCProviderInstance);
+
+    setAwareness(awarenessInstance);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document, roomId]);
 
   useEffect(() => {
-    if (!provider) {
+    if (!socketIOProvider) {
       return;
     }
-    provider.awareness.setLocalState({
-      id: user?.userId,
-      name: user?.name,
-    });
-    provider.on("status", ({ status }: { status: string }) => {
+    socketIOProvider.on("status", ({ status }: { status: string }) => {
       if (status === "connected") {
-        setIsConnected(true);
+        setIsSocketIOConnected(true);
       } else {
-        setIsConnected(false);
+        setIsSocketIOConnected(false);
       }
     });
-  }, [provider, user, setIsConnected]);
+    socketIOProvider.on("synced", (synced: boolean) => {
+      setIsSocketIOSynced(synced);
+    });
+  }, [socketIOProvider, setIsSocketIOConnected, setIsSocketIOSynced]);
 
   useEffect(() => {
-    if (!provider) {
+    if (!awareness || !user) {
       return;
     }
-    return () => provider.destroy();
-  }, [provider]);
+    awareness.setLocalState({
+      id: user.userId,
+      name: user.name,
+    });
+  }, [user, awareness]);
+
+  useEffect(() => {
+    if (!socketIOProvider) {
+      return;
+    }
+    return () => {
+      socketIOProvider.disconnect();
+      socketIOProvider.destroy();
+    };
+  }, [socketIOProvider]);
+
+  useEffect(() => {
+    if (!webRTCProvider) {
+      return;
+    }
+    return () => {
+      webRTCProvider.disconnect();
+      webRTCProvider.destroy();
+    };
+  }, [webRTCProvider]);
 
   // Bind the editor to the provider.
   useEffect(() => {
     const editorModel = editor.current?.getModel();
     // We check for editorRef.current otherwise new Set([...]) will complain.
-    if (!monaco || !type || !editor.current || !editorModel || !provider) {
+    if (
+      !isSocketIOSynced ||
+      !webRTCProvider ||
+      !monaco ||
+      !type ||
+      !editor.current ||
+      !editorModel ||
+      !awareness
+    ) {
       return;
     }
     const binding = new MonacoBinding(
       type,
       editorModel,
       new Set([editor.current]),
-      provider.awareness,
+      awareness,
     );
     setBinding(binding);
-  }, [monaco, provider, type, isEditorMounted]);
+  }, [
+    monaco,
+    type,
+    isEditorMounted,
+    isSocketIOSynced,
+    awareness,
+    webRTCProvider,
+  ]);
 
   useEffect(() => {
     if (!binding) {
@@ -138,7 +205,8 @@ export const EditorProvider = ({
     <EditorContext.Provider
       value={{
         onMount,
-        isConnected,
+        isReady: !!webRTCProvider && !!socketIOProvider,
+        isConnected: !!webRTCProvider && isSocketIOConnected,
         onSubmit,
       }}
     >
