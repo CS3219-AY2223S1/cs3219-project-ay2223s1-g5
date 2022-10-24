@@ -22,6 +22,7 @@ type Match = {
 @Injectable()
 export class QueueService {
   private static readonly NAMESPACE = "Queue";
+  private static readonly USER_TO_SOCKET = "UserToSocket";
   private static readonly EXPIRATION_TIME = 30;
 
   constructor(
@@ -51,6 +52,16 @@ export class QueueService {
     ];
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
+    // In the event that new connection occurs and the other connection has
+    // not yet disconnected, we remove the previous connection from queue.
+    const currentSocket = await this.redisService.getValue(
+      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
+      userId.toString(),
+    );
+    if (currentSocket) {
+      await this.removeFromQueue(userId, currentSocket);
+    }
+
     if (matchedUsers.length === 0) {
       await this.addUserToQueue(difficulty, language, userId, socketId);
       return null;
@@ -63,7 +74,7 @@ export class QueueService {
       return null;
     }
 
-    await this.removeFromQueue(matchedUser.socketId);
+    await this.removeFromQueue(matchedUser.userId, matchedUser.socketId);
 
     this.logger.info(`${userId} and ${matchedUser.userId} matched`);
 
@@ -110,6 +121,11 @@ export class QueueService {
   ): Promise<string | null> {
     this.logger.info(`${userId} added to queue`);
     await this.redisService.setKey(
+      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
+      userId.toString(),
+      socketId,
+    );
+    await this.redisService.setKey(
       [QueueService.NAMESPACE],
       socketId,
       this.constructQueueKey(difficulty, language),
@@ -122,7 +138,12 @@ export class QueueService {
     );
   }
 
-  async removeFromQueue(socketId: string): Promise<void> {
+  async removeFromQueue(userId: number, socketId: string): Promise<void> {
+    await this.redisService.deleteKey(
+      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
+      userId.toString(),
+    );
+
     const queueKey = await this.redisService.getValue(
       [QueueService.NAMESPACE],
       socketId,

@@ -98,6 +98,7 @@ export class QueueGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(client: Socket) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
-    await this.queueService.removeFromQueue(client.id);
+    const userId = Number(session(client).passport?.user.userId);
+    await this.queueService.removeFromQueue(userId, client.id);
   }
 }
