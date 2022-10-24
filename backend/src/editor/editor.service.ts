@@ -32,10 +32,7 @@ export class EditorService {
     const text = document.getText(EDITOR_DOCUMENT_NAME);
     // Monaco Editor expects line endings to follow CRLF.
     text.insert(0, template.replace(/(?<!\r)\n/g, "\r\n"));
-    const update = Buffer.from(encodeStateAsUpdate(document)).toString(
-      "base64",
-    );
-    await this.redisService.setKey([EditorService.NAMESPACE], roomId, update);
+    await this.saveDocument(roomId, document);
   }
 
   async saveDocument(roomId: string, document: Document): Promise<void> {
