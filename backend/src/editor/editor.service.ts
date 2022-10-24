@@ -35,7 +35,7 @@ export class EditorService {
     await this.saveDocument(roomId, document);
   }
 
-  async saveDocument(roomId: string, document: Document): Promise<void> {
+  async saveDocument(roomId: string, document: Document | Doc): Promise<void> {
     const update = Buffer.from(encodeStateAsUpdate(document)).toString(
       "base64",
     );
