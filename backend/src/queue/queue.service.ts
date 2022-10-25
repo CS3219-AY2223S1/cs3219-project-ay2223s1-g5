@@ -22,6 +22,7 @@ type Match = {
 @Injectable()
 export class QueueService {
   private static readonly NAMESPACE = "Queue";
+  private static readonly USER_TO_SOCKET = "UserToSocket";
   private static readonly EXPIRATION_TIME = 30;
 
   constructor(
@@ -51,8 +52,14 @@ export class QueueService {
     ];
     const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
-    if (this.isUserInQueue(matchedUsers, userId)) {
-      return null;
+    // In the event that new connection occurs and the other connection has
+    // not yet disconnected, we remove the previous connection from queue.
+    const currentSocket = await this.redisService.getValue(
+      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
+      userId.toString(),
+    );
+    if (currentSocket) {
+      await this.removeFromQueue(userId, currentSocket);
     }
 
     if (matchedUsers.length === 0) {
@@ -60,25 +67,18 @@ export class QueueService {
       return null;
     }
 
-    const matchedUserId = this.getUserId(matchedUsers[0]);
-    const matchedUserSocketId = await this.redisService.getValue(
-      namespaces,
-      matchedUserId.toString(),
-    );
+    const matchedUser = await this.getUser(matchedUsers[0]);
 
-    if (!matchedUserSocketId) {
+    if (!matchedUser) {
       await this.addUserToQueue(difficulty, language, userId, socketId);
       return null;
     }
 
-    await this.removeFromQueue(matchedUserId);
+    await this.removeFromQueue(matchedUser.userId, matchedUser.socketId);
 
-    this.logger.info(`${userId} and ${matchedUserId} matched`);
+    this.logger.info(`${userId} and ${matchedUser.userId} matched`);
 
-    return [
-      { userId, socketId },
-      { userId: matchedUserId, socketId: matchedUserSocketId },
-    ];
+    return [{ userId, socketId }, matchedUser];
   }
 
   async createRoom(
@@ -98,15 +98,19 @@ export class QueueService {
     } as Match;
   }
 
-  private getUserId(matchedUser: string): number {
+  private async getUser(matchedUser: string): Promise<User | undefined> {
     const arr = matchedUser.split(":");
-    return Number(arr[arr.length - 1]);
-  }
+    const socketId = arr.pop();
 
-  private isUserInQueue(matchedUsers: string[], userId: number): boolean {
-    return matchedUsers.some(
-      (matchedUser: string) => this.getUserId(matchedUser) === userId,
-    );
+    if (!socketId) {
+      return undefined;
+    }
+
+    const userId = await this.redisService.getValue(arr, socketId);
+    return {
+      socketId,
+      userId: Number(userId),
+    };
   }
 
   async addUserToQueue(
@@ -117,28 +121,35 @@ export class QueueService {
   ): Promise<string | null> {
     this.logger.info(`${userId} added to queue`);
     await this.redisService.setKey(
-      [QueueService.NAMESPACE],
+      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
       userId.toString(),
+      socketId,
+    );
+    await this.redisService.setKey(
+      [QueueService.NAMESPACE],
+      socketId,
       this.constructQueueKey(difficulty, language),
     );
     return this.redisService.setKey(
       [QueueService.NAMESPACE, this.constructQueueKey(difficulty, language)],
-      userId.toString(),
       socketId,
+      userId.toString(),
       QueueService.EXPIRATION_TIME,
     );
   }
 
-  async removeFromQueue(userId: number): Promise<void> {
-    const queueKey = await this.redisService.getValue(
-      [QueueService.NAMESPACE],
+  async removeFromQueue(userId: number, socketId: string): Promise<void> {
+    await this.redisService.deleteKey(
+      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
       userId.toString(),
     );
 
-    await this.redisService.deleteKey(
+    const queueKey = await this.redisService.getValue(
       [QueueService.NAMESPACE],
-      userId.toString(),
+      socketId,
     );
+
+    await this.redisService.deleteKey([QueueService.NAMESPACE], socketId);
 
     if (!queueKey) {
       return;
@@ -146,12 +157,12 @@ export class QueueService {
 
     const result = await this.redisService.deleteKey(
       [QueueService.NAMESPACE, queueKey],
-      userId.toString(),
+      socketId,
     );
     if (result === 0) {
-      this.logger.info(`${userId} not in queue`);
+      this.logger.info(`${socketId} not in queue`);
     } else {
-      this.logger.info(`${userId} removed from queue`);
+      this.logger.info(`${socketId} removed from queue`);
     }
     return;
   }
