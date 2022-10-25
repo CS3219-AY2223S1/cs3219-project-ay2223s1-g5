@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, CircularProgress, Divider, Stack } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Divider,
+  LinearProgress,
+  Stack,
+} from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
+import { Center } from "src/components/Center";
 import { ChatPanel } from "src/components/room/chat/ChatPanel";
 import { Editor } from "src/components/room/Editor";
 import { QuestionSubmissionPanel } from "src/components/room/QuestionSubmissionPanel";
@@ -40,6 +47,9 @@ export const RoomPage = () => {
   const { sockets, connect } = useSockets();
   const [roomSocket, setRoomSocket] = useState<Socket | undefined>(undefined);
   const { enqueueSnackbar } = useSnackbar();
+  const [roomPassword, setRoomPassword] = useState<string | undefined>(
+    undefined,
+  );
   const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [questionId, setQuestionId] = useState<number | undefined>(undefined);
 
@@ -188,8 +198,9 @@ export const RoomPage = () => {
       ROOM_EVENTS.JOINED,
       ({
         userId,
-        metadata: { members, language, questionId },
+        metadata: { members, password, language, questionId },
       }: JoinedPayload) => {
+        setRoomPassword(password);
         setLanguage(language);
         setQuestionId(questionId);
 
@@ -314,8 +325,8 @@ export const RoomPage = () => {
     [language, questionId, roomSocket],
   );
 
-  return (
-    <EditorProvider roomId={roomId || ""}>
+  return roomPassword ? (
+    <EditorProvider roomId={roomId || ""} roomPassword={roomPassword}>
       <ChatProvider roomId={roomId || ""}>
         <Stack
           sx={{
@@ -372,5 +383,9 @@ export const RoomPage = () => {
         </Stack>
       </ChatProvider>
     </EditorProvider>
+  ) : (
+    <Center>
+      <LinearProgress />
+    </Center>
   );
 };

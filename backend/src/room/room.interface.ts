@@ -29,6 +29,7 @@ export interface RoomManagementService extends RoomCreationService {
     roomId: string,
   ): Promise<{
     members: { userId: number; isConnected: boolean }[];
+    password: string;
     language: Language;
     questionId: number;
   }>;
