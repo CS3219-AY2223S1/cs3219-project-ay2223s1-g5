@@ -15,70 +15,6 @@ import { StatisticsModule } from "../statistics.module";
 import { Difficulty } from "~shared/types/base";
 import { Status } from "~shared/types/base";
 
-const userFixtures = [
-  {
-    id: 1,
-    email: "janedoe@email.com",
-    name: "Jane Doe",
-    password: "password",
-  },
-  { id: 2, email: "johndoe@email.com", name: "John Doe", password: "password" },
-];
-
-const topicFixtures = [
-  {
-    id: 1,
-    name: "Dynamic Programming",
-  },
-  {
-    id: 2,
-    name: "Bit Manipulation",
-  },
-  {
-    id: 3,
-    name: "Greedy",
-  },
-  {
-    id: 4,
-    name: "Memoization",
-  },
-];
-const questionFixtures = [
-  {
-    id: 1,
-    title: "Integer Replacement",
-    difficulty: Difficulty.MEDIUM,
-    categoryId: 1,
-    description: "description",
-  },
-];
-const categoryFixtures = [
-  {
-    id: 1,
-    title: "Algorithms",
-  },
-];
-const roomSessionFixtures = [
-  {
-    id: "1",
-    startTime: "2022-10-20T01:54:13.692Z",
-    endTime: "2022-10-20T01:56:13.692Z",
-    questionId: 1,
-  },
-];
-const submissionFixtures = [
-  {
-    id: "1",
-    roomSessionId: "1",
-    status: Status.ACCEPTED,
-    language: Language.CPP,
-    expectedOutput: "expectedOutput",
-    code: "code",
-    createdAt: "2022-10-20T01:56:13.692Z",
-    updatedAt: "2022-10-20T01:56:13.692Z",
-  },
-];
-
 describe("User", () => {
   let app: INestApplication;
   const client: TestClient = new TestClient();
@@ -110,34 +46,136 @@ describe("User", () => {
 
   beforeEach(async () => {
     await client.reset();
-    await client.user.createMany({
-      data: userFixtures,
-    });
-    await client.category.createMany({
-      data: categoryFixtures,
+    await client.category.create({
+      data: {
+        id: 1,
+        title: "Algorithms",
+      },
     });
     await client.topic.createMany({
-      data: topicFixtures,
+      data: [
+        {
+          id: 1,
+          name: "Dynamic Programming",
+        },
+        {
+          id: 2,
+          name: "Bit Manipulation",
+        },
+        {
+          id: 3,
+          name: "Greedy",
+        },
+        {
+          id: 4,
+          name: "Memoization",
+        },
+      ],
     });
-    await client.question.createMany({
-      data: questionFixtures,
+    await client.question.create({
+      data: {
+        id: 1,
+        title: "Integer Replacement",
+        difficulty: Difficulty.MEDIUM,
+        categoryId: 1,
+        description: "description",
+        topics: {
+          connect: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+        },
+      },
+      include: {
+        topics: true,
+      },
     });
-    await client.roomSession.createMany({
-      data: roomSessionFixtures,
+    await client.roomSession.create({
+      data: {
+        id: "1",
+        startTime: "2022-10-20T01:54:13.692Z",
+        endTime: "2022-10-20T01:56:13.692Z",
+        questionId: 1,
+      },
     });
-    await client.submission.createMany({
-      data: submissionFixtures,
+    await client.submission.create({
+      data: {
+        id: "1",
+        roomSessionId: "1",
+        status: Status.ACCEPTED,
+        language: Language.CPP,
+        expectedOutput: "expectedOutput",
+        code: "code",
+        createdAt: "2022-10-20T01:56:13.692Z",
+        updatedAt: "2022-10-20T01:56:13.692Z",
+      },
+    });
+    await client.user.create({
+      data: {
+        id: 1,
+        email: "janedoe@email.com",
+        name: "Jane Doe",
+        password: "password",
+        roomSessions: {
+          connect: {
+            id: "1",
+          },
+        },
+      },
+      include: {
+        roomSessions: true,
+      },
+    });
+    await client.user.create({
+      data: {
+        id: 2,
+        email: "johndoe@email.com",
+        name: "John Doe",
+        password: "password",
+        roomSessions: {
+          connect: {
+            id: "1",
+          },
+        },
+      },
+      include: {
+        roomSessions: true,
+      },
     });
   });
 
   describe("GET /user/statistics", () => {
     it(`get default statistics`, async () => {
       const expected = {
-        attemptSummary: { EASY: 0, MEDIUM: 0, HARD: 0 },
-        durationSummary: [],
-        peerSummary: [],
-        heatmapData: [],
-        networkData: { topics: [], links: [] },
+        attemptSummary: { EASY: 0, MEDIUM: 1, HARD: 0 },
+        durationSummary: [
+          {
+            difficulty: "MEDIUM",
+            timetaken: 120,
+            date: "2022-10-20T01:54:13.692Z",
+          },
+        ],
+        peerSummary: [
+          {
+            userName: "John Doe",
+            questionTitle: "Integer Replacement",
+            date: "2022-10-20T01:54:13.692Z",
+          },
+        ],
+        heatmapData: [{ date: "2022-10-20T01:54:13.692Z" }],
+        networkData: {
+          topics: [
+            { count: 3, id: 1, name: "Dynamic Programming" },
+            { count: 3, id: 2, name: "Bit Manipulation" },
+            { count: 3, id: 3, name: "Greedy" },
+            { count: 3, id: 4, name: "Memoization" },
+          ],
+          links: [
+            { largeTopicId: 1, smallTopicId: 2 },
+            { largeTopicId: 1, smallTopicId: 3 },
+            { largeTopicId: 1, smallTopicId: 4 },
+            { largeTopicId: 2, smallTopicId: 3 },
+            { largeTopicId: 2, smallTopicId: 4 },
+            { largeTopicId: 3, smallTopicId: 4 },
+          ],
+        },
       };
       const actual = await request(app.getHttpServer())
         .get("/user/statistics")
