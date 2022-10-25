@@ -25,6 +25,8 @@ const userFixtures = [
   },
 ];
 
+jest.setTimeout(10000);
+
 describe("Judge", () => {
   let app: NestExpressApplication;
   let adapter: SessionSocketAdapter;
