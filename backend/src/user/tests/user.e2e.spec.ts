@@ -111,7 +111,6 @@ describe("User", () => {
       await request(app.getHttpServer())
         .post("/users/password")
         .send({
-          id: 1,
           oldPassword: "password",
           newPassword: "new_password",
         })
@@ -134,7 +133,6 @@ describe("User", () => {
       await request(app.getHttpServer())
         .patch("/users")
         .send({
-          id: 1,
           name: "Jane Doe Updated",
         })
         .set("Authorization", "true")
@@ -147,7 +145,7 @@ describe("User", () => {
         },
       });
       expect(actual).toHaveLength(1);
-      expect("Jane Doe Updated").toEqual(actual[0].name);
+      expect(actual[0].name).toEqual("Jane Doe Updated");
     });
   });
 
