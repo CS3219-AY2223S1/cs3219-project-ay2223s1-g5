@@ -74,6 +74,9 @@ describe("Judge", () => {
 
     beforeAll(() => {
       address = app.getHttpServer().listen().address();
+    });
+
+    beforeEach(() => {
       clientSocket = io(`ws://localhost:${address.port}/room`, {
         extraHeaders: {
           Authorization: "true",
@@ -81,6 +84,9 @@ describe("Judge", () => {
         },
       });
       clientSocket.connect();
+      clientSocket.on("connect", () => {
+        console.log("connected");
+      });
       jest
         .spyOn(RoomService.prototype, "getRoom")
         .mockReturnValue(Promise.resolve("mockRoomId"));
@@ -94,21 +100,16 @@ describe("Judge", () => {
       );
     });
 
-    afterAll(async () => {
-      clientSocket.disconnect();
-      await app.close();
-      await adapter.deactivate();
-    });
-
     it("should return update submission", (done) => {
       const judgeSpy = jest
         .spyOn(JudgeService.prototype, "sendRequest")
-        .mockReturnValue(
-          Promise.resolve({
+        .mockImplementation(() => {
+          console.log("submissionAccepted");
+          return Promise.resolve({
             roomId: "mockRoomId",
             submissionId: "mockSubmissionId",
-          }),
-        );
+          });
+        });
       const payload = {
         code: "code",
         questionId: 1,
@@ -125,7 +126,7 @@ describe("Judge", () => {
         expect(submissionId).toBe("mockSubmissionId");
         done();
       });
-
+      console.log("should return update submission");
       clientSocket.emit("join", { roomId: "mockRoomId" });
       clientSocket.emit("submit", payload);
     });
@@ -133,7 +134,10 @@ describe("Judge", () => {
     it("should return submission rejected", (done) => {
       const judgeSpy = jest
         .spyOn(JudgeService.prototype, "sendRequest")
-        .mockRejectedValue(new Error("send request fail"));
+        .mockImplementation(() => {
+          console.log("submissionRejected");
+          throw new Error("send request fail");
+        });
       const payload = {
         code: "code",
         questionId: 1,
@@ -150,9 +154,18 @@ describe("Judge", () => {
         expect(reason).toBe("send request fail");
         done();
       });
-
+      console.log("should return submission rejected");
       clientSocket.emit("join", { roomId: "mockRoomId" });
       clientSocket.emit("submit", payload);
+    });
+
+    afterEach(() => {
+      clientSocket.disconnect();
+    });
+
+    afterAll(async () => {
+      await app.close();
+      await adapter.deactivate();
     });
   });
 });
