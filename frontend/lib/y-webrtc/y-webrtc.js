@@ -235,6 +235,7 @@ export class WebrtcConn {
     log("establishing connection to ", logging.BOLD, remotePeerId);
     this.room = room;
     this.remotePeerId = remotePeerId;
+    this.conflictResolutionToken = undefined;
     this.closed = false;
     this.connected = false;
     this.synced = false;
@@ -244,13 +245,14 @@ export class WebrtcConn {
     this.peer = new Peer({ initiator, ...room.provider.peerOpts });
     this.peer.on("signal", (signal) => {
       // We need a better timer value.
-      const token = Math.random();
-      map.setIfUndefined(peerStates, remotePeerId, () => token);
+      if (this.conflictResolutionToken == undefined) {
+        this.conflictResolutionToken = Math.random();
+      }
       publishSignalingMessage(signalingConn, room, {
         to: remotePeerId,
         from: room.peerId,
         type: "signal",
-        token: token,
+        token: this.conflictResolutionToken,
         signal,
       });
     });
@@ -630,21 +632,23 @@ export class SignalingConn extends ws.WebsocketClient {
                 break;
               case "signal":
                 if (data.to === peerId) {
-                  console.log(data);
                   if (data.signal.type == "offer") {
-                    console.log("offer received");
-                    const token = peerStates.get(data.from);
-                    console.log(token);
-                    console.log(data.token);
-                    if (token && data.token > token) {
-                      console.log("offer declined");
-                      peerStates.delete(peerId);
-                      return;
+                    const existingConn = webrtcConns.get(data.from);
+                    if (existingConn) {
+                      const remoteToken = data.token;
+                      const localToken = existingConn.conflictResolutionToken;
+                      if (localToken && localToken < remoteToken) {
+                        log("offer rejected: ", data.from);
+                        return;
+                      }
+                      // If we don't reject the offer, we will be accepting it and answering it.
+                      existingConn.conflictResolutionToken = undefined;
                     }
                   }
                   if (data.signal.type == "answer") {
-                    console.log("offer accepted");
-                    peerStates.delete(peerId);
+                    log("offer accepted by: ", data.from);
+                    const existingConn = webrtcConns.get(data.from);
+                    existingConn.conflictResolutionToken = undefined;
                   }
                   map
                     .setIfUndefined(
