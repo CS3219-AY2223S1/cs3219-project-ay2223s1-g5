@@ -42,11 +42,6 @@ const signalingConns = new Map();
 const rooms = new Map();
 
 /**
- * @type {Map<string,number>}
- */
-const peerStates = new Map();
-
-/**
  * @param {Room} room
  */
 const checkIsSynced = (room) => {
@@ -235,7 +230,7 @@ export class WebrtcConn {
     log("establishing connection to ", logging.BOLD, remotePeerId);
     this.room = room;
     this.remotePeerId = remotePeerId;
-    this.conflictResolutionToken = undefined;
+    this.glareToken = undefined;
     this.closed = false;
     this.connected = false;
     this.synced = false;
@@ -244,15 +239,15 @@ export class WebrtcConn {
      */
     this.peer = new Peer({ initiator, ...room.provider.peerOpts });
     this.peer.on("signal", (signal) => {
-      // We need a better timer value.
-      if (this.conflictResolutionToken == undefined) {
-        this.conflictResolutionToken = Math.random();
+      if (this.glareToken == undefined) {
+        // add some randomness to the timestamp of the offer
+        this.glareToken = Date.now() + Math.random();
       }
       publishSignalingMessage(signalingConn, room, {
         to: remotePeerId,
         from: room.peerId,
         type: "signal",
-        token: this.conflictResolutionToken,
+        token: this.glareToken,
         signal,
       });
     });
@@ -631,25 +626,25 @@ export class SignalingConn extends ws.WebsocketClient {
                 }
                 break;
               case "signal":
-                if (data.to === peerId) {
-                  if (data.signal.type == "offer") {
-                    const existingConn = webrtcConns.get(data.from);
-                    if (existingConn) {
-                      const remoteToken = data.token;
-                      const localToken = existingConn.conflictResolutionToken;
-                      if (localToken && localToken < remoteToken) {
-                        log("offer rejected: ", data.from);
-                        return;
-                      }
-                      // If we don't reject the offer, we will be accepting it and answering it.
-                      existingConn.conflictResolutionToken = undefined;
+                if (data.signal.type == "offer") {
+                  const existingConn = webrtcConns.get(data.from);
+                  if (existingConn) {
+                    const remoteToken = data.token;
+                    const localToken = existingConn.glareToken;
+                    if (localToken && localToken > remoteToken) {
+                      log("offer rejected: ", data.from);
+                      return;
                     }
+                    // if we don't reject the offer, we will be accepting it and answering it
+                    existingConn.glareToken = undefined;
                   }
-                  if (data.signal.type == "answer") {
-                    log("offer accepted by: ", data.from);
-                    const existingConn = webrtcConns.get(data.from);
-                    existingConn.conflictResolutionToken = undefined;
-                  }
+                }
+                if (data.signal.type == "answer") {
+                  log("offer answered by: ", data.from);
+                  const existingConn = webrtcConns.get(data.from);
+                  existingConn.glareToken = undefined;
+                }
+                if (data.to === peerId) {
                   map
                     .setIfUndefined(
                       webrtcConns,
