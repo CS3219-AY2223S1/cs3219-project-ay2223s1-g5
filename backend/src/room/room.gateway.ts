@@ -2,6 +2,7 @@ import { Inject, UseFilters, UsePipes } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
@@ -10,7 +11,7 @@ import {
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Namespace, Socket } from "socket.io";
 
-import { session } from "src/common/adapters/websocket.adapter";
+import { session } from "src/common/adapters/session.websocket.adapter";
 import { RateLimitError } from "src/common/errors/rate-limit.error";
 import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
@@ -19,6 +20,7 @@ import { JudgeService } from "src/judge/judge.service";
 import { RoomManagementService, RoomServiceInterfaces } from "./room.interface";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
+import { CLIENT_EVENTS } from "~shared/constants/events";
 import {
   JoinedPayload,
   JoinPayload,
@@ -29,7 +31,7 @@ import {
 @UseFilters(WsExceptionFilter)
 @UsePipes(CustomValidationPipe)
 @WebSocketGateway({ namespace: ROOM_NAMESPACE })
-export class RoomGateway implements OnGatewayDisconnect {
+export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Namespace;
 
@@ -48,15 +50,14 @@ export class RoomGateway implements OnGatewayDisconnect {
   ) {
     const userId = Number(session(client).passport?.user.userId);
     try {
-      const { language, questionId, members } = await this.roomService.joinRoom(
-        userId,
-        roomId,
-      );
+      const { language, questionId, members, password } =
+        await this.roomService.joinRoom(userId, roomId);
       const payload: JoinedPayload = {
         userId,
         metadata: {
-          language,
           members,
+          password,
+          language,
           questionId,
         },
       };
@@ -127,6 +128,17 @@ export class RoomGateway implements OnGatewayDisconnect {
     this.server
       .to(roomId)
       .emit(ROOM_EVENTS.SUBMISSION_UPDATED, { submissionId });
+  }
+
+  async handleConnection(client: Socket) {
+    const userId = Number(session(client).passport?.user.userId);
+    const existing = await this.server.to(`user:${userId}`).allSockets();
+    if (existing.size > 0) {
+      this.server.to(Array.from(existing)).emit(CLIENT_EVENTS.ERROR, {
+        message: "Duplicate connection",
+      } as Error);
+    }
+    await client.join(`user:${userId}`);
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {

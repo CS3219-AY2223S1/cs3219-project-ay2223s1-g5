@@ -34,6 +34,7 @@
     "@nestjs/platform-socket.io": "^9.0.11",
     "@nestjs/serve-static": "^3.0.0",
     "@nestjs/websockets": "^9.0.11",
+    "@socket.io/redis-adapter": "^7.2.0",
     "@types/connect-redis": "^0.0.18",
     "@types/express-session": "^1.17.5",
     "bcrypt": "^5.0.1",

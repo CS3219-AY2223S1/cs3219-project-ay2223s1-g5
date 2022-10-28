@@ -5,16 +5,20 @@ import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
+import { StyledButton } from "src/components/StyledButton";
 import { Timer } from "src/components/Timer";
+import { useAuth } from "src/contexts/AuthContext";
 import { useSockets } from "src/contexts/SocketsContext";
 
 import { QUEUE_EVENTS, QUEUE_NAMESPACE } from "~shared/constants";
+import { CLIENT_EVENTS } from "~shared/constants/events";
 import { FoundRoomPayload } from "~shared/types/api";
 import { Difficulty, Language } from "~shared/types/base";
 
 const TIMEOUT = 30;
 
 export const QueuePage = () => {
+  const { user } = useAuth();
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const difficulty = params.get("difficulty");
@@ -35,7 +39,7 @@ export const QueuePage = () => {
       enqueueSnackbar("No difficulty level or language specified", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
       return;
     }
 
@@ -48,7 +52,7 @@ export const QueuePage = () => {
       enqueueSnackbar("Invalid difficulty level", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
     }
 
     const normalizedLanguage = language.toUpperCase();
@@ -60,7 +64,7 @@ export const QueuePage = () => {
       enqueueSnackbar("Invalid language", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
     }
   }, [difficulty, language, navigate, enqueueSnackbar]);
 
@@ -82,8 +86,13 @@ export const QueuePage = () => {
     if (!socket) {
       return;
     }
+    // Replace error handler
+    socket.on(CLIENT_EVENTS.ERROR, (error: Error) => {
+      enqueueSnackbar(error.message, { variant: "error" });
+      navigate("/select");
+    });
     setQueueSocket(socket);
-  }, [sockets]);
+  }, [enqueueSnackbar, navigate, sockets]);
 
   useEffect(() => {
     if (!queueSocket) {
@@ -130,10 +139,11 @@ export const QueuePage = () => {
     });
 
     queueSocket.on(QUEUE_EVENTS.ROOM_READY, (match: FoundRoomPayload) => {
-      setMessage("Room ready. Joining...");
-      clearTimeout(timeoutId);
       queueSocket.disconnect();
-      setTimeout(() => navigate(`/room/${match.roomId}`), 1000);
+      clearTimeout(timeoutId);
+
+      setMessage("Room ready. Joining...");
+      setTimeout(() => navigate(`/room/${match.roomId}`), 500);
     });
 
     queueSocket.on(QUEUE_EVENTS.EXISTING_MATCH, (roomId: string) => {
@@ -152,7 +162,7 @@ export const QueuePage = () => {
 
   return (
     <Stack
-      spacing={4}
+      spacing={12}
       sx={{
         height: "100vh",
         width: "100%",
@@ -161,12 +171,27 @@ export const QueuePage = () => {
         justifyContent: "center",
       }}
     >
-      {timerVariant === "determinate" ? (
-        <Timer size="4rem" state={timer} total={TIMEOUT} />
-      ) : (
-        <CircularProgress size="4rem" />
-      )}
-      <Typography component={"span"}>{message}</Typography>
+      <Stack
+        spacing={4}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {timerVariant === "determinate" ? (
+          <Timer size="4rem" state={timer} total={TIMEOUT} />
+        ) : (
+          <CircularProgress size="4rem" />
+        )}
+        <Typography component={"span"}>{message}</Typography>
+      </Stack>
+      <StyledButton
+        label="Exit"
+        color="error"
+        disabled={timerVariant === "indeterminate"}
+        onClick={() => navigate(-1)}
+      />
     </Stack>
   );
 };

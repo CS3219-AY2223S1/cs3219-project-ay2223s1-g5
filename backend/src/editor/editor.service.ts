@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Document } from "y-socket.io/dist/server/index";
-import { Doc } from "yjs";
+import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
 
 import { RedisService } from "src/redis/redis.service";
 import {
@@ -28,35 +28,32 @@ export class EditorService {
   }
 
   async createDocument(roomId: string, template: string): Promise<void> {
-    const text = new Doc().getText();
+    const document = new Doc();
+    const text = document.getText(EDITOR_DOCUMENT_NAME);
     // Monaco Editor expects line endings to follow CRLF.
     text.insert(0, template.replace(/(?<!\r)\n/g, "\r\n"));
-    const delta = JSON.stringify(text.toDelta());
-    await this.redisService.setKey([EditorService.NAMESPACE], roomId, delta);
+    await this.saveDocument(roomId, document);
   }
 
-  async saveDocument(roomId: string, document: Document): Promise<void> {
-    if (!document.getText(EDITOR_DOCUMENT_NAME)) {
-      return;
-    }
-    const delta = JSON.stringify(
-      document.getText(EDITOR_DOCUMENT_NAME).toDelta(),
+  async saveDocument(roomId: string, document: Document | Doc): Promise<void> {
+    const update = Buffer.from(encodeStateAsUpdate(document)).toString(
+      "base64",
     );
     this.logger.info(`Saving document: ${roomId}`);
-    await this.redisService.setKey([EditorService.NAMESPACE], roomId, delta);
+    await this.redisService.setKey([EditorService.NAMESPACE], roomId, update);
   }
 
   async loadDocument(roomId: string, document: Document): Promise<void> {
-    const rawDelta = await this.redisService.getValue(
+    const serializedUpdate = await this.redisService.getValue(
       [EditorService.NAMESPACE],
       roomId,
     );
-    if (!rawDelta) {
+    if (!serializedUpdate) {
       return;
     }
     this.logger.info(`Restoring document: ${roomId}`);
-    const delta = JSON.parse(rawDelta);
-    document.getText(EDITOR_DOCUMENT_NAME).applyDelta(delta);
+    const update = Buffer.from(serializedUpdate, "base64");
+    applyUpdate(document, update);
   }
 
   async removeDocument(roomId: string): Promise<void> {

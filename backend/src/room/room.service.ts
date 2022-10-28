@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ChatService } from "src/chat/chat.service";
@@ -26,6 +27,7 @@ export class RoomService
   implements RoomManagementService, RoomAuthorizationService
 {
   private static readonly NAMESPACE = "Room";
+  private static readonly PASSWORD_NAMESPACE = "PASSWORD";
   private static readonly LANGUAGE_NAMESPACE = "LANGUAGE";
   private static readonly QUESTION_NAMESPACE = "QUESTION";
   private static readonly MEMBERS_NAMESPACE = "MEMBERS";
@@ -49,6 +51,8 @@ export class RoomService
     difficulty: Difficulty,
     userIds: number[],
   ): Promise<string> {
+    const password = nanoid();
+
     const questionId = await this.questionService.getIdByDifficulty(difficulty);
 
     const room = await this.prismaService.roomSession.create({
@@ -63,6 +67,11 @@ export class RoomService
 
     const roomId = room.id;
 
+    await this.redisService.setKey(
+      [RoomService.NAMESPACE, RoomService.PASSWORD_NAMESPACE],
+      roomId,
+      password,
+    );
     await this.redisService.setKey(
       [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
       roomId,
@@ -118,6 +127,7 @@ export class RoomService
     roomId: string,
   ): Promise<{
     members: { userId: number; isConnected: boolean }[];
+    password: string;
     language: Language;
     questionId: number;
   }> {
@@ -142,6 +152,12 @@ export class RoomService
       .execute();
 
     const members = await this.getMembers(roomId);
+
+    const password = await this.redisService.getValue(
+      [RoomService.NAMESPACE, RoomService.PASSWORD_NAMESPACE],
+      roomId,
+    );
+
     const languageString = await this.redisService.getValue(
       [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
       roomId,
@@ -158,15 +174,16 @@ export class RoomService
       ),
     );
 
-    if (!members || !language || isNaN(questionId)) {
+    if (!members || !password || !language || isNaN(questionId)) {
       this.logger.error(
-        `Unable to retrieve room metadata: ${roomId} [${members} | ${language} | ${questionId}]`,
+        `Unable to retrieve room metadata: ${roomId} [${members} | ${password} | ${language} | ${questionId}]`,
       );
       throw new InternalServerError();
     }
 
     return {
       members,
+      password,
       language,
       questionId,
     };

@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "paths": {
       "~shared/*": ["../shared/src/*"],
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
+      "lib/*": ["./lib/*"]
     }
   },
   "include": ["src"]

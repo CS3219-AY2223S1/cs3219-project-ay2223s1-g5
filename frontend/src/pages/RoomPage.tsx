@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, CircularProgress, Divider, Stack } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Divider,
+  LinearProgress,
+  Stack,
+} from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
+import { Center } from "src/components/Center";
 import { ChatPanel } from "src/components/room/chat/ChatPanel";
 import { Editor } from "src/components/room/Editor";
 import { QuestionSubmissionPanel } from "src/components/room/QuestionSubmissionPanel";
@@ -18,6 +25,7 @@ import { useRefreshSubmissions } from "src/hooks/useSubmissions";
 import { useGetUsersName } from "src/hooks/useUsers";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
+import { CLIENT_EVENTS } from "~shared/constants/events";
 import {
   JoinedPayload,
   PartnerDisconnectPayload,
@@ -39,6 +47,9 @@ export const RoomPage = () => {
   const { sockets, connect } = useSockets();
   const [roomSocket, setRoomSocket] = useState<Socket | undefined>(undefined);
   const { enqueueSnackbar } = useSnackbar();
+  const [roomPassword, setRoomPassword] = useState<string | undefined>(
+    undefined,
+  );
   const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [questionId, setQuestionId] = useState<number | undefined>(undefined);
 
@@ -78,7 +89,7 @@ export const RoomPage = () => {
       enqueueSnackbar("Invalid room ID", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
       return;
     }
   }, [roomId, navigate, enqueueSnackbar]);
@@ -93,8 +104,17 @@ export const RoomPage = () => {
     if (!socket) {
       return;
     }
+    // Replace error handler
+    socket.on(CLIENT_EVENTS.ERROR, (error: Error) => {
+      socket.off(CLIENT_EVENTS.DISCONNECT);
+      enqueueSnackbar(error.message, { variant: "error" });
+      // TODO: Transmit error code instead
+      if (error.message === "Duplicate connection") {
+        navigate("/select");
+      }
+    });
     setRoomSocket(socket);
-  }, [sockets]);
+  }, [enqueueSnackbar, navigate, sockets]);
 
   useEffect(() => {
     if (roomSocket && roomId) {
@@ -112,8 +132,8 @@ export const RoomPage = () => {
     if (!roomSocket || !roomId) {
       return;
     }
-
-    roomSocket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
+    roomSocket.off(CLIENT_EVENTS.DISCONNECT);
+    roomSocket.on(CLIENT_EVENTS.DISCONNECT, (reason: string) => {
       if (reason === SOCKET_IO_DISCONNECT_REASON.SERVER_CLOSE) {
         navigate("/dashboard");
         return;
@@ -178,8 +198,9 @@ export const RoomPage = () => {
       ROOM_EVENTS.JOINED,
       ({
         userId,
-        metadata: { members, language, questionId },
+        metadata: { members, password, language, questionId },
       }: JoinedPayload) => {
+        setRoomPassword(password);
         setLanguage(language);
         setQuestionId(questionId);
 
@@ -304,8 +325,8 @@ export const RoomPage = () => {
     [language, questionId, roomSocket],
   );
 
-  return (
-    <EditorProvider roomId={roomId || ""}>
+  return roomPassword ? (
+    <EditorProvider roomId={roomId || ""} roomPassword={roomPassword}>
       <ChatProvider roomId={roomId || ""}>
         <Stack
           sx={{
@@ -362,5 +383,9 @@ export const RoomPage = () => {
         </Stack>
       </ChatProvider>
     </EditorProvider>
+  ) : (
+    <Center>
+      <LinearProgress />
+    </Center>
   );
 };
