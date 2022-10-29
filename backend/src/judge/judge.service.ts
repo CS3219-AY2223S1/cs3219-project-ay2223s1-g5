@@ -7,9 +7,9 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RateLimitError } from "src/common/errors/rate-limit.error";
 import { ConfigService } from "src/core/config/config.service";
-import { PrismaService } from "src/core/prisma.service";
+import { PrismaService } from "src/core/prisma/prisma.service";
+import { RedisService } from "src/core/redis/redis.service";
 import { QuestionService } from "src/question/question.service";
-import { RedisService } from "src/redis/redis.service";
 
 import { CppMiddleware } from "./middleware/cpp";
 import { JavaMiddleware } from "./middleware/java";

@@ -5,7 +5,7 @@ import { Server, ServerOptions, Socket } from "socket.io";
 import { ExtendedError, Namespace } from "socket.io/dist/namespace";
 
 import { ConfigService } from "src/core/config/config.service";
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "src/core/redis/redis.service";
 
 import { SynchronizedSocketAdapter } from "./synchronized.websocket.adapter";
 

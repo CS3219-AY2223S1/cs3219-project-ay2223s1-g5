@@ -7,9 +7,9 @@ import request from "supertest";
 
 import { AuthModule } from "src/auth/auth.module";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
-import { PrismaServiceModule } from "src/core/prisma.service.module";
+import { PrismaServiceModule } from "src/core/prisma/prisma.service.module";
+import { RedisServiceModule } from "src/core/redis/redis.service.module";
 import { TestClient } from "src/core/test/test-client";
-import { RedisServiceModule } from "src/redis/redis.service.module";
 
 import { UserModule } from "../user.module";
 

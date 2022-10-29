@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ConfigService } from "src/core/config/config.service";
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "src/core/redis/redis.service";
 
 @Injectable()
 export class MockTwilioService {

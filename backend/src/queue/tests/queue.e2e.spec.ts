@@ -7,9 +7,9 @@ import { io, Socket } from "socket.io-client";
 import { AuthModule } from "src/auth/auth.module";
 import { SessionSocketAdapter } from "src/common/adapters/session.websocket.adapter";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
-import { PrismaServiceModule } from "src/core/prisma.service.module";
+import { PrismaServiceModule } from "src/core/prisma/prisma.service.module";
+import { RedisServiceModule } from "src/core/redis/redis.service.module";
 import { TestClient } from "src/core/test/test-client";
-import { RedisServiceModule } from "src/redis/redis.service.module";
 import { RoomService } from "src/room/room.service";
 
 import { QueueModule } from "../queue.module";

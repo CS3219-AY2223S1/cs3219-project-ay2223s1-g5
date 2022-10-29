@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "src/core/redis/redis.service";
 import {
   RoomCreationService,
   RoomServiceInterfaces,

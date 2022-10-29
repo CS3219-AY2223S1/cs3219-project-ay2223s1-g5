@@ -4,7 +4,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { ConflictError } from "src/common/errors/conflict.error";
 import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { InternalServerError } from "src/common/errors/internal-server.error";
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "src/core/redis/redis.service";
 import {
   RoomAuthorizationService,
   RoomServiceInterfaces,

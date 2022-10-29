@@ -5,10 +5,10 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { ChatService } from "src/chat/chat.service";
 import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { InternalServerError } from "src/common/errors/internal-server.error";
-import { PrismaService } from "src/core/prisma.service";
+import { PrismaService } from "src/core/prisma/prisma.service";
+import { RedisService } from "src/core/redis/redis.service";
 import { EditorService } from "src/editor/editor.service";
 import { QuestionService } from "src/question/question.service";
-import { RedisService } from "src/redis/redis.service";
 
 import {
   RoomAuthorizationService,

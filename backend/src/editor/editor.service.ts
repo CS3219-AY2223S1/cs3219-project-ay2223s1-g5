@@ -3,7 +3,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Document } from "y-socket.io/dist/server/index";
 import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
 
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "src/core/redis/redis.service";
 import {
   RoomAuthorizationService,
   RoomServiceInterfaces,
