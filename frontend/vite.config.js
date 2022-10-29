@@ -21,6 +21,10 @@ export default defineConfig({
         replacement: resolve(__dirname, "./src"),
       },
       {
+        find: "lib",
+        replacement: resolve(__dirname, "./lib"),
+      },
+      {
         find: "~shared",
         replacement: resolve(__dirname, "../shared/src"),
       },

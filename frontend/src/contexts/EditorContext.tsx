@@ -11,9 +11,9 @@ import { useMonaco } from "@monaco-editor/react";
 import * as monacoType from "monaco-editor";
 import { MonacoBinding } from "y-monaco";
 import { SocketIOProvider } from "y-socket.io";
-import { WebrtcProvider } from "y-webrtc";
 import { Doc, Text } from "yjs";
 
+import { WebrtcProvider } from "lib/y-webrtc/y-webrtc";
 import { useAuth } from "src/contexts/AuthContext";
 import { Awareness } from "y-protocols/awareness";
 
@@ -102,6 +102,7 @@ export const EditorProvider = ({
 
     const webRTCProviderInstance = new WebrtcProvider(roomId, document, {
       signaling: [
+        "wss://signaling.yjs.dev",
         "wss://y-webrtc-signaling-eu.herokuapp.com",
         "wss://y-webrtc-signaling-us.herokuapp.com",
       ],
