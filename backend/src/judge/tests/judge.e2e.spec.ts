@@ -25,8 +25,6 @@ const userFixtures = [
   },
 ];
 
-jest.setTimeout(10000);
-
 describe("Judge", () => {
   let app: NestExpressApplication;
   let adapter: SessionSocketAdapter;
@@ -74,6 +72,14 @@ describe("Judge", () => {
 
     beforeAll(() => {
       address = app.getHttpServer().listen().address();
+    });
+
+    afterAll(async () => {
+      await app.close();
+      await adapter.deactivate();
+    });
+
+    beforeEach(() => {
       clientSocket = io(`ws://localhost:${address.port}/room`, {
         extraHeaders: {
           Authorization: "true",
@@ -94,10 +100,9 @@ describe("Judge", () => {
       );
     });
 
-    afterAll(async () => {
+    afterEach(() => {
       clientSocket.disconnect();
-      await app.close();
-      await adapter.deactivate();
+      jest.clearAllMocks();
     });
 
     it("should return update submission", (done) => {
