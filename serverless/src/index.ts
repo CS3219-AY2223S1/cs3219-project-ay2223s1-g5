@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 
+import { filter } from "./filter";
 import { ingest } from "./ingest";
 import { process as processFunction } from "./process";
 import { scrapper } from "./scrapper";
@@ -16,12 +17,18 @@ export const entry = async () => {
     console.log("Starting download");
     questions = await scrapper();
     console.log("Completed download");
+    if (process.env.NODE_ENV === "development") {
+      console.log("Saving question bank");
+      const data = JSON.stringify(questions, undefined, 2);
+      writeFileSync("questions.json", data);
+    }
   }
   console.log("Starting data processing");
   const processed = await processFunction(questions);
   console.log("Completed data processing");
+  const filtered = filter(processed);
   console.log("Starting ingest");
-  await ingest(processed);
+  await ingest(filtered);
   console.log("Completed ingest");
 };
 
