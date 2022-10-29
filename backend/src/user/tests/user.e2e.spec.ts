@@ -1,6 +1,7 @@
 import { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { compareSync } from "bcrypt";
+import { hashSync } from "bcrypt";
 import { LoggerModule } from "nestjs-pino";
 import request from "supertest";
 
@@ -12,12 +13,13 @@ import { RedisServiceModule } from "src/redis/redis.service.module";
 
 import { UserModule } from "../user.module";
 
+const SALT_ROUNDS = 10;
 const userFixtures = [
   {
     // User ID: 1
     email: "janedoe@email.com",
     name: "Jane Doe",
-    password: "password",
+    password: hashSync("password", SALT_ROUNDS),
   },
 ];
 
@@ -101,6 +103,49 @@ describe("User", () => {
         },
       });
       expect(actual[0]?.name).toBe("Jane Doe");
+    });
+  });
+
+  describe("POST /users/password", () => {
+    it(`update password`, async () => {
+      await request(app.getHttpServer())
+        .post("/users/password")
+        .send({
+          oldPassword: "password",
+          newPassword: "new_password",
+        })
+        .set("Authorization", "true")
+        .set("user", "1")
+        .expect(201);
+
+      const actual = await client.user.findMany({
+        where: {
+          email: userFixtures[0].email,
+        },
+      });
+      expect(actual).toHaveLength(1);
+      expect(compareSync("new_password", actual[0].password)).toBe(true);
+    });
+  });
+
+  describe("PATCH /users", () => {
+    it(`update display name`, async () => {
+      await request(app.getHttpServer())
+        .patch("/users")
+        .send({
+          name: "Jane Doe Updated",
+        })
+        .set("Authorization", "true")
+        .set("user", "1")
+        .expect(200);
+
+      const actual = await client.user.findMany({
+        where: {
+          email: userFixtures[0].email,
+        },
+      });
+      expect(actual).toHaveLength(1);
+      expect(actual[0].name).toEqual("Jane Doe Updated");
     });
   });
 
