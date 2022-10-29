@@ -105,7 +105,7 @@ describe("User", () => {
         categoryId: 1,
         description: "description",
         topics: {
-          connect: [{ id: 5 }, { id: 6 }],
+          connect: [{ id: 4 }, { id: 5 }, { id: 6 }],
         },
       },
     });
@@ -207,20 +207,22 @@ describe("User", () => {
         ],
         networkData: {
           topics: [
-            { count: 3, id: 1, name: "Dynamic Programming" },
-            { count: 3, id: 2, name: "Bit Manipulation" },
-            { count: 3, id: 3, name: "Greedy" },
-            { count: 3, id: 4, name: "Memoization" },
+            { count: 1, id: 1, name: "Dynamic Programming" },
+            { count: 1, id: 2, name: "Bit Manipulation" },
+            { count: 1, id: 3, name: "Greedy" },
+            { count: 2, id: 4, name: "Memoization" },
             { count: 1, id: 5, name: "Two Pointers" },
             { count: 1, id: 6, name: "String" },
           ],
           links: [
             { largeTopicId: 1, smallTopicId: 2 },
             { largeTopicId: 1, smallTopicId: 3 },
-            { largeTopicId: 1, smallTopicId: 4 },
+            { largeTopicId: 4, smallTopicId: 1 },
             { largeTopicId: 2, smallTopicId: 3 },
-            { largeTopicId: 2, smallTopicId: 4 },
-            { largeTopicId: 3, smallTopicId: 4 },
+            { largeTopicId: 4, smallTopicId: 2 },
+            { largeTopicId: 4, smallTopicId: 3 },
+            { largeTopicId: 4, smallTopicId: 5 },
+            { largeTopicId: 4, smallTopicId: 6 },
             { largeTopicId: 5, smallTopicId: 6 },
           ],
         },
