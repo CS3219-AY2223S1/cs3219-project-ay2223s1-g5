@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
 import { VerificationError } from "src/common/errors/verification.error";
-import { TwilioService } from "src/twilio/twilio.service";
+import { TwilioService } from "src/external/twilio/twilio.service";
 
 import { UserService } from "../user.service";
 
