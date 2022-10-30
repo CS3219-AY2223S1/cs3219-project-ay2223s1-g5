@@ -4,11 +4,7 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-# TODO: Replace with workflow dispatch
-on:
-  push:
-    branches:
-      - serverless/staging
+on: workflow_dispatch
 
 jobs:
   deploy:
