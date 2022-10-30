@@ -12,6 +12,7 @@ import {
 
 import { Center } from "src/components/Center";
 import { StyledButton } from "src/components/StyledButton";
+import { useGetRoomId, useLeaveRoom } from "src/hooks/useRoom";
 
 import { Difficulty, Language } from "~shared/types/base";
 
@@ -48,6 +49,35 @@ export const SelectionPage = () => {
     setSelectedLanguage(language);
   };
 
+  const { roomId } = useGetRoomId();
+  const userHasExistingRoom = roomId?.roomId != undefined;
+
+  const { leaveRoomMutation } = useLeaveRoom();
+
+  if (userHasExistingRoom) {
+    return (
+      <Center>
+        <Stack spacing={5}>
+          <Typography
+            sx={{ fontWeight: "bold", textAlign: "center" }}
+            variant="h6"
+          >
+            You are already inside a room!
+          </Typography>
+          <Stack spacing={3}>
+            <StyledButton
+              label="Rejoin Room"
+              onClick={() => navigate(`/room/${roomId.roomId}`)}
+            />
+            <StyledButton
+              label="Leave Room"
+              onClick={() => leaveRoomMutation()}
+            />
+          </Stack>
+        </Stack>
+      </Center>
+    );
+  }
   return (
     <Center>
       <Stack spacing={10}>
