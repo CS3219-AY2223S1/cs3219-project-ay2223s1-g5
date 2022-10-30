@@ -13,6 +13,7 @@ import { RedisServiceModule } from "src/redis/redis.service.module";
 import { RoomService } from "src/room/room.service";
 
 import { QueueModule } from "../queue.module";
+import { QueueService } from "../queue.service";
 
 import { QUEUE_EVENTS } from "~shared/constants";
 import { Difficulty, Language } from "~shared/types/base";
@@ -122,17 +123,15 @@ describe("Queue", () => {
 
       clientSocket1.connect();
 
-      // To prevent race condition.
-      setTimeout(() => clientSocket2.connect(), 100);
+      clientSocket1.on("connect", () => {
+        clientSocket2.connect();
+      });
 
       clientSocket1.on("exception", ({ message }) => {
         expect(message).toBe("Duplicate connection");
         clientSocket1.disconnect();
-        done();
-      });
-
-      clientSocket2.on("connect", () => {
         clientSocket2.disconnect();
+        done();
       });
     });
   });
@@ -176,10 +175,6 @@ describe("Queue", () => {
     });
 
     it("should match users with same language and difficulty", (done) => {
-      clientSocket2.on(QUEUE_EVENTS.MATCH_FOUND, () => {
-        done();
-      });
-
       clientSocket1.emit(QUEUE_EVENTS.ENTER_QUEUE, {
         language: Language.CPP,
         difficulty: Difficulty.EASY,
@@ -194,6 +189,41 @@ describe("Queue", () => {
           }),
         100,
       );
+
+      clientSocket2.on(QUEUE_EVENTS.MATCH_FOUND, () => {
+        done();
+      });
+    });
+
+    it("should create room with correct parameters", (done) => {
+      const roomSpy = jest
+        .spyOn(RoomService.prototype, "createRoom")
+        .mockReturnValue(Promise.resolve("mockRoomId"));
+      const queueSpy = jest.spyOn(QueueService.prototype, "createRoom");
+      const payload = {
+        language: Language.CPP,
+        difficulty: Difficulty.EASY,
+      };
+
+      clientSocket1.emit(QUEUE_EVENTS.ENTER_QUEUE, payload);
+
+      // To prevent race condition.
+      setTimeout(
+        () => clientSocket2.emit(QUEUE_EVENTS.ENTER_QUEUE, payload),
+        100,
+      );
+
+      clientSocket2.on(QUEUE_EVENTS.ROOM_READY, (match) => {
+        expect(queueSpy.mock.calls[0][0]).toBe(Language.CPP);
+        expect(queueSpy.mock.calls[0][1]).toBe(Difficulty.EASY);
+
+        expect(roomSpy.mock.calls[0][0]).toBe(Language.CPP);
+        expect(roomSpy.mock.calls[0][1]).toBe(Difficulty.EASY);
+        expect(roomSpy.mock.calls[0][2].sort()).toEqual([1, 2]);
+
+        expect(match.roomId).toEqual("mockRoomId");
+        done();
+      });
     });
 
     afterEach(() => {
