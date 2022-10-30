@@ -82,7 +82,8 @@ jobs:
             DATABASE_PASSWORD=DATABASE_PASSWORD:latest
             DATABASE_HOST=DATABASE_HOST:latest
             DATABASE_PORT=DATABASE_PORT:latest
-            REDIS_URL=REDIS_URL:latest
+            REDIS_HOST=REDIS_HOST:latest
+            REDIS_PORT=REDIS_PORT:latest
             SESSION_SECRET=SESSION_SECRET:latest
             TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest
             TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest
