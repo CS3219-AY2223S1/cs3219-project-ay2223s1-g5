@@ -7,16 +7,16 @@ import {
   RoomServiceInterfaces,
 } from "src/room/room.interface";
 
-type User = {
-  userId: number;
-  socketId: string;
-};
-
 import { Difficulty, Language } from "~shared/types/base";
 
 type Match = {
   roomId: string;
   result: User[];
+};
+
+type User = {
+  userId: number;
+  socketId: string;
 };
 
 @Injectable()
