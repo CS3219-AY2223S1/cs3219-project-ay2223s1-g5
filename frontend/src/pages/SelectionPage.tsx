@@ -50,7 +50,7 @@ export const SelectionPage = () => {
   };
 
   const { roomId } = useGetRoomId();
-  const userHasExistingRoom = roomId != undefined && roomId.roomId != undefined;
+  const userHasExistingRoom = roomId?.roomId != undefined;
 
   const { leaveRoomMutation } = useLeaveRoom();
 
