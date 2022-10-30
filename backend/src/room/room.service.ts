@@ -17,11 +17,6 @@ import {
 
 import { Difficulty, Language } from "~shared/types/base";
 
-enum Status {
-  CONNECTED = 1,
-  DISCONNECTED = 0,
-}
-
 @Injectable()
 export class RoomService
   implements RoomManagementService, RoomAuthorizationService
@@ -33,6 +28,7 @@ export class RoomService
   private static readonly MEMBERS_NAMESPACE = "MEMBERS";
   private static readonly REVERSE_MAPPING_NAMESPACE = "REVERSE";
   private static readonly DELIMITER = ":";
+  private static readonly DISCONNECTED = "DISCONNECTED";
 
   constructor(
     @InjectPinoLogger(RoomService.name)
@@ -87,7 +83,9 @@ export class RoomService
       await this.redisService.addKeySet(
         [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}${RoomService.DELIMITER}${Status.DISCONNECTED}`,
+        `${userId.toString()}${RoomService.DELIMITER}${
+          RoomService.DISCONNECTED
+        }`,
       );
 
       await this.redisService.setKey(
@@ -124,6 +122,7 @@ export class RoomService
 
   async joinRoom(
     userId: number,
+    socketId: string,
     roomId: string,
   ): Promise<{
     members: { userId: number; isConnected: boolean }[];
@@ -142,12 +141,14 @@ export class RoomService
       .deleteFromSet(
         [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}:${Status.DISCONNECTED}`,
+        `${userId.toString()}${RoomService.DELIMITER}${
+          RoomService.DISCONNECTED
+        }`,
       )
       .addKeySet(
         [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}:${Status.CONNECTED}`,
+        `${userId.toString()}${RoomService.DELIMITER}${socketId}`,
       )
       .execute();
 
@@ -195,17 +196,20 @@ export class RoomService
       [RoomService.NAMESPACE, RoomService.REVERSE_MAPPING_NAMESPACE],
       userId.toString(),
     );
-    await this.redisService.deleteFromSet(
+    const set = await this.redisService.getSet(
       [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
       roomId,
-      `${userId.toString()}:${Status.CONNECTED}`,
     );
-    // The user should be connected, but just in case we delete both entries.
-    await this.redisService.deleteFromSet(
-      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
-      roomId,
-      `${userId.toString()}:${Status.DISCONNECTED}`,
-    );
+    for (const record in set) {
+      if (!record.startsWith(userId.toString())) {
+        continue;
+      }
+      await this.redisService.deleteFromSet(
+        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        roomId,
+        record,
+      );
+    }
 
     // We don't need to await this but we catch all errors and log them.
     this.chatService.leaveChatRoom(roomId, userId).catch((error) => {
@@ -225,20 +229,31 @@ export class RoomService
     }
   }
 
-  async disconnectRoom(userId: number, roomId: string): Promise<void> {
+  async disconnectRoom(
+    userId: number,
+    socketId: string,
+    roomId: string,
+  ): Promise<boolean> {
     await this.redisService
       .transaction()
       .addKeySet(
         [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}:${Status.DISCONNECTED}`,
+        `${userId.toString()}${RoomService.DELIMITER}${
+          RoomService.DISCONNECTED
+        }`,
       )
       .deleteFromSet(
         [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}:${Status.CONNECTED}`,
+        `${userId.toString()}${RoomService.DELIMITER}${socketId}`,
       )
       .execute();
+    const members = await this.getMembers(roomId);
+    console.log(members);
+    return (
+      members?.find((member) => member.userId === userId)?.isConnected || false
+    );
   }
 
   async getRoom(userId: number): Promise<string | null> {
@@ -289,9 +304,18 @@ export class RoomService
     if (members.length === 0) {
       return null;
     }
-    return members.map((info) => ({
-      userId: Number(info.split(RoomService.DELIMITER)[0]),
-      isConnected: Boolean(Number(info.split(RoomService.DELIMITER)[1])),
+    const map = new Map<number, boolean>();
+    for (const member of members) {
+      const userId = Number(member.split(RoomService.DELIMITER)[0]);
+      const isConnected =
+        map.get(userId) ||
+        false ||
+        member.split(RoomService.DELIMITER)[1] !== RoomService.DISCONNECTED;
+      map.set(userId, isConnected);
+    }
+    return Array.from(map.entries()).map((entry) => ({
+      userId: entry[0],
+      isConnected: entry[1],
     }));
   }
 }
