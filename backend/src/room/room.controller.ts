@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   NotFoundException,
   Session,
   UseGuards,
@@ -10,13 +11,14 @@ import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
 
-import { RoomService } from "./room.service";
+import { RoomManagementService, RoomServiceInterfaces } from "./room.interface";
 
 import { GetRoomIdRes } from "~shared/types/api/room.dto";
 
 @Controller("room")
 export class RoomController {
-  constructor(private roomService: RoomService) {}
+  @Inject(RoomServiceInterfaces.RoomManagementService)
+  private readonly roomService: RoomManagementService;
 
   @UseGuards(SessionGuard)
   @Get()
@@ -36,7 +38,7 @@ export class RoomController {
   }
 
   @UseGuards(SessionGuard)
-  @Delete("/leave")
+  @Delete()
   async leaveRoom(@Session() session: Request["session"]): Promise<void> {
     const userId = session.passport?.user.userId;
     if (!userId) {

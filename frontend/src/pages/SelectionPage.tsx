@@ -49,10 +49,10 @@ export const SelectionPage = () => {
     setSelectedLanguage(language);
   };
 
-  const { roomId, isGetRoomIdLoading } = useGetRoomId();
-  const userHasExistingRoom = roomId != undefined;
+  const { roomId } = useGetRoomId();
+  const userHasExistingRoom = roomId != undefined && roomId.roomId != undefined;
 
-  const { isUseLeaveRoomLoading, useLeaveRoomMutation } = useLeaveRoom();
+  const { leaveRoomMutation } = useLeaveRoom();
 
   if (userHasExistingRoom) {
     return (
@@ -71,7 +71,7 @@ export const SelectionPage = () => {
             />
             <StyledButton
               label="Leave Room"
-              onClick={() => useLeaveRoomMutation}
+              onClick={() => leaveRoomMutation()}
             />
           </Stack>
         </Stack>

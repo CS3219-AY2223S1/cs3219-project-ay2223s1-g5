@@ -23,15 +23,13 @@ export const useGetRoomId = () => {
 export const useLeaveRoom = () => {
   const queryClient = useQueryClient();
   const leaveRoom = async () => {
-    await ApiService.post<void>(`/room/leave`);
+    await ApiService.delete<void>(`/room`);
     queryClient.invalidateQueries([QUERY_KEYS.USERS, "ROOM"]);
   };
-  const {
-    isLoading: isUseLeaveRoomLoading,
-    mutateAsync: useLeaveRoomMutation,
-  } = useMutation(leaveRoom);
+  const { isLoading: isUseLeaveRoomLoading, mutateAsync: leaveRoomMutation } =
+    useMutation(leaveRoom);
   return {
     isUseLeaveRoomLoading,
-    useLeaveRoomMutation,
+    leaveRoomMutation,
   };
 };
