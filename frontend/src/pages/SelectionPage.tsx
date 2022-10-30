@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -12,7 +12,6 @@ import {
 
 import { Center } from "src/components/Center";
 import { StyledButton } from "src/components/StyledButton";
-import { useAuth } from "src/contexts/AuthContext";
 import { useGetRoomId, useLeaveRoom } from "src/hooks/useRoom";
 
 import { Difficulty, Language } from "~shared/types/base";
@@ -50,14 +49,10 @@ export const SelectionPage = () => {
     setSelectedLanguage(language);
   };
 
-  const { user } = useAuth();
-  const userId = user ? user.userId : 0;
+  const { roomId, isGetRoomIdLoading } = useGetRoomId();
+  const userHasExistingRoom = roomId != undefined;
 
-  const { getRoomId } = useGetRoomId();
-  const roomId = getRoomId();
-  const userHasExistingRoom = !!roomId;
-
-  const { useLeaveRoomMutation } = useLeaveRoom();
+  const { isUseLeaveRoomLoading, useLeaveRoomMutation } = useLeaveRoom();
 
   if (userHasExistingRoom) {
     return (
@@ -72,7 +67,7 @@ export const SelectionPage = () => {
           <Stack spacing={3}>
             <StyledButton
               label="Rejoin Room"
-              onClick={() => navigate(`/room/${roomId}`)}
+              onClick={() => navigate(`/room/${roomId.roomId}`)}
             />
             <StyledButton
               label="Leave Room"

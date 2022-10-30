@@ -10,9 +10,9 @@ import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
 
-import { GetRoomIdRes } from "../../../shared/src/types/api/room.dto";
-
 import { RoomService } from "./room.service";
+
+import { GetRoomIdRes } from "~shared/types/api/room.dto";
 
 @Controller("room")
 export class RoomController {
