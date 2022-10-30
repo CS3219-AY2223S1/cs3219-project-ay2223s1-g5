@@ -2,9 +2,8 @@ FROM node:16-alpine as build
 
 WORKDIR /opt/codecollab
 COPY . ./
-COPY ./backend/.env.example ./backend/.env
 RUN npm ci \
-  && npm run on-backend prisma:gen \
+  && npm run prisma:gen \
   && npm run build \
   && npm prune --production
 

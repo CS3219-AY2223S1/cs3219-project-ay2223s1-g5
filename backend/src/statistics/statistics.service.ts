@@ -140,8 +140,8 @@ export class StatisticsService {
     });
 
     const existing = new Set<number>();
-    const topics = new Map<number, string>();
-    const links = new Map<number, Map<number, number>>();
+    const topics = new Map<number, { name: string; count: number }>();
+    const links = new Map<number, Set<number>>();
     for (const session of data) {
       // We only want to count unique questions.
       if (existing.has(session.questionId)) {
@@ -152,44 +152,34 @@ export class StatisticsService {
         (lhs, rhs) => lhs.id - rhs.id,
       );
       for (const topic of sortedTopics) {
-        topics.set(topic.id, topic.name);
+        const existing = topics.get(topic.id) || { name: topic.name, count: 0 };
+        existing.count++;
+        topics.set(topic.id, existing);
       }
 
       for (let low = 0; low < sortedTopics.length; low++) {
         for (let high = low + 1; high < sortedTopics.length; high++) {
-          const currentMap = links.get(sortedTopics[low].id);
-          const innerMap = currentMap || new Map<number, number>();
-          innerMap.set(
-            sortedTopics[high].id,
-            (innerMap.get(sortedTopics[high].id) || 0) + 1,
-          );
-          if (!currentMap) {
-            links.set(sortedTopics[low].id, innerMap);
+          const currentSet = links.get(sortedTopics[low].id);
+          const set = currentSet || new Set<number>();
+          set.add(sortedTopics[high].id);
+          if (!currentSet) {
+            links.set(sortedTopics[low].id, set);
           }
         }
-      }
-    }
-
-    const topicSize = new Map<number, number>();
-    for (const outerEntry of links) {
-      const lowId = outerEntry[0];
-      for (const innerEntry of outerEntry[1]) {
-        const highId = innerEntry[1];
-        topicSize.set(lowId, (topicSize.get(lowId) || 0) + 1);
-        topicSize.set(highId, (topicSize.get(highId) || 0) + 1);
       }
     }
 
     return {
       topics: Array.from(topics.entries()).map((entry) => ({
         id: entry[0],
-        name: entry[1],
-        count: topicSize.get(entry[0]) || 0,
+        ...entry[1],
       })),
       links: Array.from(links.entries()).flatMap((edges) => {
-        return Array.from(edges[1].keys()).map((edge) => {
+        return Array.from(edges[1].values()).map((edge) => {
           // In event of tie we set the larger ID to be the larger topic.
-          if ((topicSize.get(edges[0]) || 0) < (topicSize.get(edge) || 0)) {
+          if (
+            (topics.get(edges[0])?.count || 0) < (topics.get(edge)?.count || 0)
+          ) {
             return {
               smallTopicId: edges[0],
               largeTopicId: edge,

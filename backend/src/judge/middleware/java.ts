@@ -1,8 +1,24 @@
 import { CodePrototype, JudgeMiddleware } from "./middleware";
 
+const primitiveTypes = [
+  "int",
+  "byte",
+  "short",
+  "long",
+  "float",
+  "double",
+  "boolean",
+  "char",
+];
+
 export class JavaMiddleware extends JudgeMiddleware {
-  constructor(template: string, inputs: string[], output: string) {
-    super(template, inputs, output);
+  constructor(
+    template: string,
+    inputs: string[],
+    output: string,
+    canaryValue: string,
+  ) {
+    super(template, inputs, output, canaryValue);
   }
 
   getImports(): string {
@@ -62,6 +78,11 @@ export class JavaMiddleware extends JudgeMiddleware {
       const output = this.output.replace(/^\[/, "{").replace(/\]$/, "}");
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${output};`;
       isEqual = `boolean isEqual = Arrays.equals(res, expectedOutput);`;
+    } else if (
+      primitiveTypes.some((type) => type === codePrototype.returnType)
+    ) {
+      expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
+      isEqual = "boolean isEqual = res == expectedOutput;";
     } else {
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
       isEqual =
@@ -81,7 +102,7 @@ export class JavaMiddleware extends JudgeMiddleware {
       `    ${expectedOutput}\n` +
       `    ${codePrototype.returnType} res = solution.${codePrototype.functionName}(${joinedVariableNames});\n` +
       `    ${isEqual}\n` +
-      `    System.out.print(isEqual ? "True" : "False");\n` +
+      `    System.err.print(isEqual ? "${this.canaryValue}|true" : "${this.canaryValue}|false");\n` +
       `  }\n` +
       `}\n`
     );

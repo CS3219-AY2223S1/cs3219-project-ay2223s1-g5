@@ -1,14 +1,13 @@
-import "./index.css";
+import "src/index.css";
 
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import ReactDOM from "react-dom/client";
-
-import theme from "./utils/theme";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
+import App from "src/App";
+import reportWebVitals from "src/reportWebVitals";
+import theme from "src/utils/theme";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,

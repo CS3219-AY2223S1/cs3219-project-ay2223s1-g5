@@ -8,13 +8,18 @@
   "scripts": {
     "on-backend": "npm run --prefix backend",
     "on-frontend": "npm run --prefix frontend",
+    "on-serverless": "npm run --prefix serverless",
     "all": "concurrently -c green,blue,yellow",
-    "dev": "npm run --prefix shared build && npm run all -- --kill-others \"npm:on-* dev\"",
-    "dev:full": "npm run all \"docker-compose --env-file backend/.env up\" \"npm run dev\"",
+    "dev": "npm run --prefix shared build && npm run all -- --kill-others \"npm:on-frontend dev\" \"npm:on-backend dev\"",
+    "dev:full": "npm run all \"docker-compose up\" \"npm run dev\"",
     "build": "npm run --prefix shared build && npm run all \"npm:on-* build\"",
-    "clean": "npm run all \"npm --prefix shared run clean\" \"npm --prefix frontend run clean\" \"npm --prefix backend run clean\" && rm -rf node_modules",
-    "postinstall": "npm run all \"npm --prefix backend install\" \"npm --prefix frontend install\" \"npm --prefix shared install\"",
-    "prepare": "husky install"
+    "clean": "npm run all \"npm --prefix backend run clean\" \"npm --prefix frontend run clean\" \"npm --prefix shared run clean\"  \"npm --prefix serverless clean\" && rm -rf node_modules",
+    "postinstall": "npm run all \"npm --prefix backend install\" \"npm --prefix frontend install\" \"npm --prefix shared install\" \"npm --prefix serverless install\"",
+    "prepare": "husky install",
+    "prisma:gen": "npx prisma generate",
+    "migrate:gen": "npx prisma migrate dev --create-only --name",
+    "migrate:run": "npx prisma migrate dev",
+    "migrate:reset": "npx prisma migrate reset"
   },
   "repository": {
     "type": "git",
@@ -24,6 +29,10 @@
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
     "concurrently": "^7.3.0",
-    "husky": "^8.0.1"
+    "husky": "^8.0.1",
+    "prisma": "^4.2.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.2.1"
   }
 }

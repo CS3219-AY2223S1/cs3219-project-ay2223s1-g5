@@ -1,13 +1,10 @@
-import { INestApplication } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
-import { compareSync } from "bcrypt";
 import { LoggerModule } from "nestjs-pino";
 import { io } from "socket.io-client";
-import request from "supertest";
 
 import { AuthModule } from "src/auth/auth.module";
-import { SocketSessionAdapter } from "src/common/adapters/websocket.adapter";
+import { SessionSocketAdapter } from "src/common/adapters/session.websocket.adapter";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
 import { PrismaServiceModule } from "src/core/prisma.service.module";
 import { TestClient } from "src/core/test/test-client";
@@ -26,6 +23,7 @@ const userFixtures = [
 
 describe("User", () => {
   let app: NestExpressApplication;
+  let adapter: SessionSocketAdapter;
   const client: TestClient = new TestClient();
 
   beforeAll(async () => {
@@ -48,9 +46,12 @@ describe("User", () => {
 
     app = module.createNestApplication<NestExpressApplication>();
     // Mock session data.
-    app.useWebSocketAdapter(
-      new SocketSessionAdapter(app, (_c, _r) => new MockSessionMiddleware()),
+    adapter = new SessionSocketAdapter(
+      app,
+      (_c, _r) => new MockSessionMiddleware(),
     );
+    await adapter.activate();
+    app.useWebSocketAdapter(adapter);
     await app.init();
   });
 
@@ -96,5 +97,6 @@ describe("User", () => {
 
   afterAll(async () => {
     await app.close();
+    await adapter.deactivate();
   });
 });

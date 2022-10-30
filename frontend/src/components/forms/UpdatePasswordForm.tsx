@@ -9,21 +9,16 @@ import { useUpdatePassword } from "src/hooks/useUsers";
 import { ApiResponseError } from "src/services/ApiService";
 import isStrongPassword from "validator/es/lib/isStrongPassword";
 
-export interface UpdatePasswordFormProps {
-  userId: number;
-}
-
 type UpdatePasswordFormState = {
   oldPassword: string;
   password: string;
   passwordConfirmation: string;
 };
 
-export const UpdatePasswordForm = (props: UpdatePasswordFormProps) => {
+export const UpdatePasswordForm = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const { updatePasswordMutation, isUpdatePasswordLoading } = useUpdatePassword(
-    props.userId,
-  );
+  const { updatePasswordMutation, isUpdatePasswordLoading } =
+    useUpdatePassword();
 
   const formMethods = useForm<UpdatePasswordFormState>();
 

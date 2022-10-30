@@ -1,38 +1,127 @@
-import { Grid, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import {
+  AccessTime,
+  DriveFolderUpload,
+  Hub,
+  People,
+  Quiz,
+} from "@mui/icons-material";
+import { Box, Stack } from "@mui/material";
 
-import { BarChart } from "../components/charts/BarChart";
-import { PieChart } from "../components/charts/PieChart";
+import { AttemptSummaryChart } from "src/components/charts/AttemptSummaryChart";
+import { DataTable } from "src/components/charts/DataTable";
+import { DurationSummaryChart } from "src/components/charts/DurationSummaryChart";
+import { NetworkChart } from "src/components/charts/NetworkChart";
+import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
+import { ChartContainer } from "src/components/dashboard/ChartContainer";
+import { Title } from "src/components/Title";
+import { useGetUserStatistics } from "src/hooks/useStatistics";
+import { formatDate } from "src/utils/string";
+
+import { Difficulty } from "~shared/types/base/index";
 
 export const DashboardPage = () => {
-  return (
-    <Grid container>
-      <Grid item xs={4}>
-        <Grid container direction="row">
-          <Grid item sx={{ bgcolor: "primary.500", width: "16px" }}></Grid>
-          <Grid item sx={{ flex: 1 }}>
-            <Typography variant="body1" sx={{ pl: 2, py: 1 }}>
-              Questions Attempted
-            </Typography>
-          </Grid>
-        </Grid>
+  const { statistics } = useGetUserStatistics();
+  const [attemptSummary, setAttemptSummary] = useState<
+    Record<Difficulty | string, number> | undefined
+  >();
+  const [durationSummary, setDurationSummary] = useState<
+    | {
+        difficulty: Difficulty | string;
+        timetaken: number;
+        date: Date | string;
+      }[]
+    | undefined
+  >();
+  const [peerSummary, setPeerSummary] = useState<
+    | {
+        userName: string;
+        questionTitle: string;
+        date: Date | string;
+      }[]
+    | undefined
+  >();
+  const [heatmapData, setHeatmapData] = useState<
+    | {
+        date: Date | string;
+      }[]
+    | undefined
+  >();
+  const [networkData, setNetworkData] = useState<
+    | {
+        topics: {
+          id: number;
+          name: string;
+          count: number;
+        }[];
+        links: {
+          smallTopicId: number;
+          largeTopicId: number;
+        }[];
+      }
+    | undefined
+  >();
 
-        <Grid item xs={12}>
-          <PieChart />
-        </Grid>
-      </Grid>
-      <Grid item xs={8}>
-        <Grid container direction="row">
-          <Grid item sx={{ bgcolor: "primary.500", width: "16px" }}></Grid>
-          <Grid item sx={{ flex: 1 }}>
-            <Typography variant="body1" sx={{ pl: 2, py: 1 }}>
-              Question Sources
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <BarChart />
-        </Grid>
-      </Grid>
-    </Grid>
+  useEffect(() => {
+    if (!statistics) {
+      return;
+    }
+    setAttemptSummary(statistics.attemptSummary);
+    setDurationSummary(statistics.durationSummary);
+    setPeerSummary(statistics.peerSummary);
+    setHeatmapData(statistics.heatmapData);
+    setNetworkData(statistics.networkData);
+  }, [statistics]);
+
+  return (
+    <Stack spacing={3}>
+      <Title title="Dashboard" />
+      <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+        <ChartContainer
+          title={"Questions Attempted"}
+          chart={<AttemptSummaryChart attemptSummary={attemptSummary} />}
+          Icon={Quiz}
+        />
+        <ChartContainer
+          title={"Time Taken Per Question"}
+          chart={<DurationSummaryChart durationSummary={durationSummary} />}
+          Icon={AccessTime}
+        />
+      </Stack>
+      <Stack direction="row" spacing={2} sx={{ justifyContent: "center" }}>
+        <ChartContainer
+          title={"Topics Attempted"}
+          chart={<NetworkChart networkData={networkData} />}
+          Icon={Hub}
+        />
+        <ChartContainer
+          title={"Collaborators"}
+          chart={
+            <Box sx={{ height: "300px", overflowY: "auto" }}>
+              <DataTable
+                headers={["Date", "Question", "Peer"]}
+                rows={
+                  !peerSummary
+                    ? []
+                    : peerSummary.map((summary) => {
+                        return [
+                          formatDate(summary.date),
+                          summary.questionTitle,
+                          summary.userName,
+                        ];
+                      })
+                }
+              />
+            </Box>
+          }
+          Icon={People}
+        />
+      </Stack>
+      <ChartContainer
+        title={"Submissions In The Last Year"}
+        chart={<SubmissionsHeatmap heatmapData={heatmapData} />}
+        Icon={DriveFolderUpload}
+      />
+    </Stack>
   );
 };

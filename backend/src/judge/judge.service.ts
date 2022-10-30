@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Language as PrismaLanguage, Status } from "@prisma/client";
 import axios from "axios";
 import { AxiosInstance } from "axios";
+import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { RateLimitError } from "src/common/errors/rate-limit.error";
@@ -39,13 +40,22 @@ const languageToLanguageId = (language: Language) => {
   }
 };
 
-const statusIdToStatus = (status: number) => {
+const statusIdToStatus = (
+  status: number,
+  output?: string,
+  expectedOutput?: string,
+) => {
   switch (status) {
     case 1:
-    case 2:
-    case 3: {
-      // We compare results manually and don't rely on Judge 0.
+    case 2: {
       return Status.PENDING;
+    }
+    case 3: {
+      if (!expectedOutput || !output) {
+        return Status.RUNTIME_ERROR;
+      }
+
+      return compareOutput(output, expectedOutput);
     }
     case 4: {
       return Status.WRONG_ANSWER;
@@ -69,6 +79,22 @@ const statusIdToStatus = (status: number) => {
       return Status.INTERNAL_ERROR;
     }
   }
+};
+
+const compareOutput = (output: string, expectedOutput: string) => {
+  const outputArr = output.trim().split("|");
+  const expectedOutputArr = expectedOutput.trim().split("|");
+
+  // Compare canary values
+  if (outputArr[0] !== expectedOutputArr[0]) {
+    return Status.RUNTIME_ERROR;
+  }
+
+  if (outputArr[1] !== expectedOutputArr[1]) {
+    return Status.WRONG_ANSWER;
+  }
+
+  return Status.ACCEPTED;
 };
 
 interface TestCase {
@@ -116,6 +142,7 @@ export class JudgeService {
     if (await this.hasSubmission(roomId)) {
       throw new RateLimitError("Processing previous submission.");
     }
+    const canaryValue = nanoid();
     await this.redisService.setKey([JudgeService.NAMESPACE], roomId, "");
 
     this.logger.info("Sending code to Judge0...");
@@ -126,6 +153,7 @@ export class JudgeService {
       template,
       testCase.inputs,
       testCase.output,
+      canaryValue,
     );
 
     // Replace leading tabs with whitespaces
@@ -152,7 +180,7 @@ export class JudgeService {
         id: token,
         roomSessionId: roomId,
         code,
-        expectedOutput: "true", // TODO: Protect with randomised canary value.
+        expectedOutput: `${canaryValue}|true`,
         language: language.toUpperCase() as PrismaLanguage,
       },
     });
@@ -203,10 +231,13 @@ export class JudgeService {
     );
     const content = JSON.parse(storedContent) as Judge0Callback;
 
+    const storedSubmission = await this.prismaService.submission.findFirst({
+      where: { id: submissionId },
+    });
+    const expectedOutput = storedSubmission?.expectedOutput;
+
     const time = Number(content.time) * secondsToMilliseconds;
     const memory = content.memory * kilobytesToBytes;
-
-    // TODO: Handle result checking.
 
     const { roomSessionId: roomId } =
       await this.prismaService.submission.update({
@@ -224,7 +255,13 @@ export class JudgeService {
             ? this.decodeBase64(content.compile_output)
             : undefined,
           exitCode: content.exit_code,
-          status: statusIdToStatus(content.status.id), // TODO: Update depending on result
+          status: content.stderr
+            ? statusIdToStatus(
+                content.status.id,
+                this.decodeBase64(content.stderr),
+                expectedOutput,
+              )
+            : statusIdToStatus(content.status.id),
         },
         select: {
           roomSessionId: true,
@@ -277,16 +314,17 @@ export class JudgeService {
     template: string,
     inputs: string[],
     output: string,
+    canaryValue: string,
   ): JudgeMiddleware {
     switch (language) {
       case Language.JAVA:
-        return new JavaMiddleware(template, inputs, output);
+        return new JavaMiddleware(template, inputs, output, canaryValue);
       case Language.JAVASCRIPT:
-        return new JavascriptMiddleware(template, inputs, output);
+        return new JavascriptMiddleware(template, inputs, output, canaryValue);
       case Language.PYTHON:
-        return new PythonMiddleware(template, inputs, output);
+        return new PythonMiddleware(template, inputs, output, canaryValue);
       case Language.CPP:
-        return new CppMiddleware(template, inputs, output);
+        return new CppMiddleware(template, inputs, output, canaryValue);
       default:
         throw Error("Language not supported yet");
     }

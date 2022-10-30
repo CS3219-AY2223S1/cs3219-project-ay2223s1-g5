@@ -36,6 +36,7 @@ jobs:
           - shared
           - backend
           - frontend
+          - serverless
     runs-on: ubuntu-latest
 
     steps:
@@ -68,6 +69,7 @@ jobs:
           - shared
           - backend
           - frontend
+          - serverless
     runs-on: ubuntu-latest
 
     steps:
@@ -86,6 +88,12 @@ jobs:
           path: ~/.npm
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
 
+      - name: Install common packages
+        run: npm ci --production --ignore-scripts
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
       - name: Install packages
         run: npm --prefix ${{ matrix.app }} ci
 
@@ -98,8 +106,6 @@ jobs:
         run: npm run --prefix shared build
 
       - name: Compile code
-        # Shared code will already be compiled for dependent builds
-        if: matrix.app != 'shared'
         run: npm run --prefix ${{ matrix.app }} build
 
   test:
@@ -127,6 +133,12 @@ jobs:
           # npm cache files are stored in `~/.npm` on Linux/macOS
           path: ~/.npm
           key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install common packages
+        run: npm ci --production --ignore-scripts
+
+      - name: Generate Prisma client
+        run: npx prisma generate
 
       - name: Install packages
         run: npm --prefix ${{ matrix.app }} ci

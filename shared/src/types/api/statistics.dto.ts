@@ -5,15 +5,15 @@ export type UserStatisticsRes = {
   durationSummary: {
     difficulty: Difficulty;
     timetaken: number;
-    date: Date;
+    date: Date | string;
   }[];
   peerSummary: {
     userName: string;
     questionTitle: string;
-    date: Date;
+    date: Date | string;
   }[];
   heatmapData: {
-    date: Date;
+    date: Date | string;
   }[];
   networkData: {
     topics: {

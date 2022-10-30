@@ -21,7 +21,7 @@ export class MockTwilioService {
     this.domain = this.configService.get("domain");
   }
 
-  createConversationsToken(_: string): string {
+  createConversationsToken(_identity: string, _room: string): string {
     return "MOCK_CONVERSATION_TOKEN";
   }
 

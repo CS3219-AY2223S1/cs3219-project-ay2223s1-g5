@@ -11,7 +11,7 @@ export interface RoomBasicService {
   getRoom(userId: number): Promise<string | null>;
 }
 
-export interface RoomAuthorizationService {
+export interface RoomAuthorizationService extends RoomBasicService {
   isAuthorized(roomId: string, userId: number): Promise<boolean>;
 }
 
@@ -29,6 +29,7 @@ export interface RoomManagementService extends RoomCreationService {
     roomId: string,
   ): Promise<{
     members: { userId: number; isConnected: boolean }[];
+    password: string;
     language: Language;
     questionId: number;
   }>;

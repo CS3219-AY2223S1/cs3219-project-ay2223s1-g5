@@ -1,7 +1,7 @@
 import { SvgIconComponent } from "@mui/icons-material";
 import { Stack, TextField, TextFieldProps } from "@mui/material";
 
-import { Center } from "./Center";
+import { Center } from "src/components/Center";
 
 type TextBoxProps = TextFieldProps & {
   Icon: SvgIconComponent;

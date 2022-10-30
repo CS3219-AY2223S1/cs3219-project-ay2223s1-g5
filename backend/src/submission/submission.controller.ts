@@ -6,6 +6,7 @@ import { SessionGuard } from "src/auth/session.guard";
 import { SubmissionService } from "./submission.service";
 
 import { GetSubmissionsRes } from "~shared/types/api";
+import { Status } from "~shared/types/base";
 
 @Controller("room/:roomId(\\w+)/submissions")
 export class SubmissionController {
@@ -32,11 +33,14 @@ export class SubmissionController {
       submissions: submissions.map((submission) => {
         return {
           submitTime: submission.createdAt,
-          timeTaken: submission.runTime || NaN,
+          status: submission.status as Status,
+          code: submission.code,
+          runTime: submission.runTime ?? undefined,
+          memoryUsage: submission.memoryUsage ?? undefined,
           inputs: testCase?.inputs || [],
           expectedOutput: testCase?.output || "",
-          output: submission.output || "",
-          result: submission.status,
+          standardOutput: submission.output ?? undefined,
+          compileOutput: submission.compileOutput ?? undefined,
         };
       }),
     };

@@ -8,7 +8,7 @@ import {
 
 import { AccountSettingPage } from "src/pages/AccountSettingPage";
 import { DashboardPage } from "src/pages/DashboardPage";
-import { DifficultySelectionPage } from "src/pages/DifficultySelectionPage";
+import { SelectionPage } from "src/pages/SelectionPage";
 
 type NavigationRouteObject = RouteObject & {
   Icon: SvgIconComponent;
@@ -25,9 +25,9 @@ export const DisplayedNavigationBarRoutes = [
     Icon: WebOutlined,
   },
   {
-    path: "select-difficulty",
-    element: <DifficultySelectionPage />,
-    label: "PeerPrep",
+    path: "select",
+    element: <SelectionPage />,
+    label: "Code Now",
     Icon: LaptopOutlined,
   },
 ];

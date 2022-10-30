@@ -1,11 +1,10 @@
 import { Circle } from "@mui/icons-material";
 import { Avatar, Stack, Typography, useTheme } from "@mui/material";
 
+import { StyledButton } from "src/components/StyledButton";
 import { useChat } from "src/contexts/ChatContext";
 import { useEditor } from "src/contexts/EditorContext";
 import { nameToInitials } from "src/utils/string";
-
-import { StyledButton } from "../StyledButton";
 
 type RoomStatusBarProps = {
   self: { name?: string; isConnected: boolean };
@@ -26,6 +25,7 @@ export const RoomStatusBar = (props: RoomStatusBarProps) => {
         sx={{ display: "flex", alignItems: "center" }}
       >
         <Avatar
+          key={props.self.name}
           sx={{
             width: "40px",
             height: "40px",
@@ -40,9 +40,9 @@ export const RoomStatusBar = (props: RoomStatusBarProps) => {
         >
           {nameToInitials(props.self.name)}
         </Avatar>
-        {props.participants.map((participant) => (
+        {props.participants.map((participant, index) => (
           <Avatar
-            key={participant.name}
+            key={participant.name || index}
             sx={{
               width: "40px",
               height: "40px",

@@ -28,8 +28,9 @@ export class SubmitPayload {
 export type JoinedPayload = {
   userId: number;
   metadata: {
-    language: Language;
+    password: string;
     members: { userId: number; isConnected: boolean }[];
+    language: Language;
     questionId: number;
   };
 };

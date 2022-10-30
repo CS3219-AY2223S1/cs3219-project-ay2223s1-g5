@@ -1,75 +1,106 @@
-import { Cancel, CheckCircle } from "@mui/icons-material";
+import { useCallback, useState } from "react";
 import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+  Cancel,
+  CheckCircle,
+  Error,
+  PendingOutlined,
+  SvgIconComponent,
+} from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
+
+import { DataTable } from "src/components/charts/DataTable";
+import { useGetSubmissions } from "src/hooks/useSubmissions";
+import { normaliseStatus } from "src/utils/string";
 
 import { Center } from "../Center";
+import { StyledButton } from "../StyledButton";
+
+import { SubmissionDialog, SubmissionDialogContent } from "./SubmissionDialog";
 
 import { Status } from "~shared/types/base";
 
-/* Tabular Data */
-const tableHeaders = ["DATE", "RUNTIME", "TEST CASE", "STATUS"];
-const tableCells = ["2020-04-26 00:26:55", "0.13s", "[2,7,11,15], 9", "Pass"];
+const HEADERS = ["ID", "STATUS", "DETAILS"];
 
-export const Submissions = () => {
+export type SubmissionsPanelProps = {
+  roomId?: string;
+};
+
+export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [submission, setSubmission] = useState<
+    SubmissionDialogContent | undefined
+  >(undefined);
+  const submissions = useGetSubmissions(roomId).submissions || [];
+
+  const onClose = useCallback(() => {
+    setIsOpen(false);
+    setSubmission(undefined);
+  }, [setIsOpen]);
+
   return (
-    <TableContainer sx={{ flex: 1 }} component={Paper}>
-      <Table sx={{ minWidth: "100%" }}>
-        <TableHead sx={{ bgcolor: "primary.500" }}>
-          <TableRow>
-            {tableHeaders.map((tableHeader) => (
-              <TableCell
-                key={tableHeader}
-                align="center"
-                sx={{
-                  fontWeight: "bold",
-                  color: "white",
-                }}
-              >
-                {tableHeader}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          <TableRow>
-            {tableCells.map((tableCell) => (
-              <TableCell
-                key={tableCell}
-                align="center"
-                sx={{
-                  color:
-                    Object.values<string>(Status).includes(tableCell) &&
-                    tableCell === "Pass"
-                      ? "green.500"
-                      : Object.values<string>(Status).includes(tableCell)
-                      ? "red.500"
-                      : "black",
-                  fontWeight: Object.values<string>(Status).includes(tableCell)
-                    ? "bold"
-                    : "normal",
-                }}
-              >
+    <Box sx={{ height: "100%", overflowY: "auto" }}>
+      {submission && (
+        <SubmissionDialog {...submission} isOpen={isOpen} onClose={onClose} />
+      )}
+      <DataTable
+        headers={HEADERS}
+        rows={submissions.map((submission, index) => {
+          const color =
+            submission.status === Status.ACCEPTED
+              ? "green.500"
+              : submission.status === Status.PENDING
+              ? undefined
+              : "red.500";
+          const status = normaliseStatus(submission.status);
+          const Symbol: SvgIconComponent =
+            submission.status === Status.ACCEPTED
+              ? CheckCircle
+              : submission.status === Status.PENDING
+              ? PendingOutlined
+              : submission.status === Status.INTERNAL_ERROR
+              ? Error
+              : Cancel;
+
+          return [
+            `${index + 1}`,
+            {
+              sx: { color },
+              child: (
                 <Center>
-                  {Object.values<string>(Status).includes(tableCell) &&
-                  tableCell === "Pass" ? (
-                    <CheckCircle sx={{ mr: 0.5 }} />
-                  ) : Object.values<string>(Status).includes(tableCell) ? (
-                    <Cancel sx={{ mr: 0.5 }} />
-                  ) : null}
-                  {tableCell}
+                  <>
+                    <Symbol sx={{ mr: 0.5 }} />
+                    <Typography>{status}</Typography>
+                  </>
                 </Center>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
+              ),
+            },
+            {
+              child: (
+                <Center>
+                  <StyledButton
+                    disabled={submission.status === Status.PENDING}
+                    onClick={() => {
+                      setSubmission({
+                        submitTime: new Date(submission.submitTime),
+                        status: submission.status,
+                        inputs: submission.inputs,
+                        output: submission.expectedOutput,
+                        runTime: submission.runTime || 0,
+                        memoryUsage: submission.memoryUsage || 0,
+                        code: submission.code,
+                        standardOutput: submission.standardOutput,
+                        compilationError: submission.compileOutput,
+                      });
+                      setIsOpen(true);
+                    }}
+                    label="View"
+                  />
+                </Center>
+              ),
+            },
+          ];
+        })}
+      />
+    </Box>
   );
 };

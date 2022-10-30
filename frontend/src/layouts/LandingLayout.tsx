@@ -1,8 +1,8 @@
 import { Outlet } from "react-router-dom";
 import { Container, Grid, Stack } from "@mui/material";
 
-import LogoImage from "../assets/images/Logo/Logo.png";
-import PairProgrammingImage from "../assets/images/PairProgramming/PairProgramming.png";
+import LogoImage from "src/assets/images/Logo/Logo.png";
+import PairProgrammingImage from "src/assets/images/PairProgramming/PairProgramming.png";
 
 export const LandingLayout = () => {
   return (

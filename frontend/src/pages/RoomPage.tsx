@@ -1,10 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, CircularProgress, Divider, Stack } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Divider,
+  LinearProgress,
+  Stack,
+} from "@mui/material";
 import { useSnackbar } from "notistack";
 import { Socket } from "socket.io-client";
 
-import { Chat } from "src/components/room/chat/Chat";
+import { Center } from "src/components/Center";
+import { ChatPanel } from "src/components/room/chat/ChatPanel";
 import { Editor } from "src/components/room/Editor";
 import { QuestionSubmissionPanel } from "src/components/room/QuestionSubmissionPanel";
 import { RoomStatusBar } from "src/components/room/RoomStatusBar";
@@ -14,9 +21,11 @@ import { useAuth } from "src/contexts/AuthContext";
 import { ChatProvider } from "src/contexts/ChatContext";
 import { EditorProvider } from "src/contexts/EditorContext";
 import { useSockets } from "src/contexts/SocketsContext";
+import { useRefreshSubmissions } from "src/hooks/useSubmissions";
 import { useGetUsersName } from "src/hooks/useUsers";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
+import { CLIENT_EVENTS } from "~shared/constants/events";
 import {
   JoinedPayload,
   PartnerDisconnectPayload,
@@ -38,9 +47,19 @@ export const RoomPage = () => {
   const { sockets, connect } = useSockets();
   const [roomSocket, setRoomSocket] = useState<Socket | undefined>(undefined);
   const { enqueueSnackbar } = useSnackbar();
+  const [roomPassword, setRoomPassword] = useState<string | undefined>(
+    undefined,
+  );
   const [language, setLanguage] = useState<Language | undefined>(undefined);
   const [questionId, setQuestionId] = useState<number | undefined>(undefined);
+
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
+  const [hasNewSubmissions, setHasNewSubmissions] = useState<boolean>(false);
+  const { refreshSubmissions } = useRefreshSubmissions(roomId);
+  const clearHasNewSubmissions = useCallback(() => {
+    setHasNewSubmissions(false);
+  }, [setHasNewSubmissions]);
+
   const [self, setSelf] = useState<Participant>({
     // We know that if the page renders, user is not null.
     userId: user?.userId || NaN,
@@ -70,7 +89,7 @@ export const RoomPage = () => {
       enqueueSnackbar("Invalid room ID", {
         variant: "error",
       });
-      navigate("/select-difficulty");
+      navigate("/select");
       return;
     }
   }, [roomId, navigate, enqueueSnackbar]);
@@ -85,8 +104,17 @@ export const RoomPage = () => {
     if (!socket) {
       return;
     }
+    // Replace error handler
+    socket.on(CLIENT_EVENTS.ERROR, (error: Error) => {
+      socket.off(CLIENT_EVENTS.DISCONNECT);
+      enqueueSnackbar(error.message, { variant: "error" });
+      // TODO: Transmit error code instead
+      if (error.message === "Duplicate connection") {
+        navigate("/select");
+      }
+    });
     setRoomSocket(socket);
-  }, [sockets]);
+  }, [enqueueSnackbar, navigate, sockets]);
 
   useEffect(() => {
     if (roomSocket && roomId) {
@@ -104,8 +132,8 @@ export const RoomPage = () => {
     if (!roomSocket || !roomId) {
       return;
     }
-
-    roomSocket.on(ROOM_EVENTS.DISCONNECT, (reason: string) => {
+    roomSocket.off(CLIENT_EVENTS.DISCONNECT);
+    roomSocket.on(CLIENT_EVENTS.DISCONNECT, (reason: string) => {
       if (reason === SOCKET_IO_DISCONNECT_REASON.SERVER_CLOSE) {
         navigate("/dashboard");
         return;
@@ -170,8 +198,9 @@ export const RoomPage = () => {
       ROOM_EVENTS.JOINED,
       ({
         userId,
-        metadata: { members, language, questionId },
+        metadata: { members, password, language, questionId },
       }: JoinedPayload) => {
+        setRoomPassword(password);
         setLanguage(language);
         setQuestionId(questionId);
 
@@ -236,6 +265,8 @@ export const RoomPage = () => {
       ROOM_EVENTS.SUBMISSION_UPDATED,
       (_payload: SubmissionUpdatedPayload) => {
         enqueueSnackbar("Submission updated");
+        refreshSubmissions();
+        setHasNewSubmissions(true);
         setIsSubmitLoading(false);
       },
     );
@@ -253,6 +284,8 @@ export const RoomPage = () => {
     user?.userId,
     enqueueSnackbar,
     participants,
+    hasNewSubmissions,
+    refreshSubmissions,
   ]);
 
   useEffect(() => {
@@ -292,8 +325,8 @@ export const RoomPage = () => {
     [language, questionId, roomSocket],
   );
 
-  return (
-    <EditorProvider roomId={roomId || ""}>
+  return roomPassword ? (
+    <EditorProvider roomId={roomId || ""} roomPassword={roomPassword}>
       <ChatProvider roomId={roomId || ""}>
         <Stack
           sx={{
@@ -313,14 +346,23 @@ export const RoomPage = () => {
           <Stack
             direction="row"
             spacing={2}
-            sx={{ minHeight: 900, p: 3, pb: 2 }}
+            sx={{ p: 3, pb: 2, flex: 1, minHeight: 0 }}
           >
             <Stack spacing={2} sx={{ minWidth: "40%", maxWidth: "40%" }}>
               <Box sx={{ height: "60%" }}>
-                <QuestionSubmissionPanel questionId={questionId} />
+                <QuestionSubmissionPanel
+                  questionId={questionId}
+                  roomId={roomId}
+                  hasNewSubmissions={hasNewSubmissions}
+                  clearHasNewSubmissions={clearHasNewSubmissions}
+                />
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <Chat />
+              <Box sx={{ flex: 1, minHeight: 0 }}>
+                {/* TODO: Support multiple participants */}
+                <ChatPanel
+                  name={user?.name}
+                  partnerName={participants[0]?.name}
+                />
               </Box>
             </Stack>
             <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -341,5 +383,9 @@ export const RoomPage = () => {
         </Stack>
       </ChatProvider>
     </EditorProvider>
+  ) : (
+    <Center>
+      <LinearProgress />
+    </Center>
   );
 };

@@ -1,25 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DriveFolderUpload, Wysiwyg } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Paper, Stack, Tab } from "@mui/material";
+import { Badge, Paper, Stack, Tab } from "@mui/material";
 
-import { Question, QuestionPanelProps } from "./Question";
+import { Question } from "./Question";
 import { Submissions } from "./Submissions";
 
-type QuestionSubmissionPanelProps = QuestionPanelProps;
+type QuestionSubmissionPanelProps = {
+  questionId?: number;
+  roomId?: string;
+  hasNewSubmissions: boolean;
+  clearHasNewSubmissions: () => void;
+};
 
-export const QuestionSubmissionPanel = (
-  props: QuestionSubmissionPanelProps,
-) => {
+export const QuestionSubmissionPanel = ({
+  questionId,
+  roomId,
+  hasNewSubmissions,
+  clearHasNewSubmissions,
+}: QuestionSubmissionPanelProps) => {
   const [selectedPanel, setSelectedPanel] = useState<
     "description" | "submissions"
   >("description");
 
+  useEffect(() => {
+    if (hasNewSubmissions && selectedPanel === "submissions") {
+      clearHasNewSubmissions();
+    }
+  }, [clearHasNewSubmissions, hasNewSubmissions, selectedPanel]);
+
   const handleChange = (
     _: React.SyntheticEvent | undefined,
-    formType: "description" | "submissions",
+    panel: "description" | "submissions",
   ) => {
-    setSelectedPanel(formType);
+    setSelectedPanel(panel);
   };
 
   return (
@@ -52,7 +66,16 @@ export const QuestionSubmissionPanel = (
                 fontWeight: "bold",
                 textTransform: "none",
               }}
-              icon={<DriveFolderUpload />}
+              icon={
+                <Badge
+                  variant="dot"
+                  color="secondary"
+                  anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                  invisible={!hasNewSubmissions}
+                >
+                  <DriveFolderUpload />
+                </Badge>
+              }
               iconPosition="start"
             />
           </TabList>
@@ -65,13 +88,18 @@ export const QuestionSubmissionPanel = (
             }}
             value="description"
           >
-            <Question {...props} />
+            <Question questionId={questionId} />
           </TabPanel>
           <TabPanel
-            sx={{ p: 0, "&.MuiTabPanel-root": { mt: 0 } }}
+            sx={{
+              p: 0,
+              minHeight: 0,
+              flex: 1,
+              overflow: "hidden",
+            }}
             value="submissions"
           >
-            <Submissions />
+            <Submissions roomId={roomId} />
           </TabPanel>
         </TabContext>
       </Stack>

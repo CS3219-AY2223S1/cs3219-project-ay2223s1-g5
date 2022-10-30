@@ -1,6 +1,6 @@
 import { Box, CircularProgress, CircularProgressProps } from "@mui/material";
 
-import { Center } from "./Center";
+import { Center } from "src/components/Center";
 
 type TimerProps = CircularProgressProps & {
   total: number;

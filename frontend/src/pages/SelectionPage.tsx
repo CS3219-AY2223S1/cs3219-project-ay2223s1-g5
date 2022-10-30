@@ -10,11 +10,10 @@ import {
   Typography,
 } from "@mui/material";
 
+import { Center } from "src/components/Center";
+import { StyledButton } from "src/components/StyledButton";
 import { useAuth } from "src/contexts/AuthContext";
 import { useGetRoomId, useLeaveRoom } from "src/hooks/useRoom";
-
-import { Center } from "../components/Center";
-import { StyledButton } from "../components/StyledButton";
 
 import { Difficulty, Language } from "~shared/types/base";
 
@@ -35,7 +34,7 @@ const languageToString = (language: Language) => {
   }
 };
 
-export const DifficultySelectionPage = () => {
+export const SelectionPage = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     Difficulty | undefined
   >(undefined);
@@ -100,9 +99,9 @@ export const DifficultySelectionPage = () => {
               sx={{
                 bgcolor:
                   selectedDifficulty === Difficulty.EASY
-                    ? "green.800"
-                    : "green.500",
-                "&:hover": { bgcolor: "green.800" },
+                    ? "green.A700"
+                    : "green.A400",
+                "&:hover": { bgcolor: "green.A700" },
                 p: 8,
                 fontSize: "20px",
               }}
@@ -113,9 +112,9 @@ export const DifficultySelectionPage = () => {
               sx={{
                 bgcolor:
                   selectedDifficulty === Difficulty.MEDIUM
-                    ? "yellow.800"
-                    : "yellow.700",
-                "&:hover": { bgcolor: "yellow.800" },
+                    ? "yellow.A700"
+                    : "yellow.A400",
+                "&:hover": { bgcolor: "yellow.A700" },
                 py: 8,
                 px: 6,
                 fontSize: "20px",
@@ -127,9 +126,9 @@ export const DifficultySelectionPage = () => {
               sx={{
                 bgcolor:
                   selectedDifficulty === Difficulty.HARD
-                    ? "red.800"
-                    : "red.500",
-                "&:hover": { bgcolor: "red.800" },
+                    ? "red.A700"
+                    : "red.A400",
+                "&:hover": { bgcolor: "red.A700" },
                 p: 8,
                 fontSize: "20px",
               }}
