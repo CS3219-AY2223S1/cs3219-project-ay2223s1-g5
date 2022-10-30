@@ -30,9 +30,9 @@
     "@commitlint/config-conventional": "^17.0.3",
     "concurrently": "^7.3.0",
     "husky": "^8.0.1",
-    "prisma": "^4.4.0"
+    "prisma": "^4.2.1"
   },
   "dependencies": {
-    "@prisma/client": "^4.4.0"
+    "@prisma/client": "^4.2.1"
   }
 }

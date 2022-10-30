@@ -3,7 +3,13 @@ import { PrismaClient } from "@prisma/client";
 import { ProcessedQuestion } from "./types";
 
 export const ingest = async (questions: ProcessedQuestion[]): Promise<void> => {
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({
+    datasources: {
+      db: {
+        url: `postgresql://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_NAME}?schema=public`,
+      },
+    },
+  });
   const categories = new Set<string>();
   const topics = new Set<string>();
 

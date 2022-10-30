@@ -56,7 +56,9 @@ export class RedisService implements OnApplicationShutdown {
   static async create(logger: PinoLogger, configService: ConfigService) {
     const redisService = new RedisService(
       logger,
-      configService.get("redis.url"),
+      `redis://${configService.get("redis.host")}:${configService.get(
+        "redis.port",
+      )}`,
     );
     await redisService.connect();
     return redisService;

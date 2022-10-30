@@ -16,7 +16,10 @@ export class SynchronizedSocketAdapter extends IoAdapter {
   }
 
   async activate(): Promise<void> {
-    const url = this.context.get(ConfigService).get("redis.url");
+    const configService = this.context.get(ConfigService);
+    const url = `redis://${configService.get("redis.host")}:${configService.get(
+      "redis.port",
+    )}`;
 
     this.publishClient = createClient({ url });
     this.subscribeClient = createClient({ url });

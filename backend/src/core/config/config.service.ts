@@ -5,7 +5,7 @@ import { join } from "path";
 
 import { ConfigSchema, schema } from "./config.schema";
 
-dotenv.config({ path: join(__dirname, "..", "..", "..", ".env") });
+dotenv.config({ path: join(__dirname, "..", "..", "..", "..", ".env") });
 @Injectable()
 export class ConfigService {
   config: Config<ConfigSchema>;

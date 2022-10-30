@@ -4,6 +4,13 @@ export interface ConfigSchema {
   port: number;
   environment: "development" | "staging" | "production" | "test";
   domain: string;
+  database: {
+    username: string;
+    password: string;
+    host: string;
+    port: number;
+    database: string;
+  };
   session: {
     name: string;
     secret: string;
@@ -19,7 +26,8 @@ export interface ConfigSchema {
     apiSecret: string;
   };
   redis: {
-    url: string;
+    host: string;
+    port: number;
   };
   judge0: {
     apiKey: string;
@@ -40,7 +48,7 @@ addFormats({
 export const schema: Schema<ConfigSchema> = {
   port: {
     env: "PORT",
-    format: "int",
+    format: "port",
     default: 8080,
   },
   environment: {
@@ -52,6 +60,33 @@ export const schema: Schema<ConfigSchema> = {
     env: "DOMAIN",
     format: "required-string",
     default: "",
+  },
+  database: {
+    username: {
+      env: "DATABASE_USERNAME",
+      format: "required-string",
+      default: "",
+    },
+    password: {
+      env: "DATABASE_PASSWORD",
+      format: "required-string",
+      default: "",
+    },
+    host: {
+      env: "DATABASE_HOST",
+      format: "required-string",
+      default: "",
+    },
+    port: {
+      env: "DATABASE_PORT",
+      format: "port",
+      default: 5432,
+    },
+    database: {
+      env: "DATABASE_NAME",
+      format: "required-string",
+      default: "",
+    },
   },
   session: {
     name: {
@@ -117,10 +152,15 @@ export const schema: Schema<ConfigSchema> = {
     },
   },
   redis: {
-    url: {
-      env: "REDIS_URL",
+    host: {
+      env: "REDIS_HOST",
       format: "required-string",
       default: "",
+    },
+    port: {
+      env: "REDIS_PORT",
+      format: "port",
+      default: 6379,
     },
   },
   judge0: {
