@@ -37,7 +37,7 @@ const userFixtures = [
 describe("Queue", () => {
   const client: TestClient = new TestClient();
   const redisClient: RedisClientType = createClient({
-    url: process.env.REDIS_URL,
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
   });
 
   let app: NestExpressApplication;
