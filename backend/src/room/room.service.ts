@@ -200,7 +200,7 @@ export class RoomService
       [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
       roomId,
     );
-    for (const record in set) {
+    for (const record of set) {
       if (!record.startsWith(userId.toString())) {
         continue;
       }
@@ -250,7 +250,6 @@ export class RoomService
       )
       .execute();
     const members = await this.getMembers(roomId);
-    console.log(members);
     return (
       members?.find((member) => member.userId === userId)?.isConnected || false
     );
@@ -309,7 +308,6 @@ export class RoomService
       const userId = Number(member.split(RoomService.DELIMITER)[0]);
       const isConnected =
         map.get(userId) ||
-        false ||
         member.split(RoomService.DELIMITER)[1] !== RoomService.DISCONNECTED;
       map.set(userId, isConnected);
     }
