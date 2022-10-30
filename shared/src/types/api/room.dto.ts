@@ -49,3 +49,7 @@ export type SubmissionRejectedPayload = {
 export type SubmissionUpdatedPayload = {
   submissionId: string;
 };
+
+export type GetRoomIdRes = {
+  roomId: string;
+};
