@@ -69,7 +69,11 @@ export const SelectionPage = () => {
               label="Rejoin Room"
               onClick={() => navigate(`/room/${room.roomId}`)}
             />
-            <StyledButton label="Leave Room" onClick={() => leaveRoom()} />
+            <StyledButton
+              label="Leave Room"
+              onClick={() => leaveRoom()}
+              color="error"
+            />
           </Stack>
         </Stack>
       ) : (
