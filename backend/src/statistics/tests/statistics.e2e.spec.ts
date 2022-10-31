@@ -7,9 +7,8 @@ import request from "supertest";
 
 import { AuthModule } from "src/auth/auth.module";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
-import { PrismaServiceModule } from "src/core/prisma.service.module";
+import { CoreModule } from "src/core/core.module";
 import { TestClient } from "src/core/test/test-client";
-import { RedisServiceModule } from "src/redis/redis.service.module";
 
 import { StatisticsModule } from "../statistics.module";
 
@@ -30,8 +29,7 @@ describe("User", () => {
         // Module under test
         StatisticsModule,
         // Global modules
-        PrismaServiceModule,
-        RedisServiceModule,
+        CoreModule,
         LoggerModule.forRoot({
           pinoHttp: {
             level: "silent",

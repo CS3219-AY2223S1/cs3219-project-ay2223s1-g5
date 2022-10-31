@@ -4,7 +4,7 @@ import { NextFunction, Request, RequestHandler, Response } from "express";
 import session from "express-session";
 
 import { ConfigService } from "src/core/config/config.service";
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "src/core/redis/redis.service";
 
 @Injectable()
 export class SessionMiddleware implements NestMiddleware {

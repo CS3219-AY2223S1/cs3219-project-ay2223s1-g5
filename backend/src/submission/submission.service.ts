@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
-import { PrismaService } from "src/core/prisma.service";
+import { PrismaService } from "src/core/prisma/prisma.service";
 import { QuestionService } from "src/question/question.service";
 
 @Injectable()

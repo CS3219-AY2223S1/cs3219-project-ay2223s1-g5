@@ -4,7 +4,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { compare, hash } from "bcrypt";
 
 import { UnauthorizedError } from "src/common/errors/unauthorized.error";
-import { PrismaService } from "src/core/prisma.service";
+import { PrismaService } from "src/core/prisma/prisma.service";
 
 const SALT_ROUNDS = 10;
 

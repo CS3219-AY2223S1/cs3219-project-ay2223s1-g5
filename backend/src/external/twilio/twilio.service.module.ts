@@ -1,12 +1,9 @@
 import { Module } from "@nestjs/common";
 
-import { CoreModule } from "src/core/core.module";
-
 import { MockTwilioService } from "./mock.twilio.service";
 import { TwilioService } from "./twilio.service";
 
 @Module({
-  imports: [CoreModule],
   providers: [
     {
       provide: TwilioService,

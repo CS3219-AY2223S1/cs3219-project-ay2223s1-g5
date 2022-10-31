@@ -4,12 +4,12 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { ConflictError } from "src/common/errors/conflict.error";
 import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { InternalServerError } from "src/common/errors/internal-server.error";
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "src/core/redis/redis.service";
+import { TwilioService } from "src/external/twilio/twilio.service";
 import {
   RoomAuthorizationService,
   RoomServiceInterfaces,
 } from "src/room/room.interface";
-import { TwilioService } from "src/twilio/twilio.service";
 import { UserService } from "src/user/user.service";
 
 const SYSTEM_WELCOME_MESSAGE = "Welcome! Chat with your partner here!";

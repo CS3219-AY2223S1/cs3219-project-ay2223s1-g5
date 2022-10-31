@@ -3,7 +3,7 @@ import { Language as PrismaLanguage } from "@prisma/client";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { InternalServerError } from "src/common/errors/internal-server.error";
-import { PrismaService } from "src/core/prisma.service";
+import { PrismaService } from "src/core/prisma/prisma.service";
 
 import { Difficulty, Language } from "~shared/types/base";
 

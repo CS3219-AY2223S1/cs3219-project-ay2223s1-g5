@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { differenceInSeconds, subDays, subYears } from "date-fns";
 
-import { PrismaService } from "src/core/prisma.service";
+import { PrismaService } from "src/core/prisma/prisma.service";
 
 import { UserStatisticsRes } from "~shared/types/api";
 import { Difficulty } from "~shared/types/base";
