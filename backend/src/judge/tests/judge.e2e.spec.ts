@@ -1,5 +1,6 @@
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
+import { createClient, RedisClientType } from "@redis/client";
 import { LoggerModule } from "nestjs-pino";
 import { io, Socket } from "socket.io-client";
 
@@ -14,6 +15,7 @@ import { RoomService } from "src/room/room.service";
 import { JudgeModule } from "../judge.module";
 import { JudgeService } from "../judge.service";
 
+import { ROOM_EVENTS } from "~shared/constants";
 import { Language } from "~shared/types/base/index";
 
 const userFixtures = [
@@ -23,14 +25,28 @@ const userFixtures = [
     name: "Jane Doe",
     password: "password",
   },
+  {
+    // User ID: 2
+    id: 2,
+    email: "johndoe@email.com",
+    name: "John Doe",
+    password: "password",
+  },
 ];
 
 describe("Judge", () => {
+  const client: TestClient = new TestClient();
+  const redisClient: RedisClientType = createClient({
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  });
+
   let app: NestExpressApplication;
   let adapter: SessionSocketAdapter;
-  const client: TestClient = new TestClient();
+  let address: { port: number };
 
   beforeAll(async () => {
+    await redisClient.connect();
+
     const module = await Test.createTestingModule({
       imports: [
         // Module under test
@@ -57,6 +73,7 @@ describe("Judge", () => {
     await adapter.activate();
     app.useWebSocketAdapter(adapter);
     await app.init();
+    address = app.getHttpServer().listen().address();
   });
 
   beforeEach(async () => {
@@ -64,32 +81,37 @@ describe("Judge", () => {
     await client.user.createMany({
       data: userFixtures,
     });
+    await redisClient.flushAll();
   });
 
   describe("Submissions", () => {
-    let address: { port: number };
-    let clientSocket: Socket;
-
-    beforeAll(() => {
-      address = app.getHttpServer().listen().address();
-    });
-
-    afterAll(async () => {
-      await app.close();
-      await adapter.deactivate();
-    });
+    let clientSocket1: Socket;
+    let clientSocket2: Socket;
+    const mockRoomId = "mockRoomId";
 
     beforeEach(() => {
-      clientSocket = io(`ws://localhost:${address.port}/room`, {
+      clientSocket1 = io(`ws://localhost:${address.port}/room`, {
         extraHeaders: {
           Authorization: "true",
           user: "1",
         },
       });
-      clientSocket.connect();
+      clientSocket2 = io(`ws://localhost:${address.port}/room`, {
+        extraHeaders: {
+          Authorization: "true",
+          user: "2",
+        },
+      });
+
+      clientSocket1.connect();
+      clientSocket2.connect();
+
+      clientSocket1.emit(ROOM_EVENTS.JOIN, { roomId: mockRoomId });
+      clientSocket2.emit(ROOM_EVENTS.JOIN, { roomId: mockRoomId });
+
       jest
         .spyOn(RoomService.prototype, "getRoom")
-        .mockReturnValue(Promise.resolve("mockRoomId"));
+        .mockReturnValue(Promise.resolve(mockRoomId));
       jest.spyOn(RoomService.prototype, "joinRoom").mockReturnValue(
         Promise.resolve({
           members: [],
@@ -101,8 +123,39 @@ describe("Judge", () => {
     });
 
     afterEach(() => {
-      clientSocket.disconnect();
-      jest.clearAllMocks();
+      clientSocket1.disconnect();
+      clientSocket2.disconnect();
+      jest.resetAllMocks();
+    });
+
+    it("should inform the other user submission accepted", (done) => {
+      const submitPayload = {
+        code: "code",
+        questionId: 1,
+        language: Language.CPP,
+      };
+      clientSocket1.emit(ROOM_EVENTS.SUBMIT, submitPayload);
+      clientSocket2.on(ROOM_EVENTS.SUBMISSION_ACCEPTED, () => {
+        done();
+      });
+    });
+
+    it("should not allow multiple submissions together", (done) => {
+      jest
+        .spyOn(JudgeService.prototype as any, "hasSubmission")
+        .mockReturnValue(Promise.resolve(true));
+
+      const submitPayload = {
+        code: "code",
+        questionId: 1,
+        language: Language.CPP,
+      };
+      clientSocket1.emit(ROOM_EVENTS.SUBMIT, submitPayload);
+
+      clientSocket1.on(ROOM_EVENTS.SUBMISSION_REJECTED, ({ reason }) => {
+        expect(reason).toBe("Processing previous submission.");
+        done();
+      });
     });
 
     it("should return update submission", (done) => {
@@ -120,7 +173,7 @@ describe("Judge", () => {
         language: Language.CPP,
       };
 
-      clientSocket.on("submissionUpdate", ({ submissionId }) => {
+      clientSocket1.on("submissionUpdate", ({ submissionId }) => {
         expect(judgeSpy).toHaveBeenCalledWith(
           Language.CPP,
           "code",
@@ -131,8 +184,7 @@ describe("Judge", () => {
         done();
       });
 
-      clientSocket.emit("join", { roomId: "mockRoomId" });
-      clientSocket.emit("submit", payload);
+      clientSocket1.emit("submit", payload);
     });
 
     it("should return submission rejected", (done) => {
@@ -145,7 +197,7 @@ describe("Judge", () => {
         language: Language.CPP,
       };
 
-      clientSocket.on("reject", ({ reason }) => {
+      clientSocket1.on("reject", ({ reason }) => {
         expect(judgeSpy).toHaveBeenCalledWith(
           Language.CPP,
           "code",
@@ -156,8 +208,14 @@ describe("Judge", () => {
         done();
       });
 
-      clientSocket.emit("join", { roomId: "mockRoomId" });
-      clientSocket.emit("submit", payload);
+      clientSocket1.emit("submit", payload);
     });
+  });
+
+  afterAll(async () => {
+    app.getHttpServer().close();
+    await app.close();
+    await adapter.deactivate();
+    await redisClient.disconnect();
   });
 });
