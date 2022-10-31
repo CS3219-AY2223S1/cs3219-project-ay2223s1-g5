@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 /* eslint-disable no-undef */
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";

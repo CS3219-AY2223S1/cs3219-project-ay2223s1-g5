@@ -7,7 +7,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
   ],
-  ignorePatterns: ["build", "tsconfig.json", ".eslintrc.js"],
+  ignorePatterns: ["build", "lib", "tsconfig.json", ".eslintrc.js"],
   env: { es6: true },
   root: true,
   settings: {
