@@ -11,14 +11,18 @@ import { Request } from "express";
 
 import { SessionGuard } from "src/auth/session.guard";
 
-import { RoomManagementService, RoomServiceInterfaces } from "./room.interface";
+import { RoomGateway } from "./room.gateway";
+import { RoomBasicService, RoomServiceInterfaces } from "./room.interface";
 
 import { GetRoomIdRes } from "~shared/types/api/room.dto";
 
 @Controller("room")
 export class RoomController {
-  @Inject(RoomServiceInterfaces.RoomManagementService)
-  private readonly roomService: RoomManagementService;
+  constructor(
+    @Inject(RoomServiceInterfaces.RoomBasicService)
+    private readonly roomService: RoomBasicService,
+    private readonly roomGateway: RoomGateway,
+  ) {}
 
   @UseGuards(SessionGuard)
   @Get()
@@ -48,6 +52,6 @@ export class RoomController {
     if (!room) {
       throw new NotFoundException("Room not found.");
     }
-    await this.roomService.leaveRoom(userId, room);
+    await this.roomGateway.handleLeaveRequest(userId, room);
   }
 }

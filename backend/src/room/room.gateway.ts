@@ -75,9 +75,13 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() { roomId }: LeavePayload,
   ) {
     const userId = Number(session(client).passport?.user.userId);
+    await this.handleLeaveRequest(userId, roomId);
+    client.disconnect();
+  }
+
+  async handleLeaveRequest(userId: number, roomId: string) {
     await this.roomService.leaveRoom(userId, roomId);
     this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_LEAVE, { userId });
-    client.disconnect();
   }
 
   @SubscribeMessage(ROOM_EVENTS.SUBMIT)
