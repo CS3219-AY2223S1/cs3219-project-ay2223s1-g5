@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Language as PrismaLanguage, Status } from "@prisma/client";
-import { compare } from "bcrypt";
 import { nanoid } from "nanoid";
-import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
 import { RateLimitError } from "src/common/errors/rate-limit.error";
