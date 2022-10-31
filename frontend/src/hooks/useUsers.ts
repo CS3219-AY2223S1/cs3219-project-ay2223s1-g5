@@ -21,36 +21,39 @@ export const useCreateUser = () => {
   const { isLoading: isCreateUserLoading, mutateAsync: createUserMutation } =
     useMutation(createUser);
   return {
-    createUserMutation,
+    createUser: createUserMutation,
     isCreateUserLoading,
   };
 };
 
-export const useGetUserName = (userId?: number) => {
+export const useUserName = (userId?: number) => {
   const getUserName = async () => {
     const { data } = await ApiService.get<GetUserNameRes | undefined>(
       `/users/${userId}`,
     );
     return data;
   };
-  const { data: user, isLoading: isGetUserNameLoading } = useQuery(
+  const { data: userName, isLoading: isUserNameLoading } = useQuery(
     [QUERY_KEYS.USERS, userId?.toString() || ""],
     getUserName,
-    {
-      enabled: !!userId,
-    },
+    { enabled: !!userId },
   );
   return {
-    user,
-    isGetUserNameLoading,
+    userName,
+    isUserNameLoading,
   };
 };
 
-export const useGetUsersName = (
+export const useUsersNames = (
   userIds: number[],
-): (GetUserNameRes & { userId: number })[] => {
+): {
+  usersNames: (GetUserNameRes & { userId: number })[];
+  isUsersNamesLoading: boolean;
+} => {
   const getUserName = async (userId: number) => {
-    const { data } = await ApiService.get<GetUserNameRes>(`/users/${userId}`);
+    const { data } = await ApiService.get<GetUserNameRes | undefined>(
+      `/users/${userId}`,
+    );
     return data;
   };
   const results = useQueries(
@@ -68,11 +71,16 @@ export const useGetUsersName = (
   );
 
   // Manual typecast because TS can't detect that filter removes undefined.
-  return results
-    .filter((result) => !!result.data)
-    .map((result) => result.data) as unknown as (GetUserNameRes & {
-    userId: number;
-  })[];
+  let isUsersNamesLoading = false;
+  const usersNames: (GetUserNameRes & { userId: number })[] = [];
+  for (const result of results) {
+    isUsersNamesLoading = isUsersNamesLoading && result.isLoading;
+    if (!result.data?.name) {
+      continue;
+    }
+    usersNames.push({ name: result.data.name, userId: result.data.userId });
+  }
+  return { usersNames, isUsersNamesLoading };
 };
 
 export const useUpdateDisplayName = (userId: number) => {
@@ -86,8 +94,8 @@ export const useUpdateDisplayName = (userId: number) => {
     mutateAsync: updateDisplayNameMutation,
   } = useMutation(updateDisplayName);
   return {
+    updateDisplayName: updateDisplayNameMutation,
     isUpdateDisplayNameLoading,
-    updateDisplayNameMutation,
   };
 };
 
@@ -100,7 +108,7 @@ export const useUpdatePassword = () => {
     mutateAsync: updatePasswordMutation,
   } = useMutation(updatePassword);
   return {
-    updatePasswordMutation,
+    updatePassword: updatePasswordMutation,
     isUpdatePasswordLoading,
   };
 };
@@ -114,7 +122,7 @@ export const useRequestResetPassword = () => {
     mutateAsync: requestResetPasswordMutation,
   } = useMutation(requestResetPassword);
   return {
-    requestResetPasswordMutation,
+    requestResetPassword: requestResetPasswordMutation,
     isRequestResetPasswordLoading,
   };
 };
@@ -128,7 +136,7 @@ export const useResetPassword = () => {
     mutateAsync: resetPasswordMutation,
   } = useMutation(resetPassword);
   return {
-    resetPasswordMutation,
+    resetPassword: resetPasswordMutation,
     isResetPasswordLoading,
   };
 };
@@ -143,7 +151,7 @@ export const useRequestVerificationEmail = () => {
   } = useMutation(requestVerificationEmail);
   return {
     isRequestVerificationEmailLoading,
-    requestVerificationEmailMutation,
+    requestVerificationEmail: requestVerificationEmailMutation,
   };
 };
 
@@ -155,6 +163,6 @@ export const useVerifyEmail = () => {
     useMutation(verifyEmail);
   return {
     isVerifyEmailLoading,
-    verifyEmailMutation,
+    verifyEmail: verifyEmailMutation,
   };
 };

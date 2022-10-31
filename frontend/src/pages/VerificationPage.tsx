@@ -14,7 +14,7 @@ export const VerificationPage = () => {
   const userId = params.get("userId");
   const code = params.get("code");
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const { verifyEmailMutation } = useVerifyEmail();
+  const { verifyEmail } = useVerifyEmail();
   const navigate = useNavigate();
   const previousCode = useRef<string>("");
 
@@ -34,7 +34,7 @@ export const VerificationPage = () => {
     previousCode.current = code;
     const verify = async () => {
       try {
-        await verifyEmailMutation({ userId: Number(userId), code: code });
+        await verifyEmail({ userId: Number(userId), code: code });
         enqueueSnackbar("Successfully verified email! Please login.", {
           variant: "success",
         });

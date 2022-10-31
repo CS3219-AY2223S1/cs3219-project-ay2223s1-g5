@@ -26,8 +26,8 @@ type LoginFormState = {
 
 export const LoginForm = (props: LoginFormProps) => {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const { loginMutation, isLoginLoading } = useLogin();
-  const { requestVerificationEmailMutation } = useRequestVerificationEmail();
+  const { login, isLoginLoading } = useLogin();
+  const { requestVerificationEmail } = useRequestVerificationEmail();
   const { getUser } = useAuth();
 
   const formMethods = useForm<LoginFormState>();
@@ -35,7 +35,7 @@ export const LoginForm = (props: LoginFormProps) => {
 
   const onSubmit = handleSubmit(async (data: LoginFormState) => {
     try {
-      await loginMutation(data);
+      await login(data);
       await getUser();
       props.onSubmit();
     } catch (e: unknown) {
@@ -53,7 +53,7 @@ export const LoginForm = (props: LoginFormProps) => {
               }}
               onClick={async () => {
                 try {
-                  await requestVerificationEmailMutation({ email: data.email });
+                  await requestVerificationEmail({ email: data.email });
                   // We don't need to close the snackbar since we have a limit of one snackbar.
                   enqueueSnackbar("Verification email sent!", {
                     variant: "success",

@@ -17,8 +17,7 @@ type UpdatePasswordFormState = {
 
 export const UpdatePasswordForm = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const { updatePasswordMutation, isUpdatePasswordLoading } =
-    useUpdatePassword();
+  const { updatePassword, isUpdatePasswordLoading } = useUpdatePassword();
 
   const formMethods = useForm<UpdatePasswordFormState>();
 
@@ -26,7 +25,7 @@ export const UpdatePasswordForm = () => {
 
   const onSubmit = handleSubmit(async (data: UpdatePasswordFormState) => {
     try {
-      await updatePasswordMutation({
+      await updatePassword({
         oldPassword: data.oldPassword,
         newPassword: data.password,
       });

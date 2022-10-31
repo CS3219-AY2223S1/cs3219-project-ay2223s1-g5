@@ -21,7 +21,7 @@ type RequestResetPasswordFormState = {
 
 export const RequestResetPasswordForm = (props: RequestResetPasswordForm) => {
   const { enqueueSnackbar } = useSnackbar();
-  const { requestResetPasswordMutation, isRequestResetPasswordLoading } =
+  const { requestResetPassword, isRequestResetPasswordLoading } =
     useRequestResetPassword();
 
   const formMethods = useForm<RequestResetPasswordFormState>();
@@ -29,7 +29,7 @@ export const RequestResetPasswordForm = (props: RequestResetPasswordForm) => {
 
   const onSubmit = handleSubmit(async (data: RequestResetPasswordFormState) => {
     try {
-      await requestResetPasswordMutation(data);
+      await requestResetPassword(data);
       enqueueSnackbar(
         "An email with password reset instructions will be sent if there is an account associated with this email.",
         {
