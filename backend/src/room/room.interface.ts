@@ -26,6 +26,7 @@ export interface RoomCreationService extends RoomBasicService {
 export interface RoomManagementService extends RoomCreationService {
   joinRoom(
     userId: number,
+    socketId: string,
     roomId: string,
   ): Promise<{
     members: { userId: number; isConnected: boolean }[];
@@ -33,6 +34,10 @@ export interface RoomManagementService extends RoomCreationService {
     language: Language;
     questionId: number;
   }>;
-  disconnectRoom(userId: number, roomId: string): Promise<void>;
+  disconnectRoom(
+    userId: number,
+    socketId: string,
+    roomId: string,
+  ): Promise<boolean>;
   leaveRoom(userId: number, roomId: string): Promise<void>;
 }

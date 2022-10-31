@@ -51,7 +51,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = Number(session(client).passport?.user.userId);
     try {
       const { language, questionId, members, password } =
-        await this.roomService.joinRoom(userId, roomId);
+        await this.roomService.joinRoom(userId, client.id, roomId);
       const payload: JoinedPayload = {
         userId,
         metadata: {
@@ -141,13 +141,20 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     await client.join(`user:${userId}`);
   }
 
-  async handleDisconnect(@ConnectedSocket() client: Socket) {
+  async handleDisconnect(client: Socket) {
     this.logger.info(`Websocket disconnected: ${client.id}`);
     const userId = Number(session(client).passport?.user.userId);
 
     const roomId = await this.roomService.getRoom(userId);
     if (roomId) {
-      await this.roomService.disconnectRoom(userId, roomId);
+      const connected = await this.roomService.disconnectRoom(
+        userId,
+        client.id,
+        roomId,
+      );
+      if (connected) {
+        return;
+      }
       this.server.to(roomId).emit(ROOM_EVENTS.PARTNER_DISCONNECT, { userId });
     }
   }
