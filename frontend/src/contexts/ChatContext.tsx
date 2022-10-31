@@ -53,7 +53,7 @@ export const ChatProvider = ({
   children,
 }: PropsWithChildren & { roomId: string }): JSX.Element => {
   const { user } = useAuth();
-  const { createChatTokenMutation } = useCreateChatToken();
+  const { createChatToken } = useCreateChatToken();
   const [token, setToken] = useState<string>("");
   const [identity, setIdentity] = useState<string>("");
 
@@ -88,7 +88,7 @@ export const ChatProvider = ({
 
   useEffect(() => {
     const retrieveToken = async () => {
-      const { token, identity } = await createChatTokenMutation();
+      const { token, identity } = await createChatToken();
       setToken(token);
       setIdentity(identity);
     };

@@ -23,7 +23,7 @@ type CreateUserFormState = {
 
 export const SignUpForm = (props: SignUpFormProps) => {
   const { enqueueSnackbar } = useSnackbar();
-  const { createUserMutation, isCreateUserLoading } = useCreateUser();
+  const { createUser, isCreateUserLoading } = useCreateUser();
 
   const formMethods = useForm<CreateUserFormState>();
 
@@ -31,7 +31,7 @@ export const SignUpForm = (props: SignUpFormProps) => {
 
   const onSubmit = handleSubmit(async (data: CreateUserFormState) => {
     try {
-      await createUserMutation({
+      await createUser({
         email: data.email,
         name: data.name,
         password: data.password,

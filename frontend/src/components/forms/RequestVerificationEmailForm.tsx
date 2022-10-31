@@ -23,10 +23,8 @@ export const RequestVerificationEmailForm = (
   props: RequestVerificationEmailFormProps,
 ) => {
   const { enqueueSnackbar } = useSnackbar();
-  const {
-    requestVerificationEmailMutation,
-    isRequestVerificationEmailLoading,
-  } = useRequestVerificationEmail();
+  const { requestVerificationEmail, isRequestVerificationEmailLoading } =
+    useRequestVerificationEmail();
 
   const formMethods = useForm<RequestVerificationEmailFormState>();
   const { handleSubmit } = formMethods;
@@ -34,7 +32,7 @@ export const RequestVerificationEmailForm = (
   const onSubmit = handleSubmit(
     async (data: RequestVerificationEmailFormState) => {
       try {
-        await requestVerificationEmailMutation(data);
+        await requestVerificationEmail(data);
         enqueueSnackbar(
           "An email with account activation instructions will be sent if there is an account associated with this email.",
           {

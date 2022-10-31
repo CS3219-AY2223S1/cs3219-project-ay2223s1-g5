@@ -14,14 +14,14 @@ import DOMPurify from "dompurify";
 import parse from "html-react-parser";
 
 import { Center } from "src/components/Center";
-import { useGetQuestion } from "src/hooks/useQuestions";
+import { useQuestion } from "src/hooks/useQuestions";
 
 export type QuestionPanelProps = {
   questionId?: number;
 };
 
 export const Question = (props: QuestionPanelProps) => {
-  const { question } = useGetQuestion(props.questionId);
+  const { question } = useQuestion(props.questionId);
 
   return question ? (
     <Stack
