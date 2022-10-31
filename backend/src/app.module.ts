@@ -13,7 +13,6 @@ import { SessionMiddlewareModule } from "src/common/middlewares/SessionMiddlewar
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
 import { CoreModule } from "src/core/core.module";
 import { EditorModule } from "src/editor/editor.module";
-import { JudgeModule } from "src/judge/judge.module";
 import { QuestionModule } from "src/question/question.module";
 import { QueueModule } from "src/queue/queue.module";
 import { RoomModule } from "src/room/room.module";
@@ -56,7 +55,6 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
     ChatModule,
     EditorModule,
     QuestionModule,
-    JudgeModule,
     StatisticsModule,
     SubmissionModule,
     // For custom WebSocket adapter

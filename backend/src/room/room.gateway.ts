@@ -15,7 +15,7 @@ import { session } from "src/common/adapters/session.websocket.adapter";
 import { RateLimitError } from "src/common/errors/rate-limit.error";
 import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
-import { JudgeService } from "src/judge/judge.service";
+import { SubmissionService } from "src/submission/submission.service";
 
 import { RoomManagementService, RoomServiceInterfaces } from "./room.interface";
 
@@ -40,7 +40,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly logger: PinoLogger,
     @Inject(RoomServiceInterfaces.RoomManagementService)
     private readonly roomService: RoomManagementService,
-    private readonly judgeService: JudgeService,
+    private readonly submissionService: SubmissionService,
   ) {}
 
   @SubscribeMessage(ROOM_EVENTS.JOIN)
@@ -96,7 +96,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(roomId).emit(ROOM_EVENTS.SUBMISSION_ACCEPTED);
 
     try {
-      const completed = await this.judgeService.sendRequest(
+      const completed = await this.submissionService.sendRequest(
         submitPayload.language,
         submitPayload.code,
         submitPayload.questionId,
