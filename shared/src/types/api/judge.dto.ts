@@ -1,12 +1,12 @@
 export type Judge0Callback = {
   token: string;
-  exit_code: number;
-  stdout: string;
-  stderr: string;
-  compile_output: string;
-  message: string;
-  time: string;
-  memory: number;
+  exit_code: number | null;
+  stdout: string | null;
+  stderr: string | null;
+  compile_output: string | null;
+  message: string | null;
+  time: string | null;
+  memory: number | null;
   status: {
     id: number;
     description: string;

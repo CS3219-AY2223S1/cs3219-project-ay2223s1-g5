@@ -1,6 +1,6 @@
-import { CodePrototype, JudgeMiddleware } from "./middleware";
+import { CodePrototype, SubmissionMiddleware } from "./middleware";
 
-export class PythonMiddleware extends JudgeMiddleware {
+export class PythonMiddleware extends SubmissionMiddleware {
   constructor(
     template: string,
     inputs: string[],
