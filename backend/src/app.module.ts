@@ -12,8 +12,6 @@ import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
 import { SessionMiddlewareModule } from "src/common/middlewares/SessionMiddleware.module";
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
 import { CoreModule } from "src/core/core.module";
-import { PrismaServiceModule } from "src/core/prisma/prisma.service.module";
-import { RedisServiceModule } from "src/core/redis/redis.service.module";
 import { EditorModule } from "src/editor/editor.module";
 import { JudgeModule } from "src/judge/judge.module";
 import { QuestionModule } from "src/question/question.module";
@@ -50,8 +48,6 @@ const FRONTEND_PATH = join(__dirname, "..", "..", "frontend", "build");
         },
       },
     }),
-    RedisServiceModule,
-    PrismaServiceModule,
     CoreModule,
     AuthModule,
     UserModule,

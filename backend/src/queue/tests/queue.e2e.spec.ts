@@ -7,8 +7,7 @@ import { io, Socket } from "socket.io-client";
 import { AuthModule } from "src/auth/auth.module";
 import { SessionSocketAdapter } from "src/common/adapters/session.websocket.adapter";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
-import { PrismaServiceModule } from "src/core/prisma/prisma.service.module";
-import { RedisServiceModule } from "src/core/redis/redis.service.module";
+import { CoreModule } from "src/core/core.module";
 import { TestClient } from "src/core/test/test-client";
 import { RoomService } from "src/room/room.service";
 
@@ -52,8 +51,7 @@ describe("Queue", () => {
         // Module under test
         QueueModule,
         // Global modules
-        PrismaServiceModule,
-        RedisServiceModule,
+        CoreModule,
         LoggerModule.forRoot({
           pinoHttp: {
             level: "silent",

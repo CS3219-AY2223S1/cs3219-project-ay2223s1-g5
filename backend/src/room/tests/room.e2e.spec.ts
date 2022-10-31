@@ -8,9 +8,8 @@ import { io, Socket } from "socket.io-client";
 import { AuthModule } from "src/auth/auth.module";
 import { SessionSocketAdapter } from "src/common/adapters/session.websocket.adapter";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
-import { PrismaServiceModule } from "src/core/prisma.service.module";
+import { CoreModule } from "src/core/core.module";
 import { TestClient } from "src/core/test/test-client";
-import { RedisServiceModule } from "src/redis/redis.service.module";
 
 import { RoomServiceInterfaces } from "../room.interface";
 import { RoomModule } from "../room.module";
@@ -87,8 +86,7 @@ describe("Room", () => {
         // Module under test
         RoomModule,
         // Global modules
-        PrismaServiceModule,
-        RedisServiceModule,
+        CoreModule,
         LoggerModule.forRoot({
           pinoHttp: {
             level: "silent",
