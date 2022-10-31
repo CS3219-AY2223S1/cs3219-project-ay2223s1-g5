@@ -1,5 +1,6 @@
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
+import { Language as PrismaLanguage } from "@prisma/client";
 import { createClient, RedisClientType } from "@redis/client";
 import { LoggerModule } from "nestjs-pino";
 import { io, Socket } from "socket.io-client";
@@ -7,16 +8,16 @@ import { io, Socket } from "socket.io-client";
 import { AuthModule } from "src/auth/auth.module";
 import { SessionSocketAdapter } from "src/common/adapters/session.websocket.adapter";
 import { MockSessionMiddleware } from "src/common/middlewares/test/MockSessionMiddleware";
-import { PrismaServiceModule } from "src/core/prisma.service.module";
+import { CoreModule } from "src/core/core.module";
 import { TestClient } from "src/core/test/test-client";
-import { RedisServiceModule } from "src/redis/redis.service.module";
+import { JudgeService } from "src/external/judge/judge.service";
 import { RoomService } from "src/room/room.service";
 
-import { JudgeModule } from "../judge.module";
-import { JudgeService } from "../judge.service";
+import { SubmissionModule } from "../submission.module";
+import { SubmissionService } from "../submission.service";
 
 import { ROOM_EVENTS } from "~shared/constants";
-import { Language } from "~shared/types/base/index";
+import { Difficulty, Language } from "~shared/types/base/index";
 
 const userFixtures = [
   {
@@ -34,7 +35,41 @@ const userFixtures = [
   },
 ];
 
-describe("Judge", () => {
+const questionFixture = {
+  title: "Question",
+  difficulty: Difficulty.EASY,
+  category: {
+    create: { title: "Category" },
+  },
+  topics: {
+    create: [{ name: "Topic" }],
+  },
+  description: "Description",
+  hints: ["Hint 1", "Hint 2"],
+  templates: {
+    create: [
+      {
+        language: PrismaLanguage.CPP,
+        code:
+          "class Solution {\n" +
+          "public:\n" +
+          "  vector<int> twoSum(vector<int>& nums, int target) {\n" +
+          "  }" +
+          "};\n",
+      },
+    ],
+  },
+  testcases: {
+    create: [
+      {
+        inputs: ["[2,7,11,15]", "9"],
+        output: "[0, 1]",
+      },
+    ],
+  },
+};
+
+describe("Submission", () => {
   const client: TestClient = new TestClient();
   const redisClient: RedisClientType = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
@@ -50,10 +85,9 @@ describe("Judge", () => {
     const module = await Test.createTestingModule({
       imports: [
         // Module under test
-        JudgeModule,
+        SubmissionModule,
         // Global modules
-        PrismaServiceModule,
-        RedisServiceModule,
+        CoreModule,
         LoggerModule.forRoot({
           pinoHttp: {
             level: "silent",
@@ -81,13 +115,21 @@ describe("Judge", () => {
     await client.user.createMany({
       data: userFixtures,
     });
+    await client.question.create({ data: questionFixture });
     await redisClient.flushAll();
   });
 
   describe("Submissions", () => {
     let clientSocket1: Socket;
     let clientSocket2: Socket;
+
     const mockRoomId = "mockRoomId";
+    const mockSubmissionId = "mockSubmissionId";
+    const defaultPayload = {
+      code: "code\n",
+      questionId: 1,
+      language: Language.CPP,
+    };
 
     beforeEach(() => {
       clientSocket1 = io(`ws://localhost:${address.port}/room`, {
@@ -129,12 +171,7 @@ describe("Judge", () => {
     });
 
     it("should inform the other user submission accepted", (done) => {
-      const submitPayload = {
-        code: "code",
-        questionId: 1,
-        language: Language.CPP,
-      };
-      clientSocket1.emit(ROOM_EVENTS.SUBMIT, submitPayload);
+      clientSocket1.emit(ROOM_EVENTS.SUBMIT, defaultPayload);
       clientSocket2.on(ROOM_EVENTS.SUBMISSION_ACCEPTED, () => {
         done();
       });
@@ -142,15 +179,10 @@ describe("Judge", () => {
 
     it("should not allow multiple submissions together", (done) => {
       jest
-        .spyOn(JudgeService.prototype as any, "hasSubmission")
+        .spyOn(SubmissionService.prototype as any, "hasSubmission")
         .mockReturnValue(Promise.resolve(true));
 
-      const submitPayload = {
-        code: "code",
-        questionId: 1,
-        language: Language.CPP,
-      };
-      clientSocket1.emit(ROOM_EVENTS.SUBMIT, submitPayload);
+      clientSocket1.emit(ROOM_EVENTS.SUBMIT, defaultPayload);
 
       clientSocket1.on(ROOM_EVENTS.SUBMISSION_REJECTED, ({ reason }) => {
         expect(reason).toBe("Processing previous submission.");
@@ -158,57 +190,76 @@ describe("Judge", () => {
       });
     });
 
-    it("should return update submission", (done) => {
+    it("should format code for submission", (done) => {
+      const middlewareSpy = jest.spyOn(
+        SubmissionService.prototype as any,
+        "getMiddleware",
+      );
       const judgeSpy = jest
-        .spyOn(JudgeService.prototype, "sendRequest")
-        .mockReturnValue(
-          Promise.resolve({
-            roomId: "mockRoomId",
-            submissionId: "mockSubmissionId",
-          }),
-        );
-      const payload = {
-        code: "code",
-        questionId: 1,
-        language: Language.CPP,
-      };
+        .spyOn(JudgeService.prototype, "submit")
+        .mockRejectedValue(new Error());
 
-      clientSocket1.on("submissionUpdate", ({ submissionId }) => {
-        expect(judgeSpy).toHaveBeenCalledWith(
-          Language.CPP,
-          "code",
-          1,
-          "mockRoomId",
-        );
-        expect(submissionId).toBe("mockSubmissionId");
+      clientSocket1.emit(ROOM_EVENTS.SUBMIT, defaultPayload);
+
+      clientSocket1.on(ROOM_EVENTS.SUBMISSION_REJECTED, () => {
+        const secretValue = middlewareSpy.mock.calls[0][4];
+        const expectedCode =
+          "code\n" +
+          "int main() {\n" +
+          "  vector<int> nums{2,7,11,15};\n" +
+          "  int target = 9;\n" +
+          "  vector<int> expectedOutput{0, 1};\n" +
+          "  vector<int> res = Solution().twoSum(nums,target);\n" +
+          "  bool isEqual = res.size() == expectedOutput.size() && std::equal(res.begin(), res.end(), expectedOutput.begin());\n" +
+          `  fprintf(stderr, "${secretValue}|%s", isEqual ? "true" : "false");\n` +
+          "}\n";
+        expect(judgeSpy.mock.calls[0][1]).toContain(expectedCode);
         done();
       });
+    });
 
-      clientSocket1.emit("submit", payload);
+    it("should return update submission", (done) => {
+      const submissionSpy = jest
+        .spyOn(SubmissionService.prototype, "sendRequest")
+        .mockReturnValue(
+          Promise.resolve({
+            roomId: mockRoomId,
+            submissionId: mockSubmissionId,
+          }),
+        );
+
+      clientSocket1.emit(ROOM_EVENTS.SUBMIT, defaultPayload);
+
+      clientSocket1.on(ROOM_EVENTS.SUBMISSION_UPDATED, ({ submissionId }) => {
+        expect(submissionSpy).toHaveBeenCalledWith(
+          Language.CPP,
+          "code\n",
+          1,
+          mockRoomId,
+        );
+        expect(submissionId).toBe(mockSubmissionId);
+        done();
+      });
     });
 
     it("should return submission rejected", (done) => {
-      const judgeSpy = jest
-        .spyOn(JudgeService.prototype, "sendRequest")
-        .mockRejectedValue(new Error("send request fail"));
-      const payload = {
-        code: "code",
-        questionId: 1,
-        language: Language.CPP,
-      };
+      const errorReason = "send request fail";
+      const submissionSpy = jest
+        .spyOn(SubmissionService.prototype, "sendRequest")
+        .mockRejectedValue(new Error(errorReason));
 
-      clientSocket1.on("reject", ({ reason }) => {
-        expect(judgeSpy).toHaveBeenCalledWith(
+      clientSocket1.emit(ROOM_EVENTS.SUBMIT, defaultPayload);
+
+      clientSocket1.on(ROOM_EVENTS.SUBMISSION_REJECTED, ({ reason }) => {
+        expect(submissionSpy).toHaveBeenCalledWith(
           Language.CPP,
-          "code",
+          "code\n",
           1,
-          "mockRoomId",
+          mockRoomId,
         );
-        expect(reason).toBe("send request fail");
+        expect(reason).toBe(errorReason);
         done();
       });
-
-      clientSocket1.emit("submit", payload);
     });
   });
 
