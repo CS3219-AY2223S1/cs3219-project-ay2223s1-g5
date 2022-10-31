@@ -9,6 +9,7 @@ export type Submission = {
   runTime?: number;
   memoryUsage?: number;
   standardOutput?: string;
+  errorOutput?: string;
   compileOutput?: string;
 };
 

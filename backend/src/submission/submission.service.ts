@@ -22,15 +22,16 @@ const secondsToMilliseconds = 1000;
 const kilobytesToBytes = 1000;
 
 const compareOutput = (output: string, expectedOutput: string) => {
-  const outputArr = output.trim().split("|");
-  const expectedOutputArr = expectedOutput.trim().split("|");
+  const expectedOutputArray = expectedOutput.trim().split("|");
+  const expectedSecret = expectedOutputArray[0];
+  const expectedResult = expectedOutputArray[1];
 
-  // Compare canary values
-  if (outputArr[0] !== expectedOutputArr[0]) {
+  const outputArray = output.trim().split(`${expectedSecret}|`);
+  if (outputArray.length !== 2) {
     return Status.RUNTIME_ERROR;
   }
 
-  if (outputArr[1] !== expectedOutputArr[1]) {
+  if (outputArray[1] !== expectedResult) {
     return Status.WRONG_ANSWER;
   }
 
@@ -53,7 +54,7 @@ export class SubmissionService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async getSessionByRoomId(roomId: string, userId: number) {
+  async getSubmissionsByRoomId(roomId: string, userId: number) {
     const roomSession = await this.prismaService.roomSession.findFirst({
       where: { id: roomId, users: { some: { id: userId } } },
       include: {
@@ -65,7 +66,21 @@ export class SubmissionService {
       throw new EntityNotFoundError("Room session not found.");
     }
 
-    return roomSession;
+    const { questionId, submissions } = roomSession;
+
+    const filteredSubmissions = submissions.map((submission) => {
+      const expectedOutput = submission.expectedOutput;
+      const errorOutput = submission.errorOutput;
+      const secret = expectedOutput.split("|")[0];
+      const trueErrorOutput = errorOutput?.split(secret)[0];
+      console.log(trueErrorOutput);
+      return {
+        ...submission,
+        errorOutput: trueErrorOutput,
+      };
+    });
+
+    return { questionId, submissions: filteredSubmissions };
   }
 
   async getTestCaseByQuestionId(questionId: number) {
@@ -85,7 +100,7 @@ export class SubmissionService {
     if (await this.hasSubmission(roomId)) {
       throw new RateLimitError("Processing previous submission.");
     }
-    const canaryValue = nanoid();
+    const secretValue = nanoid();
     await this.redisService.setKey(
       [SubmissionService.NAMESPACE, "ROOM"],
       roomId,
@@ -99,7 +114,7 @@ export class SubmissionService {
       template,
       testCase.inputs,
       testCase.output,
-      canaryValue,
+      secretValue,
     );
 
     // Replace leading tabs with whitespaces
@@ -119,7 +134,7 @@ export class SubmissionService {
           id: submissionId,
           roomSessionId: roomId,
           code,
-          expectedOutput: `${canaryValue}|true`,
+          expectedOutput: `${secretValue}|true`,
           language: language.toUpperCase() as PrismaLanguage,
         },
       });
@@ -259,17 +274,17 @@ export class SubmissionService {
     template: string,
     inputs: string[],
     output: string,
-    canaryValue: string,
+    secretValue: string,
   ): SubmissionMiddleware {
     switch (language) {
       case Language.JAVA:
-        return new JavaMiddleware(template, inputs, output, canaryValue);
+        return new JavaMiddleware(template, inputs, output, secretValue);
       case Language.JAVASCRIPT:
-        return new JavascriptMiddleware(template, inputs, output, canaryValue);
+        return new JavascriptMiddleware(template, inputs, output, secretValue);
       case Language.PYTHON:
-        return new PythonMiddleware(template, inputs, output, canaryValue);
+        return new PythonMiddleware(template, inputs, output, secretValue);
       case Language.CPP:
-        return new CppMiddleware(template, inputs, output, canaryValue);
+        return new CppMiddleware(template, inputs, output, secretValue);
       default:
         throw Error("Language not supported yet");
     }
