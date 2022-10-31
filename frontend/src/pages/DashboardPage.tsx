@@ -15,13 +15,13 @@ import { NetworkChart } from "src/components/charts/NetworkChart";
 import { SubmissionsHeatmap } from "src/components/charts/SubmissionsHeatmap";
 import { ChartContainer } from "src/components/dashboard/ChartContainer";
 import { Title } from "src/components/Title";
-import { useGetUserStatistics } from "src/hooks/useStatistics";
+import { useUserStatistics } from "src/hooks/useStatistics";
 import { formatDate } from "src/utils/string";
 
 import { Difficulty } from "~shared/types/base/index";
 
 export const DashboardPage = () => {
-  const { statistics } = useGetUserStatistics();
+  const { userStatistics } = useUserStatistics();
   const [attemptSummary, setAttemptSummary] = useState<
     Record<Difficulty | string, number> | undefined
   >();
@@ -63,15 +63,15 @@ export const DashboardPage = () => {
   >();
 
   useEffect(() => {
-    if (!statistics) {
+    if (!userStatistics) {
       return;
     }
-    setAttemptSummary(statistics.attemptSummary);
-    setDurationSummary(statistics.durationSummary);
-    setPeerSummary(statistics.peerSummary);
-    setHeatmapData(statistics.heatmapData);
-    setNetworkData(statistics.networkData);
-  }, [statistics]);
+    setAttemptSummary(userStatistics.attemptSummary);
+    setDurationSummary(userStatistics.durationSummary);
+    setPeerSummary(userStatistics.peerSummary);
+    setHeatmapData(userStatistics.heatmapData);
+    setNetworkData(userStatistics.networkData);
+  }, [userStatistics]);
 
   return (
     <Stack spacing={3}>

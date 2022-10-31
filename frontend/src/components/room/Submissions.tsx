@@ -9,7 +9,7 @@ import {
 import { Box, Typography } from "@mui/material";
 
 import { DataTable } from "src/components/charts/DataTable";
-import { useGetSubmissions } from "src/hooks/useSubmissions";
+import { useSubmissions } from "src/hooks/useSubmissions";
 import { normaliseStatus } from "src/utils/string";
 
 import { Center } from "../Center";
@@ -30,7 +30,7 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
   const [submission, setSubmission] = useState<
     SubmissionDialogContent | undefined
   >(undefined);
-  const submissions = useGetSubmissions(roomId).submissions || [];
+  const { submissions } = useSubmissions(roomId);
 
   const onClose = useCallback(() => {
     setIsOpen(false);
@@ -44,7 +44,7 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
       )}
       <DataTable
         headers={HEADERS}
-        rows={submissions.map((submission, index) => {
+        rows={(submissions || []).map((submission, index) => {
           const color =
             submission.status === Status.ACCEPTED
               ? "green.500"

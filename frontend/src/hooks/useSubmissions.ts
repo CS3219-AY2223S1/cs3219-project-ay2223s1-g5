@@ -6,7 +6,7 @@ import { ApiService } from "src/services/ApiService";
 
 import { GetSubmissionsRes } from "~shared/types/api";
 
-export const useGetSubmissions = (roomId?: string) => {
+export const useSubmissions = (roomId?: string) => {
   const getSubmissions = async () => {
     const { data } = await ApiService.get<GetSubmissionsRes | undefined>(
       `/room/${roomId}/submissions`,
@@ -20,14 +20,14 @@ export const useGetSubmissions = (roomId?: string) => {
       return x.submitTime > y.submitTime ? -1 : 0;
     });
   };
-  const { data: submissions, isLoading: isGetSubmissionsLoading } = useQuery(
+  const { data: submissions, isLoading: isSubmissionsLoading } = useQuery(
     [QUERY_KEYS.SUBMISSIONS, roomId || ""],
     getSubmissions,
     { enabled: !!roomId },
   );
   return {
     submissions,
-    isGetSubmissionsLoading,
+    isSubmissionsLoading,
   };
 };
 

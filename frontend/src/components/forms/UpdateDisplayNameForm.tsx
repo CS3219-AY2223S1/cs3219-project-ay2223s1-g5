@@ -21,7 +21,7 @@ type UpdateDisplayNameFormState = {
 export const UpdateDisplayNameForm = (props: UpdateDisplayNameFormProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const { getUser } = useAuth();
-  const { updateDisplayNameMutation, isUpdateDisplayNameLoading } =
+  const { updateDisplayName, isUpdateDisplayNameLoading } =
     useUpdateDisplayName(props.userId);
 
   const formMethods = useForm<UpdateDisplayNameFormState>();
@@ -30,7 +30,7 @@ export const UpdateDisplayNameForm = (props: UpdateDisplayNameFormProps) => {
 
   const onSubmit = handleSubmit(async (data: UpdateDisplayNameFormState) => {
     try {
-      await updateDisplayNameMutation(data);
+      await updateDisplayName(data);
       enqueueSnackbar("Successfully updated display name!", {
         variant: "success",
       });

@@ -9,14 +9,10 @@ export const useLogin = () => {
     const result = await ApiService.post<LoginRes>(`/sessions`, input);
     return result;
   };
-  const {
-    isSuccess: isLoginSuccess,
-    isLoading: isLoginLoading,
-    mutateAsync: loginMutation,
-  } = useMutation(login);
+  const { isLoading: isLoginLoading, mutateAsync: loginMutation } =
+    useMutation(login);
   return {
-    loginMutation,
-    isLoginSuccess,
+    login: loginMutation,
     isLoginLoading,
   };
 };
@@ -29,7 +25,7 @@ export const useLogout = () => {
   const { isLoading: isLogoutLoading, mutateAsync: logoutMutation } =
     useMutation(logout);
   return {
-    logoutMutation,
+    logout: logoutMutation,
     isLogoutLoading,
   };
 };

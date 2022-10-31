@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  CircularProgress,
   Container,
   FormControl,
   InputLabel,
@@ -12,7 +13,7 @@ import {
 
 import { Center } from "src/components/Center";
 import { StyledButton } from "src/components/StyledButton";
-import { useGetRoomId, useLeaveRoom } from "src/hooks/useRoom";
+import { useLeaveRoom, useRoom } from "src/hooks/useRoom";
 
 import { Difficulty, Language } from "~shared/types/base";
 
@@ -39,6 +40,8 @@ export const SelectionPage = () => {
   >(undefined);
   const [selectedLanguage, setSelectedLanguage] = useState<Language | "">("");
 
+  const { room, isRoomLoading } = useRoom();
+  const { leaveRoom } = useLeaveRoom();
   const navigate = useNavigate();
 
   const handleDifficultyChange = (difficulty: Difficulty) => {
@@ -49,14 +52,11 @@ export const SelectionPage = () => {
     setSelectedLanguage(language);
   };
 
-  const { roomId } = useGetRoomId();
-  const userHasExistingRoom = roomId?.roomId != undefined;
-
-  const { leaveRoomMutation } = useLeaveRoom();
-
-  if (userHasExistingRoom) {
-    return (
-      <Center>
+  return (
+    <Center>
+      {isRoomLoading ? (
+        <CircularProgress />
+      ) : room?.roomId ? (
         <Stack spacing={5}>
           <Typography
             sx={{ fontWeight: "bold", textAlign: "center" }}
@@ -67,108 +67,102 @@ export const SelectionPage = () => {
           <Stack spacing={3}>
             <StyledButton
               label="Rejoin Room"
-              onClick={() => navigate(`/room/${roomId.roomId}`)}
+              onClick={() => navigate(`/room/${room.roomId}`)}
             />
-            <StyledButton
-              label="Leave Room"
-              onClick={() => leaveRoomMutation()}
-            />
+            <StyledButton label="Leave Room" onClick={() => leaveRoom()} />
           </Stack>
         </Stack>
-      </Center>
-    );
-  }
-  return (
-    <Center>
-      <Stack spacing={10}>
-        <Stack spacing={5}>
-          <Typography
-            sx={{ fontWeight: "bold", textAlign: "center" }}
-            variant="h6"
-          >
-            Please select a difficulty
-          </Typography>
-          <Stack direction="row" spacing={3}>
-            <StyledButton
-              label="Easy"
-              sx={{
-                bgcolor:
-                  selectedDifficulty === Difficulty.EASY
-                    ? "green.A700"
-                    : "green.A400",
-                "&:hover": { bgcolor: "green.A700" },
-                p: 8,
-                fontSize: "20px",
-              }}
-              onClick={() => handleDifficultyChange(Difficulty.EASY)}
-            />
-            <StyledButton
-              label="Medium"
-              sx={{
-                bgcolor:
-                  selectedDifficulty === Difficulty.MEDIUM
-                    ? "yellow.A700"
-                    : "yellow.A400",
-                "&:hover": { bgcolor: "yellow.A700" },
-                py: 8,
-                px: 6,
-                fontSize: "20px",
-              }}
-              onClick={() => handleDifficultyChange(Difficulty.MEDIUM)}
-            />
-            <StyledButton
-              label="Hard"
-              sx={{
-                bgcolor:
-                  selectedDifficulty === Difficulty.HARD
-                    ? "red.A700"
-                    : "red.A400",
-                "&:hover": { bgcolor: "red.A700" },
-                p: 8,
-                fontSize: "20px",
-              }}
-              onClick={() => handleDifficultyChange(Difficulty.HARD)}
-            />
-          </Stack>
-        </Stack>
-        <Stack spacing={5}>
-          <Typography
-            sx={{ fontWeight: "bold", textAlign: "center" }}
-            variant="h6"
-          >
-            Please select a language
-          </Typography>
-          <FormControl fullWidth>
-            <InputLabel>Select a language</InputLabel>
-            <Select
-              value={selectedLanguage}
-              label="Select a language"
-              onChange={(event, _) =>
-                handleLanguageChange(event.target.value as Language)
-              }
+      ) : (
+        <Stack spacing={10}>
+          <Stack spacing={5}>
+            <Typography
+              sx={{ fontWeight: "bold", textAlign: "center" }}
+              variant="h6"
             >
-              {Object.entries(Language).map((entry) => (
-                <MenuItem key={entry[0]} value={entry[1]}>
-                  {languageToString(entry[1])}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              Please select a difficulty
+            </Typography>
+            <Stack direction="row" spacing={3}>
+              <StyledButton
+                label="Easy"
+                sx={{
+                  bgcolor:
+                    selectedDifficulty === Difficulty.EASY
+                      ? "green.A700"
+                      : "green.A400",
+                  "&:hover": { bgcolor: "green.A700" },
+                  p: 8,
+                  fontSize: "20px",
+                }}
+                onClick={() => handleDifficultyChange(Difficulty.EASY)}
+              />
+              <StyledButton
+                label="Medium"
+                sx={{
+                  bgcolor:
+                    selectedDifficulty === Difficulty.MEDIUM
+                      ? "yellow.A700"
+                      : "yellow.A400",
+                  "&:hover": { bgcolor: "yellow.A700" },
+                  py: 8,
+                  px: 6,
+                  fontSize: "20px",
+                }}
+                onClick={() => handleDifficultyChange(Difficulty.MEDIUM)}
+              />
+              <StyledButton
+                label="Hard"
+                sx={{
+                  bgcolor:
+                    selectedDifficulty === Difficulty.HARD
+                      ? "red.A700"
+                      : "red.A400",
+                  "&:hover": { bgcolor: "red.A700" },
+                  p: 8,
+                  fontSize: "20px",
+                }}
+                onClick={() => handleDifficultyChange(Difficulty.HARD)}
+              />
+            </Stack>
+          </Stack>
+          <Stack spacing={5}>
+            <Typography
+              sx={{ fontWeight: "bold", textAlign: "center" }}
+              variant="h6"
+            >
+              Please select a language
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel>Select a language</InputLabel>
+              <Select
+                value={selectedLanguage}
+                label="Select a language"
+                onChange={(event, _) =>
+                  handleLanguageChange(event.target.value as Language)
+                }
+              >
+                {Object.entries(Language).map((entry) => (
+                  <MenuItem key={entry[0]} value={entry[1]}>
+                    {languageToString(entry[1])}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+          <Container
+            sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
+          >
+            <StyledButton
+              label="Match Me!"
+              onClick={() =>
+                navigate(
+                  `/queue?difficulty=${selectedDifficulty}&language=${selectedLanguage}`,
+                )
+              }
+              disabled={!selectedDifficulty || !selectedLanguage}
+            />
+          </Container>
         </Stack>
-        <Container
-          sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
-        >
-          <StyledButton
-            label="Match Me!"
-            onClick={() =>
-              navigate(
-                `/queue?difficulty=${selectedDifficulty}&language=${selectedLanguage}`,
-              )
-            }
-            disabled={!selectedDifficulty || !selectedLanguage}
-          />
-        </Container>
-      </Stack>
+      )}
     </Center>
   );
 };

@@ -22,7 +22,7 @@ type ResetPasswordFormState = {
 
 export const ResetPasswordForm = (props: ResetPasswordFormProps) => {
   const { enqueueSnackbar } = useSnackbar();
-  const { resetPasswordMutation, isResetPasswordLoading } = useResetPassword();
+  const { resetPassword, isResetPasswordLoading } = useResetPassword();
   const navigate = useNavigate();
 
   const formMethods = useForm<ResetPasswordFormState>();
@@ -31,7 +31,7 @@ export const ResetPasswordForm = (props: ResetPasswordFormProps) => {
 
   const onSubmit = handleSubmit(async (data: ResetPasswordFormState) => {
     try {
-      await resetPasswordMutation({
+      await resetPassword({
         userId: props.userId,
         code: props.code,
         password: data.password,

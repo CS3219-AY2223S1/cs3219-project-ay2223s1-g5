@@ -22,7 +22,7 @@ import { ChatProvider } from "src/contexts/ChatContext";
 import { EditorProvider } from "src/contexts/EditorContext";
 import { useSockets } from "src/contexts/SocketsContext";
 import { useRefreshSubmissions } from "src/hooks/useSubmissions";
-import { useGetUsersName } from "src/hooks/useUsers";
+import { useUsersNames } from "src/hooks/useUsers";
 
 import { ROOM_EVENTS, ROOM_NAMESPACE } from "~shared/constants";
 import { CLIENT_EVENTS } from "~shared/constants/events";
@@ -67,7 +67,7 @@ export const RoomPage = () => {
     isConnected: false,
   });
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const userInfos = useGetUsersName(
+  const { usersNames } = useUsersNames(
     participants.map((participant) => participant.userId),
   );
 
@@ -289,7 +289,7 @@ export const RoomPage = () => {
   ]);
 
   useEffect(() => {
-    if (userInfos.length === 0) {
+    if (usersNames.length === 0) {
       return;
     }
     setParticipants((participants) => {
@@ -298,7 +298,7 @@ export const RoomPage = () => {
         if (participant.name) {
           continue;
         }
-        participant.name = userInfos.find((info) => info.userId)?.name || "?";
+        participant.name = usersNames.find((info) => info.userId)?.name || "?";
         changed = true;
       }
       if (!changed) {
@@ -308,7 +308,7 @@ export const RoomPage = () => {
       return [...participants];
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userInfos]);
+  }, [usersNames]);
 
   const onSubmit = useCallback(
     (code: string) => {

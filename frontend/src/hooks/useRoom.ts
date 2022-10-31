@@ -5,18 +5,18 @@ import { ApiService } from "src/services/ApiService";
 
 import { GetRoomIdRes } from "~shared/types/api/room.dto";
 
-export const useGetRoomId = () => {
-  const getRoomId = async () => {
+export const useRoom = () => {
+  const getRoom = async () => {
     const { data } = await ApiService.get<GetRoomIdRes | undefined>(`/room`);
     return data;
   };
-  const { data: roomId, isLoading: isGetRoomIdLoading } = useQuery(
+  const { data: room, isLoading: isRoomLoading } = useQuery(
     [QUERY_KEYS.USERS, "ROOM"],
-    getRoomId,
+    getRoom,
   );
   return {
-    roomId,
-    isGetRoomIdLoading,
+    room,
+    isRoomLoading,
   };
 };
 
@@ -26,10 +26,10 @@ export const useLeaveRoom = () => {
     await ApiService.delete<void>(`/room`);
     queryClient.invalidateQueries([QUERY_KEYS.USERS, "ROOM"]);
   };
-  const { isLoading: isUseLeaveRoomLoading, mutateAsync: leaveRoomMutation } =
+  const { isLoading: isLeaveRoomLoading, mutateAsync: leaveRoomMutation } =
     useMutation(leaveRoom);
   return {
-    isUseLeaveRoomLoading,
-    leaveRoomMutation,
+    leaveRoom: leaveRoomMutation,
+    isLeaveRoomLoading,
   };
 };

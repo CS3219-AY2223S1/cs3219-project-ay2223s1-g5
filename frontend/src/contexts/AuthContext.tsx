@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { whoAmI } = useWhoAmI();
-  const { logoutMutation } = useLogout();
+  const { logout } = useLogout();
   // We set adminUser to undefined to denote an uninitialized state.
   const [user, setUser] = useState<LoginRes | null | undefined>(undefined);
 
@@ -48,9 +48,9 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const logout = useCallback(async () => {
+  const logoutCallback = useCallback(async () => {
     try {
-      await logoutMutation();
+      await logout();
     } catch (e: unknown) {
       // eslint-disable-next-line no-console
       console.error(e);
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
         variant: "success",
       });
     }
-  }, [enqueueSnackbar, logoutMutation, navigate]);
+  }, [enqueueSnackbar, logout, navigate]);
 
   // Initialize states
   useEffect(() => {
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }: PropsWithChildren): JSX.Element => {
       value={{
         user,
         getUser,
-        logout,
+        logout: logoutCallback,
       }}
     >
       {user === undefined ? (
