@@ -89,6 +89,7 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
                         memoryUsage: submission.memoryUsage || 0,
                         code: submission.code,
                         standardOutput: submission.standardOutput,
+                        errorOutput: submission.errorOutput,
                         compilationError: submission.compileOutput,
                       });
                       setIsOpen(true);

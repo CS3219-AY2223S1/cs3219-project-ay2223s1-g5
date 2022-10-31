@@ -24,6 +24,7 @@ export type SubmissionDialogContent = {
   runTime?: number;
   memoryUsage?: number;
   standardOutput?: string;
+  errorOutput?: string;
   compilationError?: string;
 };
 
@@ -63,6 +64,7 @@ export const SubmissionDialog = (
           <Typography>
             Standard Output: {props.standardOutput || "N/A"}
           </Typography>
+          <Typography>Error Output: {props.errorOutput || "N/A"}</Typography>
           <Typography>
             Compilation Message: {props.compilationError || "N/A"}
           </Typography>

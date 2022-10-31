@@ -19,14 +19,11 @@ export class SubmissionController {
     @Param("roomId") roomId: string,
   ): Promise<GetSubmissionsRes | null> {
     const userId = Number(session.passport?.user.userId);
-    const roomSession = await this.submissionService.getSessionByRoomId(
-      roomId,
-      userId,
-    );
+    const { questionId, submissions } =
+      await this.submissionService.getSubmissionsByRoomId(roomId, userId);
 
-    const submissions = roomSession.submissions;
     const testCase = await this.submissionService.getTestCaseByQuestionId(
-      roomSession.questionId,
+      questionId,
     );
 
     const submissionsReturnType = {
@@ -40,6 +37,7 @@ export class SubmissionController {
           inputs: testCase?.inputs || [],
           expectedOutput: testCase?.output || "",
           standardOutput: submission.output ?? undefined,
+          errorOutput: submission.errorOutput ?? undefined,
           compileOutput: submission.compileOutput ?? undefined,
         };
       }),
