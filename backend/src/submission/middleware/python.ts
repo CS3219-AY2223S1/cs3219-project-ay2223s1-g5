@@ -53,11 +53,18 @@ export class PythonMiddleware extends SubmissionMiddleware {
       .map((arg) => arg.name)
       .join(", ");
 
+    let formattedOutput = this.output;
+    if (codePrototype.returnType.includes("bool")) {
+      formattedOutput = formattedOutput
+        .replace(/true/g, "True")
+        .replace(/false/g, "False");
+    }
+
     return (
       `\n` +
       variables.join("\n") +
       `\n` +
-      `if (Solution().${codePrototype.functionName}(${joinedVariableNames}) == ${this.output}):\n` +
+      `if (Solution().${codePrototype.functionName}(${joinedVariableNames}) == ${formattedOutput}):\n` +
       `  print("${this.canaryValue}|true", file=sys.stderr)\n` +
       `else:\n` +
       `  print("${this.canaryValue}|false", file=sys.stderr)\n`
