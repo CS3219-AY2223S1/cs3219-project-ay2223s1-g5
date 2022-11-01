@@ -179,6 +179,7 @@ export const EditorProvider = ({
     ) {
       return;
     }
+    editorModel.setEOL(monacoType.editor.EndOfLineSequence.LF);
     const binding = new MonacoBinding(
       type,
       editorModel,
