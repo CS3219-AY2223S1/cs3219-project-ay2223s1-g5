@@ -1,13 +1,20 @@
-import { Box, CircularProgress, CircularProgressProps } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  CircularProgressProps,
+  Typography,
+  TypographyProps,
+} from "@mui/material";
 
 import { Center } from "src/components/Center";
 
 type TimerProps = CircularProgressProps & {
   total: number;
   state: number;
+  typography?: TypographyProps;
 };
 
-export const Timer = ({ state, total, ...rest }: TimerProps) => {
+export const Timer = ({ state, total, typography, ...rest }: TimerProps) => {
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
       <CircularProgress
@@ -24,7 +31,7 @@ export const Timer = ({ state, total, ...rest }: TimerProps) => {
           position: "absolute",
         }}
       >
-        {state}
+        <Typography {...typography}>{state}</Typography>
       </Center>
     </Box>
   );
