@@ -89,40 +89,63 @@ export const SelectionPage = () => {
               <StyledButton
                 label="Easy"
                 sx={{
+                  color:
+                    selectedDifficulty === Difficulty.EASY
+                      ? "white"
+                      : "green.600",
                   bgcolor:
                     selectedDifficulty === Difficulty.EASY
-                      ? "green.A700"
-                      : "green.A400",
-                  "&:hover": { bgcolor: "green.A700" },
-                  p: 8,
-                  fontSize: "20px",
+                      ? "green.600"
+                      : "grey.50",
+                  "&:hover": { color: "white", bgcolor: "green.600" },
+                  width: 175,
+                  height: 125,
+                  fontSize: "1.5rem",
+                  border: "solid",
+                  borderWidth: "8px",
+                  borderColor: "green.600",
                 }}
                 onClick={() => handleDifficultyChange(Difficulty.EASY)}
               />
               <StyledButton
                 label="Medium"
                 sx={{
+                  color:
+                    selectedDifficulty === Difficulty.MEDIUM
+                      ? "white"
+                      : "orange.800",
                   bgcolor:
                     selectedDifficulty === Difficulty.MEDIUM
-                      ? "yellow.A700"
-                      : "yellow.A400",
-                  "&:hover": { bgcolor: "yellow.A700" },
-                  py: 8,
-                  px: 6,
-                  fontSize: "20px",
+                      ? "orange.800"
+                      : "grey.50",
+                  "&:hover": { color: "white", bgcolor: "orange.800" },
+                  width: 175,
+                  height: 125,
+                  fontSize: "1.5rem",
+                  border: "solid",
+                  borderWidth: "8px",
+                  borderColor: "orange.800",
                 }}
                 onClick={() => handleDifficultyChange(Difficulty.MEDIUM)}
               />
               <StyledButton
                 label="Hard"
                 sx={{
+                  color:
+                    selectedDifficulty === Difficulty.HARD
+                      ? "white"
+                      : "red.700",
                   bgcolor:
                     selectedDifficulty === Difficulty.HARD
-                      ? "red.A700"
-                      : "red.A400",
-                  "&:hover": { bgcolor: "red.A700" },
-                  p: 8,
-                  fontSize: "20px",
+                      ? "red.700"
+                      : "grey.50",
+                  "&:hover": { color: "white", bgcolor: "red.700" },
+                  width: 175,
+                  height: 125,
+                  fontSize: "1.5rem",
+                  border: "solid",
+                  borderWidth: "8px",
+                  borderColor: "red.700",
                 }}
                 onClick={() => handleDifficultyChange(Difficulty.HARD)}
               />
