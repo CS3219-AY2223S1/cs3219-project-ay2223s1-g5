@@ -1,6 +1,6 @@
-import { CodePrototype, SubmissionMiddleware } from "./middleware";
+import { CodePrototype, SubmissionAdapter } from "./adapter";
 
-export class JavascriptMiddleware extends SubmissionMiddleware {
+export class JavascriptAdapter extends SubmissionAdapter {
   constructor(
     template: string,
     inputs: string[],

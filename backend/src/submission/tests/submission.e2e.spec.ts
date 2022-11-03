@@ -191,9 +191,9 @@ describe("Submission", () => {
     });
 
     it("should format code for submission", (done) => {
-      const middlewareSpy = jest.spyOn(
+      const adapterSpy = jest.spyOn(
         SubmissionService.prototype as any,
-        "getMiddleware",
+        "getAdapter",
       );
       const judgeSpy = jest
         .spyOn(JudgeService.prototype, "submit")
@@ -202,7 +202,7 @@ describe("Submission", () => {
       clientSocket1.emit(ROOM_EVENTS.SUBMIT, defaultPayload);
 
       clientSocket1.on(ROOM_EVENTS.SUBMISSION_REJECTED, () => {
-        const secretValue = middlewareSpy.mock.calls[0][4];
+        const secretValue = adapterSpy.mock.calls[0][4];
         const expectedCode =
           "code\n" +
           "int main() {\n" +

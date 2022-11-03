@@ -11,11 +11,11 @@ import { JudgeService } from "src/external/judge/judge.service";
 import { JudgeResponse } from "src/external/judge/judge.types";
 import { QuestionService } from "src/question/question.service";
 
-import { CppMiddleware } from "./middleware/cpp";
-import { JavaMiddleware } from "./middleware/java";
-import { JavascriptMiddleware } from "./middleware/javascript";
-import { SubmissionMiddleware } from "./middleware/middleware";
-import { PythonMiddleware } from "./middleware/python";
+import { SubmissionAdapter } from "./adapter/adapter";
+import { CppAdapter } from "./adapter/cpp";
+import { JavaAdapter } from "./adapter/java";
+import { JavascriptAdapter } from "./adapter/javascript";
+import { PythonAdapter } from "./adapter/python";
 
 import { Language } from "~shared/types/base";
 
@@ -108,7 +108,7 @@ export class SubmissionService {
 
     const template = await this.getTemplate(questionId, language);
     const testCase = await this.getTestCase(questionId);
-    const middleware = this.getMiddleware(
+    const middleware = this.getAdapter(
       language,
       template,
       testCase.inputs,
@@ -268,22 +268,22 @@ export class SubmissionService {
     } as TestCase;
   }
 
-  private getMiddleware(
+  private getAdapter(
     language: Language,
     template: string,
     inputs: string[],
     output: string,
     secretValue: string,
-  ): SubmissionMiddleware {
+  ): SubmissionAdapter {
     switch (language) {
       case Language.JAVA:
-        return new JavaMiddleware(template, inputs, output, secretValue);
+        return new JavaAdapter(template, inputs, output, secretValue);
       case Language.JAVASCRIPT:
-        return new JavascriptMiddleware(template, inputs, output, secretValue);
+        return new JavascriptAdapter(template, inputs, output, secretValue);
       case Language.PYTHON:
-        return new PythonMiddleware(template, inputs, output, secretValue);
+        return new PythonAdapter(template, inputs, output, secretValue);
       case Language.CPP:
-        return new CppMiddleware(template, inputs, output, secretValue);
+        return new CppAdapter(template, inputs, output, secretValue);
       default:
         throw Error("Language not supported yet");
     }

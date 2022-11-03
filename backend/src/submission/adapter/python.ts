@@ -1,6 +1,6 @@
-import { CodePrototype, SubmissionMiddleware } from "./middleware";
+import { CodePrototype, SubmissionAdapter } from "./adapter";
 
-export class PythonMiddleware extends SubmissionMiddleware {
+export class PythonAdapter extends SubmissionAdapter {
   constructor(
     template: string,
     inputs: string[],
