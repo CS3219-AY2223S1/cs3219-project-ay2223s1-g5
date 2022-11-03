@@ -19,7 +19,6 @@ jobs:
       service-account: ${{ secrets.GCP_SERVICE_ACCOUNT_STAGING }}
     with:
       environment: "staging"
+      region: "asia-southeast1"
       service: "application"
-      service-region: "asia-southeast1"
       repository: "application-registry"
-      repository-region: "asia-southeast1"
