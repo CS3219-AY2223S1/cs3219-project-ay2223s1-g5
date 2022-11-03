@@ -141,13 +141,13 @@ export class JudgeService {
     if (code === null) {
       return undefined;
     }
-    return Buffer.from(code, "binary").toString("base64");
+    return Buffer.from(code, "utf-8").toString("base64");
   }
 
   private decodeBase64(code: string | null): string | undefined {
     if (code === null) {
       return undefined;
     }
-    return Buffer.from(code, "base64").toString("binary");
+    return Buffer.from(code, "base64").toString("utf-8");
   }
 }
