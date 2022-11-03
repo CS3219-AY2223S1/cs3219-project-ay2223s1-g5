@@ -17,20 +17,16 @@ on:
         description: "Application Environment"
         required: true
         type: string
+      region:
+        description: "Region"
+        required: true
+        type: string
       service:
         description: "Cloud Run Service ID"
         required: true
         type: string
-      service-region:
-        description: "Cloud Run Service Region"
-        required: true
-        type: string
       repository:
         description: "Artifact Registry"
-        required: true
-        type: string
-      repository-region:
-        description: "Artifact Registry Region"
         required: true
         type: string
 
@@ -58,38 +54,24 @@ jobs:
         id: docker-auth
         uses: "docker/login-action@v1"
         with:
-          registry: "${{ inputs.repository-region }}-docker.pkg.dev"
+          registry: "${{ inputs.region }}-docker.pkg.dev"
           username: "oauth2accesstoken"
           password: "${{ steps.auth.outputs.access_token }}"
 
       - name: Build and push container
         run: |-
-          docker build -t "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}" ./
-          docker push "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}"
+          docker build -t "${{ inputs.region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}" ./
+          docker push "${{ inputs.region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}"
+
+      - name: Configure application metadata
+        run: |
+          sed -i 's/<IMAGE_NAME>/${{ inputs.region }}-docker.pkg.dev\/${{ secrets.project }}\/${{ inputs.repository }}\/${{ inputs.service }}:${{ github.sha }}/g' application-metadata.yml
+          sed -i 's/<PROJECT_NAME>/${{ secrets.project }}/g' application-metadata.yml
+          sed -i 's/<SERVICE_REGION>/${{ inputs.region }}/g' application-metadata.yml
+          sed -i 's/<ENVIRONMENT>/${{ inputs.environment }}/g' application-metadata.yml
 
       - name: Deploy to Cloud Run
-        id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
         with:
-          service: ${{ inputs.service }}
-          region: ${{ inputs.service-region }}
-          image: ${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}
-          env_vars: NODE_ENV=${{ inputs.environment }}
-          secrets: |
-            DOMAIN=DOMAIN:latest
-            DATABASE_NAME=DATABASE_NAME:latest
-            DATABASE_USERNAME=DATABASE_USERNAME:latest
-            DATABASE_PASSWORD=DATABASE_PASSWORD:latest
-            DATABASE_HOST=DATABASE_HOST:latest
-            DATABASE_PORT=DATABASE_PORT:latest
-            REDIS_HOST=REDIS_HOST:latest
-            REDIS_PORT=REDIS_PORT:latest
-            SESSION_SECRET=SESSION_SECRET:latest
-            TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest
-            TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest
-            TWILIO_VERIFICATION_SID=TWILIO_VERIFICATION_SID:latest
-            TWILIO_RESET_PASSWORD_SID=TWILIO_RESET_PASSWORD_SID:latest
-            TWILIO_CONVERSATIONS_SID=TWILIO_CONVERSATIONS_SID:latest
-            TWILIO_API_KEY=TWILIO_API_KEY:latest
-            TWILIO_API_SECRET=TWILIO_API_SECRET:latest
-            JUDGE0_API_KEY=JUDGE0_API_KEY:latest
+          region: ${{ inputs.region }}
+          metadata: application-metadata.yml

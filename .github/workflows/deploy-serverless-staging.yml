@@ -16,7 +16,6 @@ jobs:
       service-account: ${{ secrets.GCP_SERVICE_ACCOUNT_STAGING }}
     with:
       environment: "staging"
+      region: "asia-southeast1"
       job: "question-database-update"
-      job-region: "asia-southeast1"
       repository: "serverless-registry"
-      repository-region: "asia-southeast1"
