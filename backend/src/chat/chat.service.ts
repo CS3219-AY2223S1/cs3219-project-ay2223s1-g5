@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { REDIS_NAMESPACES } from "src/common/constants/namespaces";
 import { ConflictError } from "src/common/errors/conflict.error";
 import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { InternalServerError } from "src/common/errors/internal-server.error";
@@ -16,7 +17,6 @@ const SYSTEM_WELCOME_MESSAGE = "Welcome! Chat with your partner here!";
 
 @Injectable()
 export class ChatService {
-  private static readonly NAMESPACE = "CHAT";
   private static readonly ROOM_NAMESPACE = "ROOM";
   private static readonly PARTICIPANT_NAMESPACE = "PARTICIPANT";
 
@@ -136,7 +136,7 @@ export class ChatService {
 
   private async saveParticipantSid(identity: string, sid: string) {
     await this.redisService.setKey(
-      [ChatService.NAMESPACE, ChatService.PARTICIPANT_NAMESPACE],
+      [REDIS_NAMESPACES.CHAT, ChatService.PARTICIPANT_NAMESPACE],
       identity,
       sid,
     );
@@ -144,21 +144,21 @@ export class ChatService {
 
   private async getParticipantSid(identity: string) {
     return await this.redisService.getValue(
-      [ChatService.NAMESPACE, ChatService.PARTICIPANT_NAMESPACE],
+      [REDIS_NAMESPACES.CHAT, ChatService.PARTICIPANT_NAMESPACE],
       identity,
     );
   }
 
   private async deleteParticipantSid(identity: string) {
     await this.redisService.deleteKey(
-      [ChatService.NAMESPACE, ChatService.PARTICIPANT_NAMESPACE],
+      [REDIS_NAMESPACES.CHAT, ChatService.PARTICIPANT_NAMESPACE],
       identity,
     );
   }
 
   private async saveChatRoomSid(roomId: string, chatRoomSid: string) {
     await this.redisService.setKey(
-      [ChatService.NAMESPACE, ChatService.ROOM_NAMESPACE],
+      [REDIS_NAMESPACES.CHAT, ChatService.ROOM_NAMESPACE],
       roomId,
       chatRoomSid,
     );
@@ -166,14 +166,14 @@ export class ChatService {
 
   private async getChatRoomSid(roomId: string) {
     return this.redisService.getValue(
-      [ChatService.NAMESPACE, ChatService.ROOM_NAMESPACE],
+      [REDIS_NAMESPACES.CHAT, ChatService.ROOM_NAMESPACE],
       roomId,
     );
   }
 
   private async deleteChatRoomSid(roomId: string) {
     await this.redisService.deleteKey(
-      [ChatService.NAMESPACE, ChatService.ROOM_NAMESPACE],
+      [REDIS_NAMESPACES.CHAT, ChatService.ROOM_NAMESPACE],
       roomId,
     );
   }

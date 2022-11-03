@@ -1,0 +1,7 @@
+export const REDIS_NAMESPACES = {
+  QUEUE: "QUEUE",
+  CHAT: "CHAT",
+  EDITOR: "EDITOR",
+  ROOM: "ROOM",
+  SUBMISSION: "SUBMISSION",
+};
