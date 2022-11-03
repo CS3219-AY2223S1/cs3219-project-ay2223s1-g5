@@ -1,6 +1,6 @@
-import { CodePrototype, SubmissionMiddleware } from "./middleware";
+import { CodePrototype, SubmissionAdapter } from "./adapter";
 
-export class CppMiddleware extends SubmissionMiddleware {
+export class CppAdapter extends SubmissionAdapter {
   constructor(
     template: string,
     inputs: string[],

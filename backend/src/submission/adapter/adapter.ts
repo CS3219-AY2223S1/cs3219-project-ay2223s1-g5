@@ -4,7 +4,7 @@ export interface CodePrototype {
   returnType: string;
 }
 
-export abstract class SubmissionMiddleware {
+export abstract class SubmissionAdapter {
   template: string;
   inputs: string[];
   output: string;

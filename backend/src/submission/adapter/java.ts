@@ -1,4 +1,4 @@
-import { CodePrototype, SubmissionMiddleware } from "./middleware";
+import { CodePrototype, SubmissionAdapter } from "./adapter";
 
 const primitiveTypes = [
   "int",
@@ -11,7 +11,7 @@ const primitiveTypes = [
   "char",
 ];
 
-export class JavaMiddleware extends SubmissionMiddleware {
+export class JavaAdapter extends SubmissionAdapter {
   constructor(
     template: string,
     inputs: string[],
