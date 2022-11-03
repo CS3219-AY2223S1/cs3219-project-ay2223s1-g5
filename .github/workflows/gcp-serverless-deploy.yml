@@ -17,20 +17,16 @@ on:
         description: "Application Environment"
         required: true
         type: string
+      region:
+        description: "Region"
+        required: true
+        type: string
       job:
         description: "Cloud Run Job ID"
         required: true
         type: string
-      job-region:
-        description: "Cloud Run Job Region"
-        required: true
-        type: string
       repository:
         description: "Artifact Registry"
-        required: true
-        type: string
-      repository-region:
-        description: "Artifact Registry Region"
         required: true
         type: string
 
@@ -58,14 +54,14 @@ jobs:
         id: docker-auth
         uses: "docker/login-action@v1"
         with:
-          registry: "${{ inputs.repository-region }}-docker.pkg.dev"
+          registry: "${{ inputs.region }}-docker.pkg.dev"
           username: "oauth2accesstoken"
           password: "${{ steps.auth.outputs.access_token }}"
 
       - name: Build and push container
         run: |-
-          docker build -t "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.job }}:${{ github.sha }}" -f Serverless.Dockerfile ./
-          docker push "${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.job }}:${{ github.sha }}"
+          docker build -t "${{ inputs.region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.job }}:${{ github.sha }}" -f Serverless.Dockerfile ./
+          docker push "${{ inputs.region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.job }}:${{ github.sha }}"
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
@@ -76,8 +72,8 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           gcloud beta run jobs update ${{ inputs.job }} \
-            --image="${{ inputs.repository-region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.job }}:${{ github.sha }}" \
-            --region=${{ inputs.job-region }} \
+            --image="${{ inputs.region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.job }}:${{ github.sha }}" \
+            --region=${{ inputs.region }} \
             --vpc-connector=serverless-vpc-access \
             --vpc-egress=private-ranges-only \
             --task-timeout=1200 \
