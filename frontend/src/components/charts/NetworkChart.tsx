@@ -75,7 +75,17 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
     <ReactEcharts
       option={{
         tooltip: {
-          formatter: "Questions Attempted: <b>{c0}</b>",
+          formatter: ({
+            data,
+          }: {
+            data: { value: number } | { source: number; target: number };
+          }) => {
+            if (!Object.prototype.hasOwnProperty.call(data, "value")) {
+              return "";
+            }
+            data = data as { value: number };
+            return `Questions Attempted: <b>${data.value}</b>`;
+          },
         },
         backgroundColor: "white",
         animationDuration: 1500,
@@ -85,9 +95,10 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
             type: "graph",
             layout: "force",
             draggable: true,
+            zoom: 2,
             force: {
-              friction: 0.3,
-              gravity: 0.03,
+              friction: 0.1,
+              gravity: 0.2,
             },
             data: data.nodes,
             links: data.links,

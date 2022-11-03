@@ -32,7 +32,7 @@ export const Question = (props: QuestionPanelProps) => {
         flex: 1,
         height: "100%",
         minHeight: 0,
-        overflowX: "hidden",
+        overflowX: "auto",
         overflowY: "auto",
       }}
     >
