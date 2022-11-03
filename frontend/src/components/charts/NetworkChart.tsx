@@ -99,6 +99,7 @@ export const NetworkChart = ({ networkData }: NetworkChartProps) => {
             force: {
               friction: 0.1,
               gravity: 0.2,
+              repulsion: [75, 100],
             },
             data: data.nodes,
             links: data.links,

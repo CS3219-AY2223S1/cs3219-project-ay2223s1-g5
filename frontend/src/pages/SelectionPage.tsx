@@ -92,18 +92,18 @@ export const SelectionPage = () => {
                   color:
                     selectedDifficulty === Difficulty.EASY
                       ? "white"
-                      : "green.600",
+                      : "green.500",
                   bgcolor:
                     selectedDifficulty === Difficulty.EASY
-                      ? "green.600"
+                      ? "green.500"
                       : "grey.50",
-                  "&:hover": { color: "white", bgcolor: "green.600" },
+                  "&:hover": { color: "white", bgcolor: "green.500" },
                   width: 175,
                   height: 125,
                   fontSize: "1.5rem",
                   border: "solid",
                   borderWidth: "8px",
-                  borderColor: "green.600",
+                  borderColor: "green.500",
                 }}
                 onClick={() => handleDifficultyChange(Difficulty.EASY)}
               />
@@ -113,18 +113,18 @@ export const SelectionPage = () => {
                   color:
                     selectedDifficulty === Difficulty.MEDIUM
                       ? "white"
-                      : "orange.800",
+                      : "amber.700",
                   bgcolor:
                     selectedDifficulty === Difficulty.MEDIUM
-                      ? "orange.800"
+                      ? "amber.700"
                       : "grey.50",
-                  "&:hover": { color: "white", bgcolor: "orange.800" },
+                  "&:hover": { color: "white", bgcolor: "amber.700" },
                   width: 175,
                   height: 125,
                   fontSize: "1.5rem",
                   border: "solid",
                   borderWidth: "8px",
-                  borderColor: "orange.800",
+                  borderColor: "amber.700",
                 }}
                 onClick={() => handleDifficultyChange(Difficulty.MEDIUM)}
               />
@@ -134,18 +134,18 @@ export const SelectionPage = () => {
                   color:
                     selectedDifficulty === Difficulty.HARD
                       ? "white"
-                      : "red.700",
+                      : "red.600",
                   bgcolor:
                     selectedDifficulty === Difficulty.HARD
-                      ? "red.700"
+                      ? "red.600"
                       : "grey.50",
-                  "&:hover": { color: "white", bgcolor: "red.700" },
+                  "&:hover": { color: "white", bgcolor: "red.600" },
                   width: 175,
                   height: 125,
                   fontSize: "1.5rem",
                   border: "solid",
                   borderWidth: "8px",
-                  borderColor: "red.700",
+                  borderColor: "red.600",
                 }}
                 onClick={() => handleDifficultyChange(Difficulty.HARD)}
               />
