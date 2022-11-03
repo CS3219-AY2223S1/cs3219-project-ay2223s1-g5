@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
+import { REDIS_NAMESPACES } from "src/common/constants/namespaces";
 import { RedisService } from "src/core/redis/redis.service";
 import {
   RoomCreationService,
@@ -21,8 +22,8 @@ type User = {
 
 @Injectable()
 export class QueueService {
-  private static readonly NAMESPACE = "Queue";
-  private static readonly USER_TO_SOCKET = "UserToSocket";
+  private static readonly SOCKET_TO_QUEUE_NAMESPACE = "SOCKET-TO-QUEUE";
+  private static readonly USER_TO_SOCKET_NAMESPACE = "USER-TO-SOCKET";
   private static readonly EXPIRATION_TIME = 30;
 
   constructor(
@@ -47,20 +48,21 @@ export class QueueService {
       `[${socketId}] Searching for match for ${userId}: ${difficulty} | ${language}`,
     );
     const namespaces = [
-      QueueService.NAMESPACE,
+      REDIS_NAMESPACES.QUEUE,
       this.constructQueueKey(difficulty, language),
     ];
-    const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
     // In the event that new connection occurs and the other connection has
     // not yet disconnected, we remove the previous connection from queue.
     const currentSocket = await this.redisService.getValue(
-      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
+      [REDIS_NAMESPACES.QUEUE, QueueService.USER_TO_SOCKET_NAMESPACE],
       userId.toString(),
     );
     if (currentSocket) {
       await this.removeFromQueue(userId, currentSocket);
     }
+
+    const matchedUsers = await this.redisService.getAllKeys(namespaces);
 
     if (matchedUsers.length === 0) {
       await this.addUserToQueue(difficulty, language, userId, socketId);
@@ -74,7 +76,14 @@ export class QueueService {
       return null;
     }
 
-    await this.removeFromQueue(matchedUser.userId, matchedUser.socketId);
+    const acquired = await this.removeFromQueue(
+      matchedUser.userId,
+      matchedUser.socketId,
+    );
+    if (!acquired) {
+      await this.addUserToQueue(difficulty, language, userId, socketId);
+      return null;
+    }
 
     this.logger.info(`${userId} and ${matchedUser.userId} matched`);
 
@@ -121,50 +130,53 @@ export class QueueService {
   ): Promise<string | null> {
     this.logger.info(`${userId} added to queue`);
     await this.redisService.setKey(
-      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
+      [REDIS_NAMESPACES.QUEUE, QueueService.USER_TO_SOCKET_NAMESPACE],
       userId.toString(),
       socketId,
     );
     await this.redisService.setKey(
-      [QueueService.NAMESPACE],
+      [REDIS_NAMESPACES.QUEUE, QueueService.SOCKET_TO_QUEUE_NAMESPACE],
       socketId,
       this.constructQueueKey(difficulty, language),
     );
     return this.redisService.setKey(
-      [QueueService.NAMESPACE, this.constructQueueKey(difficulty, language)],
+      [REDIS_NAMESPACES.QUEUE, this.constructQueueKey(difficulty, language)],
       socketId,
       userId.toString(),
       QueueService.EXPIRATION_TIME,
     );
   }
 
-  async removeFromQueue(userId: number, socketId: string): Promise<void> {
+  async removeFromQueue(userId: number, socketId: string): Promise<boolean> {
     await this.redisService.deleteKey(
-      [QueueService.NAMESPACE, QueueService.USER_TO_SOCKET],
+      [REDIS_NAMESPACES.QUEUE, QueueService.USER_TO_SOCKET_NAMESPACE],
       userId.toString(),
     );
 
     const queueKey = await this.redisService.getValue(
-      [QueueService.NAMESPACE],
+      [REDIS_NAMESPACES.QUEUE, QueueService.SOCKET_TO_QUEUE_NAMESPACE],
       socketId,
     );
 
-    await this.redisService.deleteKey([QueueService.NAMESPACE], socketId);
+    await this.redisService.deleteKey(
+      [REDIS_NAMESPACES.QUEUE, QueueService.SOCKET_TO_QUEUE_NAMESPACE],
+      socketId,
+    );
 
     if (!queueKey) {
-      return;
+      return false;
     }
 
     const result = await this.redisService.deleteKey(
-      [QueueService.NAMESPACE, queueKey],
+      [REDIS_NAMESPACES.QUEUE, queueKey],
       socketId,
     );
     if (result === 0) {
       this.logger.info(`${socketId} not in queue`);
-    } else {
-      this.logger.info(`${socketId} removed from queue`);
+      return false;
     }
-    return;
+    this.logger.info(`${socketId} removed from queue`);
+    return true;
   }
 
   private constructQueueKey(

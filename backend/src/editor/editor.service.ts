@@ -3,6 +3,7 @@ import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { Document } from "y-socket.io/dist/server/index";
 import { applyUpdate, Doc, encodeStateAsUpdate } from "yjs";
 
+import { REDIS_NAMESPACES } from "src/common/constants/namespaces";
 import { RedisService } from "src/core/redis/redis.service";
 import {
   RoomAuthorizationService,
@@ -13,8 +14,6 @@ import { EDITOR_DOCUMENT_NAME } from "~shared/constants";
 
 @Injectable()
 export class EditorService {
-  private static readonly NAMESPACE = "EDITOR";
-
   constructor(
     @InjectPinoLogger(EditorService.name)
     private readonly logger: PinoLogger,
@@ -40,12 +39,12 @@ export class EditorService {
       "base64",
     );
     this.logger.info(`Saving document: ${roomId}`);
-    await this.redisService.setKey([EditorService.NAMESPACE], roomId, update);
+    await this.redisService.setKey([REDIS_NAMESPACES.EDITOR], roomId, update);
   }
 
   async loadDocument(roomId: string, document: Document): Promise<void> {
     const serializedUpdate = await this.redisService.getValue(
-      [EditorService.NAMESPACE],
+      [REDIS_NAMESPACES.EDITOR],
       roomId,
     );
     if (!serializedUpdate) {
@@ -58,6 +57,6 @@ export class EditorService {
 
   async removeDocument(roomId: string): Promise<void> {
     this.logger.info(`Removing document: ${roomId}`);
-    await this.redisService.deleteKey([EditorService.NAMESPACE], roomId);
+    await this.redisService.deleteKey([REDIS_NAMESPACES.EDITOR], roomId);
   }
 }

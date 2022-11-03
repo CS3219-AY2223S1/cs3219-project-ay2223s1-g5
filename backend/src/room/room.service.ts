@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 import { ChatService } from "src/chat/chat.service";
+import { REDIS_NAMESPACES } from "src/common/constants/namespaces";
 import { ForbiddenError } from "src/common/errors/forbidden.error";
 import { InternalServerError } from "src/common/errors/internal-server.error";
 import { PrismaService } from "src/core/prisma/prisma.service";
@@ -21,7 +22,6 @@ import { Difficulty, Language } from "~shared/types/base";
 export class RoomService
   implements RoomManagementService, RoomAuthorizationService
 {
-  private static readonly NAMESPACE = "Room";
   private static readonly PASSWORD_NAMESPACE = "PASSWORD";
   private static readonly LANGUAGE_NAMESPACE = "LANGUAGE";
   private static readonly QUESTION_NAMESPACE = "QUESTION";
@@ -64,24 +64,24 @@ export class RoomService
     const roomId = room.id;
 
     await this.redisService.setKey(
-      [RoomService.NAMESPACE, RoomService.PASSWORD_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.PASSWORD_NAMESPACE],
       roomId,
       password,
     );
     await this.redisService.setKey(
-      [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.LANGUAGE_NAMESPACE],
       roomId,
       language.toString(),
     );
     await this.redisService.setKey(
-      [RoomService.NAMESPACE, RoomService.QUESTION_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.QUESTION_NAMESPACE],
       roomId,
       questionId.toString(),
     );
 
     for (const userId of userIds) {
       await this.redisService.addKeySet(
-        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
         roomId,
         `${userId.toString()}${RoomService.DELIMITER}${
           RoomService.DISCONNECTED
@@ -89,7 +89,7 @@ export class RoomService
       );
 
       await this.redisService.setKey(
-        [RoomService.NAMESPACE, RoomService.REVERSE_MAPPING_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.REVERSE_MAPPING_NAMESPACE],
         userId.toString(),
         roomId,
       );
@@ -139,28 +139,26 @@ export class RoomService
     await this.redisService
       .transaction()
       .deleteFromSet(
-        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}${RoomService.DELIMITER}${
-          RoomService.DISCONNECTED
-        }`,
+        this.constructConnectionValue(userId),
       )
       .addKeySet(
-        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}${RoomService.DELIMITER}${socketId}`,
+        this.constructConnectionValue(userId, socketId),
       )
       .execute();
 
     const members = await this.getMembers(roomId);
 
     const password = await this.redisService.getValue(
-      [RoomService.NAMESPACE, RoomService.PASSWORD_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.PASSWORD_NAMESPACE],
       roomId,
     );
 
     const languageString = await this.redisService.getValue(
-      [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.LANGUAGE_NAMESPACE],
       roomId,
     );
 
@@ -170,7 +168,7 @@ export class RoomService
 
     const questionId = Number(
       await this.redisService.getValue(
-        [RoomService.NAMESPACE, RoomService.QUESTION_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.QUESTION_NAMESPACE],
         roomId,
       ),
     );
@@ -193,11 +191,11 @@ export class RoomService
   async leaveRoom(userId: number, roomId: string): Promise<void> {
     this.logger.info(`Leaving room [${roomId}]: ${userId}`);
     await this.redisService.deleteKey(
-      [RoomService.NAMESPACE, RoomService.REVERSE_MAPPING_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.REVERSE_MAPPING_NAMESPACE],
       userId.toString(),
     );
     const set = await this.redisService.getSet(
-      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
       roomId,
     );
     for (const record of set) {
@@ -205,7 +203,7 @@ export class RoomService
         continue;
       }
       await this.redisService.deleteFromSet(
-        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
         roomId,
         record,
       );
@@ -218,7 +216,7 @@ export class RoomService
 
     if (
       !(await this.redisService.getSetSize(
-        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
         roomId,
       ))
     ) {
@@ -237,16 +235,14 @@ export class RoomService
     await this.redisService
       .transaction()
       .addKeySet(
-        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}${RoomService.DELIMITER}${
-          RoomService.DISCONNECTED
-        }`,
+        this.constructConnectionValue(userId),
       )
       .deleteFromSet(
-        [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+        [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
         roomId,
-        `${userId.toString()}${RoomService.DELIMITER}${socketId}`,
+        this.constructConnectionValue(userId, socketId),
       )
       .execute();
     const members = await this.getMembers(roomId);
@@ -257,7 +253,7 @@ export class RoomService
 
   async getRoom(userId: number): Promise<string | null> {
     return await this.redisService.getValue(
-      [RoomService.NAMESPACE, RoomService.REVERSE_MAPPING_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.REVERSE_MAPPING_NAMESPACE],
       userId.toString(),
     );
   }
@@ -273,15 +269,15 @@ export class RoomService
   async terminateRoom(roomId: string): Promise<void> {
     this.logger.info(`Closing room: ${roomId}`);
     await this.redisService.deleteKey(
-      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
       roomId,
     );
     await this.redisService.deleteKey(
-      [RoomService.NAMESPACE, RoomService.LANGUAGE_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.LANGUAGE_NAMESPACE],
       roomId,
     );
     await this.redisService.deleteKey(
-      [RoomService.NAMESPACE, RoomService.QUESTION_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.QUESTION_NAMESPACE],
       roomId,
     );
     await this.prismaService.roomSession.update({
@@ -297,7 +293,7 @@ export class RoomService
     roomId: string,
   ): Promise<{ userId: number; isConnected: boolean }[] | null> {
     const members = await this.redisService.getSet(
-      [RoomService.NAMESPACE, RoomService.MEMBERS_NAMESPACE],
+      [REDIS_NAMESPACES.ROOM, RoomService.MEMBERS_NAMESPACE],
       roomId,
     );
     if (members.length === 0) {
@@ -305,15 +301,28 @@ export class RoomService
     }
     const map = new Map<number, boolean>();
     for (const member of members) {
-      const userId = Number(member.split(RoomService.DELIMITER)[0]);
-      const isConnected =
-        map.get(userId) ||
-        member.split(RoomService.DELIMITER)[1] !== RoomService.DISCONNECTED;
-      map.set(userId, isConnected);
+      const { userId, isConnected } = this.deconstructConnectionValue(member);
+      map.set(userId, map.get(userId) || isConnected);
     }
     return Array.from(map.entries()).map((entry) => ({
       userId: entry[0],
       isConnected: entry[1],
     }));
+  }
+
+  private constructConnectionValue(userId: number, socketId?: string): string {
+    return `${userId.toString()}${RoomService.DELIMITER}${
+      socketId ? socketId : RoomService.DISCONNECTED
+    }`;
+  }
+
+  private deconstructConnectionValue(value: string): {
+    userId: number;
+    isConnected: boolean;
+  } {
+    const userId = Number(value.split(RoomService.DELIMITER)[0]);
+    const isConnected =
+      value.split(RoomService.DELIMITER)[1] !== RoomService.DISCONNECTED;
+    return { userId, isConnected };
   }
 }

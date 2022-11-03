@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Language as PrismaLanguage, Status } from "@prisma/client";
 import { nanoid } from "nanoid";
 
+import { REDIS_NAMESPACES } from "src/common/constants/namespaces";
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
 import { RateLimitError } from "src/common/errors/rate-limit.error";
 import { PrismaService } from "src/core/prisma/prisma.service";
@@ -10,11 +11,11 @@ import { JudgeService } from "src/external/judge/judge.service";
 import { JudgeResponse } from "src/external/judge/judge.types";
 import { QuestionService } from "src/question/question.service";
 
-import { CppMiddleware } from "./middleware/cpp";
-import { JavaMiddleware } from "./middleware/java";
-import { JavascriptMiddleware } from "./middleware/javascript";
-import { SubmissionMiddleware } from "./middleware/middleware";
-import { PythonMiddleware } from "./middleware/python";
+import { SubmissionAdapter } from "./adapter/adapter";
+import { CppAdapter } from "./adapter/cpp";
+import { JavaAdapter } from "./adapter/java";
+import { JavascriptAdapter } from "./adapter/javascript";
+import { PythonAdapter } from "./adapter/python";
 
 import { Language } from "~shared/types/base";
 
@@ -45,8 +46,6 @@ interface TestCase {
 
 @Injectable()
 export class SubmissionService {
-  private static readonly NAMESPACE = "SUBMISSIONS";
-
   constructor(
     private readonly judgeService: JudgeService,
     private readonly questionService: QuestionService,
@@ -102,14 +101,14 @@ export class SubmissionService {
     }
     const secretValue = nanoid();
     await this.redisService.setKey(
-      [SubmissionService.NAMESPACE, "ROOM"],
+      [REDIS_NAMESPACES.SUBMISSION, "ROOM"],
       roomId,
       "",
     );
 
     const template = await this.getTemplate(questionId, language);
     const testCase = await this.getTestCase(questionId);
-    const middleware = this.getMiddleware(
+    const middleware = this.getAdapter(
       language,
       template,
       testCase.inputs,
@@ -142,7 +141,7 @@ export class SubmissionService {
       return this.processResponse(submissionId);
     } catch (e: unknown) {
       await this.redisService.deleteKey(
-        [SubmissionService.NAMESPACE, "ROOM"],
+        [REDIS_NAMESPACES.SUBMISSION, "ROOM"],
         roomId,
       );
       throw e;
@@ -158,7 +157,7 @@ export class SubmissionService {
     const submissionId = data.submissionId;
 
     this.redisService.setKey(
-      [SubmissionService.NAMESPACE, "SUBMISSION"],
+      [REDIS_NAMESPACES.SUBMISSION, "SUBMISSION"],
       submissionId,
       JSON.stringify(data),
     );
@@ -178,14 +177,14 @@ export class SubmissionService {
     submissionId: string,
   ): Promise<{ roomId: string; submissionId: string } | null> {
     const storedContent = await this.redisService.getValue(
-      [SubmissionService.NAMESPACE, "SUBMISSION"],
+      [REDIS_NAMESPACES.SUBMISSION, "SUBMISSION"],
       submissionId,
     );
     if (!storedContent) {
       return null;
     }
     await this.redisService.deleteKey(
-      [SubmissionService.NAMESPACE, "SUBMISSION"],
+      [REDIS_NAMESPACES.SUBMISSION, "SUBMISSION"],
       submissionId,
     );
     const content = JSON.parse(storedContent) as JudgeResponse;
@@ -226,7 +225,7 @@ export class SubmissionService {
         },
       });
 
-    this.redisService.deleteKey([SubmissionService.NAMESPACE, "ROOM"], roomId);
+    this.redisService.deleteKey([REDIS_NAMESPACES.SUBMISSION, "ROOM"], roomId);
 
     return { roomId, submissionId };
   }
@@ -234,7 +233,7 @@ export class SubmissionService {
   private async hasSubmission(roomId: string): Promise<boolean> {
     return (
       (await this.redisService.getValue(
-        [SubmissionService.NAMESPACE, "ROOM"],
+        [REDIS_NAMESPACES.SUBMISSION, "ROOM"],
         roomId,
       )) != null
     );
@@ -269,22 +268,22 @@ export class SubmissionService {
     } as TestCase;
   }
 
-  private getMiddleware(
+  private getAdapter(
     language: Language,
     template: string,
     inputs: string[],
     output: string,
     secretValue: string,
-  ): SubmissionMiddleware {
+  ): SubmissionAdapter {
     switch (language) {
       case Language.JAVA:
-        return new JavaMiddleware(template, inputs, output, secretValue);
+        return new JavaAdapter(template, inputs, output, secretValue);
       case Language.JAVASCRIPT:
-        return new JavascriptMiddleware(template, inputs, output, secretValue);
+        return new JavascriptAdapter(template, inputs, output, secretValue);
       case Language.PYTHON:
-        return new PythonMiddleware(template, inputs, output, secretValue);
+        return new PythonAdapter(template, inputs, output, secretValue);
       case Language.CPP:
-        return new CppMiddleware(template, inputs, output, secretValue);
+        return new CppAdapter(template, inputs, output, secretValue);
       default:
         throw Error("Language not supported yet");
     }
