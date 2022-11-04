@@ -54,11 +54,11 @@ export const DurationSummaryChart = ({
       const attemptDate = duration.date;
       const color =
         difficulty === Difficulty.EASY
-          ? theme.palette.green["A400"]
+          ? theme.palette.green["500"]
           : difficulty === Difficulty.MEDIUM
-          ? theme.palette.yellow["A400"]
+          ? theme.palette.amber["700"]
           : difficulty === Difficulty.HARD
-          ? theme.palette.red["A400"]
+          ? theme.palette.red["600"]
           : undefined;
       const date = format(new Date(attemptDate), "d/M");
       const point = { value: [date, timetaken], itemStyle: { color: color } };

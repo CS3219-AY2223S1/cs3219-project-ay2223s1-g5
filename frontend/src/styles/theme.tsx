@@ -1,5 +1,16 @@
 import { Color, createTheme, PaletteColorOptions } from "@mui/material";
-import { blueGrey, green, grey, red, teal, yellow } from "@mui/material/colors";
+import {
+  amber,
+  blueGrey,
+  deepOrange,
+  green,
+  grey,
+  orange,
+  pink,
+  red,
+  teal,
+  yellow,
+} from "@mui/material/colors";
 declare module "@mui/material/styles" {
   export interface Palette {
     green: Partial<Color>;
@@ -7,6 +18,8 @@ declare module "@mui/material/styles" {
     red: Partial<Color>;
     teal: Partial<Color>;
     blueGrey: Partial<Color>;
+    orange: Partial<Color>;
+    amber: Partial<Color>;
   }
 
   export interface PaletteOptions {
@@ -15,6 +28,7 @@ declare module "@mui/material/styles" {
     red: PaletteColorOptions;
     teal: PaletteColorOptions;
     blueGrey: PaletteColorOptions;
+    amber: PaletteColorOptions;
   }
 }
 
@@ -68,6 +82,7 @@ const theme = createTheme({
     red,
     teal,
     yellow,
+    amber,
     background: { default: grey[50] },
   },
   components: {

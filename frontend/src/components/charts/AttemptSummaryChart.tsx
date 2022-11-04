@@ -45,19 +45,19 @@ export const AttemptSummaryChart = ({
               {
                 value: !attemptSummary ? 0 : attemptSummary.EASY,
                 itemStyle: {
-                  color: theme.palette.green["A400"],
+                  color: theme.palette.green["500"],
                 },
               },
               {
                 value: !attemptSummary ? 0 : attemptSummary.MEDIUM,
                 itemStyle: {
-                  color: theme.palette.yellow["A400"],
+                  color: theme.palette.amber["700"],
                 },
               },
               {
                 value: !attemptSummary ? 0 : attemptSummary.HARD,
                 itemStyle: {
-                  color: theme.palette.red["A400"],
+                  color: theme.palette.red["600"],
                 },
               },
             ],

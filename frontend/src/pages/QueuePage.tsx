@@ -180,11 +180,16 @@ export const QueuePage = () => {
         }}
       >
         {timerVariant === "determinate" ? (
-          <Timer size="4rem" state={timer} total={TIMEOUT} />
+          <Timer
+            size="6rem"
+            typography={{ fontSize: "1.5rem" }}
+            state={timer}
+            total={TIMEOUT}
+          />
         ) : (
-          <CircularProgress size="4rem" />
+          <CircularProgress size="6rem" />
         )}
-        <Typography component={"span"}>{message}</Typography>
+        <Typography fontSize="1.5rem">{message}</Typography>
       </Stack>
       <StyledButton
         label="Exit"
