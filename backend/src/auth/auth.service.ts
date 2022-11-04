@@ -41,6 +41,8 @@ export class AuthService {
       throw new ForbiddenException("Account not activated.");
     }
 
+    await this.userService.resetFailedAttempts(user.id);
+
     return user;
   }
 
