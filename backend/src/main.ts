@@ -5,7 +5,7 @@ import { Logger } from "nestjs-pino";
 import { SessionSocketAdapter } from "src/common/adapters/session.websocket.adapter";
 import { ConfigService } from "src/core/config/config.service";
 
-import { SessionMiddleware } from "./common/middlewares/SessionMiddleware";
+import { SessionMiddleware } from "./common/middlewares/session.middleware";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {

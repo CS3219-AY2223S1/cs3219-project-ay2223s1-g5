@@ -8,7 +8,7 @@ import { Document } from "y-socket.io/dist/server/index";
 
 import { serverMiddlewareSetup } from "src/common/adapters/session.websocket.adapter";
 import { WsExceptionFilter } from "src/common/filters/ws-exception.filter";
-import { SessionMiddleware } from "src/common/middlewares/SessionMiddleware";
+import { SessionMiddleware } from "src/common/middlewares/session.middleware";
 
 import { EditorService } from "./editor.service";
 

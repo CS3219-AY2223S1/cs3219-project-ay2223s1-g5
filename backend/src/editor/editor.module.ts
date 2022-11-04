@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 
-import { SessionMiddlewareModule } from "src/common/middlewares/SessionMiddleware.module";
+import { SessionMiddlewareModule } from "src/common/middlewares/session.middleware.module";
 
 import { EditorGateway } from "./editor.gateway";
 import { EditorServiceModule } from "./editor.service.module";
