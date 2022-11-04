@@ -8,6 +8,7 @@ import { join } from "path";
 import { AuthModule } from "src/auth/auth.module";
 import { ChatModule } from "src/chat/chat.module";
 import { ExceptionFilter } from "src/common/filters/exception.filter";
+import { HelmetMiddleware } from "src/common/middlewares/helmet.middleware";
 import { SessionMiddleware } from "src/common/middlewares/session.middleware";
 import { SessionMiddlewareModule } from "src/common/middlewares/session.middleware.module";
 import { CustomValidationPipe } from "src/common/pipes/validation.pipe";
@@ -76,5 +77,6 @@ export class AppModule implements NestModule {
     consumer
       .apply(SessionMiddleware, passport.initialize(), passport.session())
       .forRoutes("*");
+    consumer.apply(HelmetMiddleware).forRoutes("*");
   }
 }
