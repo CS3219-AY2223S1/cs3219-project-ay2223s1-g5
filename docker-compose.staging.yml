@@ -1,0 +1,77 @@
+version: "3.1"
+services:
+  master:
+    image: codecollab
+    ports:
+      - 4000:4000
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - DOMAIN=http://localhost:4000
+      - DATABASE_NAME=$DATABASE_NAME
+      - DATABASE_USERNAME=$DATABASE_USERNAME
+      - DATABASE_PASSWORD=$DATABASE_PASSWORD
+      - DATABASE_HOST=db-staging
+      - DATABASE_PORT=5432
+      - SESSION_NAME=codecollab.sid
+      - SESSION_SECRET=SomethingSecret
+      - SESSION_MAX_AGE=604800000
+      - TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID
+      - TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN
+      - TWILIO_VERIFICATION_SID=$TWILIO_VERIFICATION_SID
+      - TWILIO_RESET_PASSWORD_SID=$TWILIO_RESET_PASSWORD_SID
+      - TWILIO_CONVERSATIONS_SID=$TWILIO_CONVERSATIONS_SID
+      - TWILIO_API_KEY=$TWILIO_API_KEY
+      - TWILIO_API_SECRET=$TWILIO_API_SECRET
+      - REDIS_HOST=redis-staging
+      - REDIS_PORT=6379
+      - JUDGE0_API_KEY=$JUDGE0_API_KEY
+      - JUDGE0_API_HOST=$JUDGE0_API_HOST
+
+  slave:
+    image: codecollab
+    ports:
+      - 8000:8000
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - DOMAIN=http://localhost:8000
+      - DATABASE_NAME=$DATABASE_NAME
+      - DATABASE_USERNAME=$DATABASE_USERNAME
+      - DATABASE_PASSWORD=$DATABASE_PASSWORD
+      - DATABASE_HOST=db-staging
+      - DATABASE_PORT=5432
+      - SESSION_NAME=codecollab.sid
+      - SESSION_SECRET=SomethingSecret
+      - SESSION_MAX_AGE=604800000
+      - TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID
+      - TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN
+      - TWILIO_VERIFICATION_SID=$TWILIO_VERIFICATION_SID
+      - TWILIO_RESET_PASSWORD_SID=$TWILIO_RESET_PASSWORD_SID
+      - TWILIO_CONVERSATIONS_SID=$TWILIO_CONVERSATIONS_SID
+      - TWILIO_API_KEY=$TWILIO_API_KEY
+      - TWILIO_API_SECRET=$TWILIO_API_SECRET
+      - REDIS_HOST=redis-staging
+      - REDIS_PORT=6379
+      - JUDGE0_API_KEY=$JUDGE0_API_KEY
+      - JUDGE0_API_HOST=$JUDGE0_API_HOST
+
+  db-staging:
+    image: postgres
+    container_name: db-staging
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=$DATABASE_NAME
+      - POSTGRES_USER=$DATABASE_USERNAME
+      - POSTGRES_PASSWORD=$DATABASE_PASSWORD
+
+  redis-staging:
+    image: redis
+    container_name: redis-staging
+    volumes:
+      - redis:/data
+
+volumes:
+  postgres:
+  redis:

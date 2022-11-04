@@ -9,6 +9,7 @@
     "on-backend": "npm run --prefix backend",
     "on-frontend": "npm run --prefix frontend",
     "on-serverless": "npm run --prefix serverless",
+    "staging:local": "docker build . -t codecollab:latest && docker compose -f docker-compose.staging.yml up",
     "all": "concurrently -c green,blue,yellow",
     "dev": "npm run --prefix shared build && npm run all -- --kill-others \"npm:on-frontend dev\" \"npm:on-backend dev\"",
     "dev:full": "npm run all \"docker-compose up\" \"npm run dev\"",
