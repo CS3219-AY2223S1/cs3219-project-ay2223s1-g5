@@ -24,7 +24,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint --ext ts,tsx,js,jsx .",
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
-    "clean": "rm -rf node_modules && rm -rf build"
+    "clean": "rimraf node_modules && rimraf build"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
@@ -53,7 +53,6 @@
     "pino-http": "^8.2.0",
     "redis": "^4.3.0",
     "reflect-metadata": "^0.1.13",
-    "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "socket.io": "4.5.1",
     "twilio": "^3.81.0",

@@ -8,7 +8,7 @@
     "start": "node build/src/index.js",
     "lint": "eslint --ext ts,tsx,js,jsx .",
     "lint:fix": "eslint --fix --ext ts,tsx,js,jsx .",
-    "clean": "rm -rf node_modules && rm -rf build"
+    "clean": "rimraf node_modules && rimraf build"
   },
   "author": "",
   "license": "ISC",
