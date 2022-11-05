@@ -1,0 +1,10 @@
+{
+  "packages": ["frontend", "backend", "shared", "serverless"],
+  "version": "0.0.0",
+  "command": {
+    "version": {
+      "allowBranch": "main",
+      "conventionalCommits": true
+    }
+  }
+}
