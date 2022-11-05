@@ -4,7 +4,9 @@
   "command": {
     "version": {
       "allowBranch": "main",
-      "conventionalCommits": true
+      "conventionalCommits": true,
+      "ignoreChanges": ["**/tests/**", "**/*.md"],
+      "message": "chore(release): %v"
     }
   }
 }
