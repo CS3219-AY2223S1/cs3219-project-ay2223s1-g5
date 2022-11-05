@@ -1,0 +1,113 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: application
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "5"
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        run.googleapis.com/vpc-access-connector: projects/<PROJECT_NAME>/locations/<SERVICE_REGION>/connectors/application-vpc-access
+        run.googleapis.com/sessionAffinity: "true"
+    spec:
+      containers:
+        - image: "<IMAGE_NAME>"
+          env:
+            - name: NODE_ENV
+              value: <ENVIRONMENT>
+            - name: JUDGE0_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: JUDGE0_API_KEY
+            - name: TWILIO_CONVERSATIONS_SID
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: TWILIO_CONVERSATIONS_SID
+            - name: DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: DOMAIN
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: DATABASE_NAME
+            - name: TWILIO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: TWILIO_API_KEY
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: DATABASE_HOST
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: DATABASE_PORT
+            - name: TWILIO_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: TWILIO_API_SECRET
+            - name: TWILIO_RESET_PASSWORD_SID
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: TWILIO_RESET_PASSWORD_SID
+            - name: TWILIO_VERIFICATION_SID
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: TWILIO_VERIFICATION_SID
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: SESSION_SECRET
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: DATABASE_USERNAME
+            - name: TWILIO_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: TWILIO_AUTH_TOKEN
+            - name: TWILIO_ACCOUNT_SID
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: TWILIO_ACCOUNT_SID
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: DATABASE_PASSWORD
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: latest
+                  name: REDIS_PORT
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+  traffic:
+    - percent: 100
+      latestRevision: true
