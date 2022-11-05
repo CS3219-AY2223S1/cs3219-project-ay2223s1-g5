@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 
 import { REDIS_NAMESPACES } from "src/common/constants/namespaces";
 import { EntityNotFoundError } from "src/common/errors/entity-not-found.error";
+import { InternalServerError } from "src/common/errors/internal-server.error";
 import { RateLimitError } from "src/common/errors/rate-limit.error";
 import { PrismaService } from "src/core/prisma/prisma.service";
 import { RedisService } from "src/core/redis/redis.service";
@@ -65,7 +66,35 @@ export class SubmissionService {
       throw new EntityNotFoundError("Room session not found.");
     }
 
-    const { questionId, submissions } = roomSession;
+    const questionId = roomSession.questionId;
+    let submissions = roomSession.submissions;
+    // We may query Judge0 too fast when the callback occurs,
+    // leading to outdated data in the database when Judge0 returns with
+    // stale data.
+    // If a submission is pending, we force a query to Judge0 again.
+    let requireRequery = false;
+
+    for (const submission of submissions) {
+      if (submission.status === Status.PENDING) {
+        await this.updateSubmission(submission.id);
+        requireRequery = true;
+      }
+    }
+
+    if (requireRequery) {
+      const requery = await this.prismaService.roomSession.findFirst({
+        where: { id: roomId, users: { some: { id: userId } } },
+        include: {
+          submissions: true,
+        },
+      });
+
+      if (!requery) {
+        throw new InternalServerError();
+      }
+
+      submissions = requery.submissions;
+    }
 
     const filteredSubmissions = submissions.map((submission) => {
       const expectedOutput = submission.expectedOutput;
@@ -153,7 +182,18 @@ export class SubmissionService {
     submissionId: string;
   } | null> {
     const data = await this.judgeService.retrieveSubmission(response);
+    return this.prepareSubmissionUpdate(data);
+  }
 
+  private async updateSubmission(submissionId: string): Promise<void> {
+    const data = await this.judgeService.retrieveSubmission(submissionId);
+    await this.prepareSubmissionUpdate(data);
+  }
+
+  private async prepareSubmissionUpdate(data: JudgeResponse): Promise<{
+    roomId: string;
+    submissionId: string;
+  } | null> {
     const submissionId = data.submissionId;
 
     this.redisService.setKey(
