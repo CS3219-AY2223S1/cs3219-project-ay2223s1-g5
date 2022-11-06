@@ -55,9 +55,11 @@ export const ResetPasswordForm = (props: ResetPasswordFormProps) => {
           defaultValue={""}
           rules={{
             required: "Password is required.",
-            // TODO: Abstract this and improve error message.
             validate: (value: string) => {
-              return isStrongPassword(value) || "Password is too weak.";
+              return (
+                isStrongPassword(value) ||
+                "Your password must contain an uppercase character, lowercase character, special symbol, number, and be at least 8 characters long."
+              );
             },
           }}
           render={({
