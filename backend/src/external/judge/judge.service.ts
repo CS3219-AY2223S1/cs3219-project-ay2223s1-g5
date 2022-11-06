@@ -104,14 +104,21 @@ export class JudgeService {
     return { submissionId: data.token };
   }
 
-  async retrieveSubmission(response: unknown): Promise<JudgeResponse> {
-    if (!Object.prototype.hasOwnProperty.call(response, "token")) {
-      throw new InternalServerError("Unexpected response in callback");
+  async retrieveSubmission(submissionId: string): Promise<JudgeResponse>;
+  async retrieveSubmission(response: unknown): Promise<JudgeResponse>;
+  async retrieveSubmission(argument: unknown): Promise<JudgeResponse> {
+    let submissionId: string;
+    if (typeof argument === "string") {
+      submissionId = argument;
+    } else {
+      if (!Object.prototype.hasOwnProperty.call(argument, "token")) {
+        throw new InternalServerError("Unexpected response in callback");
+      }
+      if (typeof (argument as { token: unknown }).token !== "string") {
+        throw new InternalServerError("Unexpected response in callback");
+      }
+      submissionId = (argument as { token: string }).token;
     }
-    if (typeof (response as { token: unknown }).token !== "string") {
-      throw new InternalServerError("Unexpected response in callback");
-    }
-    const submissionId = (response as { token: string }).token;
     const { data } = await this.axiosInstance.get<Judge0Callback>(
       `/submissions/${submissionId}`,
     );
