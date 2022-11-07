@@ -14,11 +14,11 @@ export class HelmetMiddleware implements NestMiddleware {
           baseUri: ["'self'"],
           connectSrc: [
             "'self'",
-            "wss://signaling.yjs.dev/",
-            "wss://y-webrtc-signaling-us.herokuapp.com/",
-            "wss://y-webrtc-signaling-eu.herokuapp.com/",
+            "wss://signaling.yjs.dev",
+            "wss://y-webrtc-signaling-us.herokuapp.com",
+            "wss://y-webrtc-signaling-eu.herokuapp.com",
             "https://ecs.us1.twilio.com",
-            "wss://tsock.us1.twilio.com/",
+            "wss://tsock.us1.twilio.com",
             "wss://global.vss.twilio.com",
             "wss://sdkgw.us1.twilio.com",
           ],
@@ -29,7 +29,7 @@ export class HelmetMiddleware implements NestMiddleware {
             "data:",
           ],
           frameAncestors: ["'none'"],
-          imgSrc: ["'self'", "data:"],
+          imgSrc: ["'self'", "https://assets.leetcode.com", "data:"],
           objectSrc: ["'none'"],
           styleSrc: [
             "'self'",
@@ -45,6 +45,7 @@ export class HelmetMiddleware implements NestMiddleware {
           workerSrc: ["'self'", "blob:"],
         },
       },
+      crossOriginEmbedderPolicy: false,
     });
   }
 
