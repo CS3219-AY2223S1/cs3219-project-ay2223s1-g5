@@ -16,7 +16,7 @@ export class ResetPasswordService {
   async sendResetPasswordEmail(email: string) {
     const user = await this.userService.getByEmail(email.toLowerCase());
     if (!user) {
-      throw new EntityNotFoundError("User not found.");
+      return;
     }
     return this.twilioService.sendResetPasswordEmail(
       user.email,
