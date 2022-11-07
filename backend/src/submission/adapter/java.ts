@@ -77,7 +77,7 @@ export class JavaAdapter extends SubmissionAdapter {
     if (codePrototype.returnType.includes("[]")) {
       const output = this.output.replace(/^\[/, "{").replace(/\]$/, "}");
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${output};`;
-      isEqual = `boolean isEqual = Arrays.equals(res, expectedOutput);`;
+      isEqual = `boolean isEqual = Arrays.deepEquals(res, expectedOutput);`;
     } else if (
       primitiveTypes.some((type) => type === codePrototype.returnType)
     ) {
@@ -86,7 +86,7 @@ export class JavaAdapter extends SubmissionAdapter {
     } else {
       expectedOutput = `${codePrototype.returnType} expectedOutput = ${this.output};`;
       isEqual =
-        "boolean isEqual = res.toString().equals(expectedOuput.toString());";
+        "boolean isEqual = res.toString().equals(expectedOutput.toString());";
     }
 
     const joinedVariableNames = codePrototype.arguments
