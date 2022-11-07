@@ -45,7 +45,7 @@ export class JavascriptAdapter extends SubmissionAdapter {
     }
 
     const isEqual =
-      "const isEqual = JSON.stringify(result) == JSON.stringify(expectedOutput);";
+      "const isEqual = JSON.stringify(result) === JSON.stringify(expectedOutput);";
 
     const joinedVariableNames = codePrototype.arguments
       .map((arg) => arg.name)

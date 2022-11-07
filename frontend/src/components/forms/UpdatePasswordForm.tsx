@@ -70,13 +70,15 @@ export const UpdatePasswordForm = () => {
           defaultValue={""}
           rules={{
             required: "Password is required.",
-            // TODO: Abstract this and improve error message.
             validate: (value: string) => {
               // We should do this at the backend.
               if (getValues("oldPassword") === value) {
                 return "New password cannot be the same as existing password.";
               }
-              return isStrongPassword(value) || "Password is too weak.";
+              return (
+                isStrongPassword(value) ||
+                "Your password must contain an uppercase character, lowercase character, special symbol, number, and be at least 8 characters long."
+              );
             },
           }}
           render={({
