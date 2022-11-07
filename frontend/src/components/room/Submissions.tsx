@@ -62,7 +62,7 @@ export const Submissions = ({ roomId }: SubmissionsPanelProps) => {
               : Cancel;
 
           return [
-            `${index + 1}`,
+            `${(submissions?.length || 0) - index}`,
             {
               sx: { color },
               child: (
