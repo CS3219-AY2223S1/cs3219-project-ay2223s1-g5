@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.2](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g5/compare/v0.1.1...v0.1.2) (2022-11-08)
+
+
+### Bug Fixes
+
+* prevent leakage of accounts through reset password request ([494a084](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g5/commit/494a084866b1581043250259291f1985c8cea984))
+* prevent lost update for frontend submit button ([5d44ed5](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g5/commit/5d44ed5ffaa75b4871863ce2db49e8293bb646b5))
+* reorder submissions table indexes ([16e407f](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g5/commit/16e407f180f22934b65e629b37141c400f13c81f))
+* reverse past sessions sort order ([9d20728](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g5/commit/9d20728cd1e82fd0415f6a13bffb37b05a4bec7b))
+
+
+
+
+
 ## [0.1.1](https://github.com/CS3219-AY2223S1/cs3219-project-ay2223s1-g5/compare/v0.1.0...v0.1.1) (2022-11-07)
 
 
