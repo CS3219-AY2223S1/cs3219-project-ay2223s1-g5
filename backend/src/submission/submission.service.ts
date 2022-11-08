@@ -101,7 +101,6 @@ export class SubmissionService {
       const errorOutput = submission.errorOutput;
       const secret = expectedOutput.split("|")[0];
       const trueErrorOutput = errorOutput?.split(secret)[0];
-      console.log(trueErrorOutput);
       return {
         ...submission,
         errorOutput: trueErrorOutput,
@@ -167,7 +166,7 @@ export class SubmissionService {
         },
       });
 
-      return this.processResponse(submissionId);
+      return this.triggerSubmissionUpdate(submissionId);
     } catch (e: unknown) {
       await this.redisService.deleteKey(
         [REDIS_NAMESPACES.SUBMISSION, "ROOM"],
@@ -187,7 +186,10 @@ export class SubmissionService {
 
   private async updateSubmission(submissionId: string): Promise<void> {
     const data = await this.judgeService.retrieveSubmission(submissionId);
-    await this.prepareSubmissionUpdate(data);
+    // Avoid affecting Redis records to prevent lost updates from
+    // callback which will prevent frontend submission button from
+    // being enabled.
+    await this.processSubmissionUpdate(data);
   }
 
   private async prepareSubmissionUpdate(data: JudgeResponse): Promise<{
@@ -210,10 +212,10 @@ export class SubmissionService {
       return null;
     }
     // We are sure that the submission already exists and we can process it.
-    return this.processResponse(submissionId);
+    return this.triggerSubmissionUpdate(submissionId);
   }
 
-  private async processResponse(
+  private async triggerSubmissionUpdate(
     submissionId: string,
   ): Promise<{ roomId: string; submissionId: string } | null> {
     const storedContent = await this.redisService.getValue(
@@ -228,9 +230,15 @@ export class SubmissionService {
       submissionId,
     );
     const content = JSON.parse(storedContent) as JudgeResponse;
+    // We are sure that the submission already exists and we can process it.
+    return this.processSubmissionUpdate(content);
+  }
 
+  private async processSubmissionUpdate(
+    content: JudgeResponse,
+  ): Promise<{ roomId: string; submissionId: string } | null> {
     const storedSubmission = await this.prismaService.submission.findFirst({
-      where: { id: submissionId },
+      where: { id: content.submissionId },
     });
     const expectedOutput = storedSubmission?.expectedOutput;
 
@@ -250,7 +258,7 @@ export class SubmissionService {
 
     const { roomSessionId: roomId } =
       await this.prismaService.submission.update({
-        where: { id: submissionId },
+        where: { id: content.submissionId },
         data: {
           runTime: time,
           memoryUsage: memory,
@@ -267,7 +275,7 @@ export class SubmissionService {
 
     this.redisService.deleteKey([REDIS_NAMESPACES.SUBMISSION, "ROOM"], roomId);
 
-    return { roomId, submissionId };
+    return { roomId, submissionId: content.submissionId };
   }
 
   private async hasSubmission(roomId: string): Promise<boolean> {
