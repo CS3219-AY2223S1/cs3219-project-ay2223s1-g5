@@ -103,13 +103,19 @@ export const DashboardPage = () => {
                 rows={
                   !peerSummary
                     ? []
-                    : peerSummary.map((summary) => {
-                        return [
-                          formatDate(summary.date),
-                          summary.questionTitle,
-                          summary.userName,
-                        ];
-                      })
+                    : peerSummary
+                        .sort(
+                          (lhs, rhs) =>
+                            new Date(rhs.date).valueOf() -
+                            new Date(lhs.date).valueOf(),
+                        )
+                        .map((summary) => {
+                          return [
+                            formatDate(summary.date),
+                            summary.questionTitle,
+                            summary.userName,
+                          ];
+                        })
                 }
               />
             </Box>
