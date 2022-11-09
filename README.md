@@ -1,4 +1,4 @@
-# CS3219-AY22-23-Project-Skeleton
+# CodeCollab
 
 ## Getting Started
 
