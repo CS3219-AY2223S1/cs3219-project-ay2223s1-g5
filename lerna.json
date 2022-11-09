@@ -1,0 +1,20 @@
+{
+  "packages": [
+    "frontend",
+    "backend",
+    "shared",
+    "serverless"
+  ],
+  "version": "0.1.2",
+  "command": {
+    "version": {
+      "allowBranch": "main",
+      "conventionalCommits": true,
+      "ignoreChanges": [
+        "**/tests/**",
+        "**/*.md"
+      ],
+      "message": "chore(release): %v"
+    }
+  }
+}

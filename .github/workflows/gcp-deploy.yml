@@ -1,0 +1,77 @@
+name: Build and Deploy to Cloud Run
+
+on:
+  workflow_call:
+    secrets:
+      project:
+        description: "Project ID"
+        required: true
+      provider:
+        description: "GCP WIF Provider"
+        required: true
+      service-account:
+        description: "Service Account Email"
+        required: true
+    inputs:
+      environment:
+        description: "Application Environment"
+        required: true
+        type: string
+      region:
+        description: "Region"
+        required: true
+        type: string
+      service:
+        description: "Cloud Run Service ID"
+        required: true
+        type: string
+      repository:
+        description: "Artifact Registry"
+        required: true
+        type: string
+
+permissions:
+  contents: "read"
+  id-token: "write"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: GCP authentication
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          token_format: "access_token"
+          workload_identity_provider: ${{ secrets.provider }}
+          service_account: ${{ secrets.service-account }}
+
+      - name: Docker authentication
+        id: docker-auth
+        uses: "docker/login-action@v1"
+        with:
+          registry: "${{ inputs.region }}-docker.pkg.dev"
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
+
+      - name: Build and push container
+        run: |-
+          docker build -t "${{ inputs.region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}" ./
+          docker push "${{ inputs.region }}-docker.pkg.dev/${{ secrets.project }}/${{ inputs.repository }}/${{ inputs.service }}:${{ github.sha }}"
+
+      - name: Configure application metadata
+        run: |
+          sed -i 's/<IMAGE_NAME>/${{ inputs.region }}-docker.pkg.dev\/${{ secrets.project }}\/${{ inputs.repository }}\/${{ inputs.service }}:${{ github.sha }}/g' application-metadata.yml
+          sed -i 's/<PROJECT_NAME>/${{ secrets.project }}/g' application-metadata.yml
+          sed -i 's/<SERVICE_REGION>/${{ inputs.region }}/g' application-metadata.yml
+          sed -i 's/<ENVIRONMENT>/${{ inputs.environment }}/g' application-metadata.yml
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          region: ${{ inputs.region }}
+          metadata: application-metadata.yml

@@ -1,0 +1,37 @@
+name: Deploy to Production
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  deploy-application:
+    name: Deploy Application Container
+    uses: ./.github/workflows/gcp-deploy.yml
+    secrets:
+      project: ${{ secrets.GCP_PROJECT_PRODUCTION }}
+      provider: ${{ secrets.GCP_PROVIDER_PRODUCTION }}
+      service-account: ${{ secrets.GCP_SERVICE_ACCOUNT_PRODUCTION }}
+    with:
+      environment: "production"
+      service: "application"
+      region: "asia-southeast1"
+      repository: "application-registry"
+
+  deploy-serverless:
+    name: Deploy Serverless Container
+    uses: ./.github/workflows/gcp-serverless-deploy.yml
+    secrets:
+      project: ${{ secrets.GCP_PROJECT_PRODUCTION }}
+      provider: ${{ secrets.GCP_PROVIDER_PRODUCTION }}
+      service-account: ${{ secrets.GCP_SERVICE_ACCOUNT_PRODUCTION }}
+    with:
+      environment: "production"
+      region: "asia-southeast1"
+      job: "question-database-update"
+      repository: "serverless-registry"

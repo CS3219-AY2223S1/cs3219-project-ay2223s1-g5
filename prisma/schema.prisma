@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Language {
+  CPP
+  JAVA
+  JAVASCRIPT
+  PYTHON
+}
+
+enum Status {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  COMPILE_ERROR
+  RUNTIME_ERROR
+  TIME_LIMIT_EXCEEDED
+  INTERNAL_ERROR
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  name         String
+  password     String
+  failedLogins Int           @default(0)
+  verified     Boolean       @default(false)
+  roomSessions RoomSession[]
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  title     String     @unique
+  questions Question[]
+}
+
+model Topic {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  questions Question[]
+}
+
+model SolutionTemplate {
+  id         Int      @id @default(autoincrement())
+  language   Language
+  code       String
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+}
+
+model TestCase {
+  id         Int      @id @default(autoincrement())
+  inputs     String[]
+  output     String
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+}
+
+model Question {
+  id           Int                @id @default(autoincrement())
+  title        String             @unique
+  difficulty   Difficulty
+  category     Category           @relation(fields: [categoryId], references: [id])
+  categoryId   Int
+  topics       Topic[]
+  description  String
+  hints        String[]
+  templates    SolutionTemplate[]
+  testcases    TestCase[]
+  roomSessions RoomSession[]
+}
+
+model RoomSession {
+  id          String       @id @default(cuid())
+  users       User[]
+  startTime   DateTime     @default(now())
+  endTime     DateTime?
+  question    Question     @relation(fields: [questionId], references: [id])
+  questionId  Int
+  submissions Submission[]
+}
+
+model Submission {
+  id             String      @id
+  roomSession    RoomSession @relation(fields: [roomSessionId], references: [id])
+  roomSessionId  String
+  status         Status      @default(PENDING)
+  language       Language
+  expectedOutput String
+  output         String?
+  errorOutput    String?
+  compileOutput  String?
+  exitCode       Int?
+  code           String
+  runTime        Int? // In milliseconds
+  memoryUsage    Int? // In bytes
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
